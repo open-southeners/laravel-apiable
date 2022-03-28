@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "bmewburn.vscode-intelephense-client",
+    "ikappas.composer",
+    "pixelfear.composer-links",
+    "editorconfig.editorconfig",
+    "xdebug.php-debug",
+    "junstyle.php-cs-fixer",
+    "kasik96.latte",
+    "calebporzio.better-phpunit"
+  ]
+}
