@@ -1,9 +1,9 @@
 {
-    "name": "packagist_package_here",
-    "description": "and_description_here",
+    "name": "open-southeners/laravel-apiable",
+    "description": "Convert your Laravel application into one with a full API support and with extra capabilities",
     "license": "MIT",
     "keywords": [
-        "open-southeners"
+        "open-southeners", "apiable", "json-api", "laravel"
     ],
     "authors": [
         {
@@ -12,19 +12,22 @@
         }
     ],
     "require": {
-        "php": "^7.2|^8.0|^8.1"
+        "php": "^8.0",
+        "illuminate/support": "^9.0",
+        "open-southeners/laravel-helpers": "^0.5.0"
     },
     "require-dev": {
-        "nunomaduro/larastan": "^1.0",
-        "phpstan/phpstan": "^1.0",
         "friendsofphp/php-cs-fixer": "^3.0",
-        "phpunit/phpunit": "^7.0|^9.0",
-        "orchestra/testbench": "^4.0|^6.0|^7.0"
+        "laravel/pint": "^0.2.1",
+        "nunomaduro/larastan": "^1.0",
+        "orchestra/testbench": "^7.0",
+        "phpstan/phpstan": "^1.0",
+        "phpunit/phpunit": "^9.0"
     },
     "autoload": {
         "psr-4": {
-            "OpenSoutheners\\PhpPackage\\": "src",
-            "OpenSoutheners\\PhpPackage\\Tests\\": "tests"
+            "OpenSoutheners\\LaravelApiable\\": "src",
+            "OpenSoutheners\\LaravelApiable\\Tests\\": "tests"
         }
     },
     "config": {
@@ -33,9 +36,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "OpenSoutheners\\PhpPackage\\JsonApiServiceProvider"
+                "OpenSoutheners\\LaravelApiable\\ServiceProvider"
             ]
         }
     },
-    "minimum-stability": "dev"
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }

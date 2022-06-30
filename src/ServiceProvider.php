@@ -1,8 +1,9 @@
 <?php
 
-namespace OpenSoutheners\PhpPackage;
+namespace OpenSoutheners\LaravelApiable;
 
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
+use OpenSoutheners\LaravelApiable\Support\Apiable;
 
 class ServiceProvider extends BaseServiceProvider
 {
@@ -13,7 +14,7 @@ class ServiceProvider extends BaseServiceProvider
      */
     public function boot()
     {
-        // 
+        //
     }
 
     /**
@@ -23,6 +24,23 @@ class ServiceProvider extends BaseServiceProvider
      */
     public function register()
     {
-        // 
+        $this->registerMacros();
+
+        $this->app->singleton('apiable', function () {
+            return new Apiable();
+        });
+    }
+
+    /**
+     * Register package macros for framework built-ins.
+     *
+     * @return void
+     */
+    public function registerMacros()
+    {
+        \Illuminate\Testing\TestResponse::mixin(new \OpenSoutheners\LaravelApiable\Testing\TestResponseMacros());
+        \Illuminate\Http\Request::mixin(new \OpenSoutheners\LaravelApiable\Http\Request());
+        \Illuminate\Database\Eloquent\Builder::mixin(new \OpenSoutheners\LaravelApiable\Builder());
+        \Illuminate\Support\Collection::mixin(new \OpenSoutheners\LaravelApiable\Collection());
     }
 }
