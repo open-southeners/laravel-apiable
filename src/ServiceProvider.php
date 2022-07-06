@@ -24,11 +24,11 @@ class ServiceProvider extends BaseServiceProvider
      */
     public function register()
     {
-        $this->registerMacros();
-
         $this->app->singleton('apiable', function () {
             return new Apiable();
         });
+
+        $this->registerMacros();
     }
 
     /**

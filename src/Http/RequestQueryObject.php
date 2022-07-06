@@ -106,31 +106,58 @@ class RequestQueryObject
         return $this->query;
     }
 
-    public function allowSort($attribute, $directions = '*')
+    /**
+     * Process query object allowing the following user operations.
+     *
+     * @param  array  $alloweds
+     * @return $this
+     */
+    public function allowing(array $alloweds)
+    {
+        foreach ($alloweds as $allowed) {
+            match (get_class($allowed)) {
+                AllowedSort::class => $this->allowSort($allowed),
+                AllowedFilter::class => $this->allowFilter($allowed),
+                AllowedInclude::class => $this->allowInclude($allowed),
+                AllowedFields::class => $this->allowFields($allowed),
+            };
+        }
+
+        return $this;
+    }
+
+    /**
+     * Allow sorting by the following attribute and direction.
+     *
+     * @param  \OpenSoutheners\LaravelApiable\Http\AllowedSort|string  $attribute
+     * @param  string  $direction
+     * @return void
+     */
+    public function allowSort($attribute, $direction = '*')
     {
         if ($attribute instanceof AllowedSort) {
             $this->allowedSorts = array_merge($this->allowedSorts, $attribute->toArray());
+        } else {
+            $this->allowedSorts[$attribute] = $direction;
         }
 
-        $this->allowedSorts[$attribute] = $directions;
+        return $this;
     }
 
     /**
      * Allow filter by attribute and pattern of value(s).
      *
-     * @param  string|\OpenSoutheners\LaravelApiable\Http\AllowedFilter  $attribute
-     * @param  string|array<string>  $value
+     * @param  \OpenSoutheners\LaravelApiable\Http\AllowedFilter|string  $attribute
+     * @param  array<string>|string  $value
      * @return $this
      */
     public function allowFilter($attribute, $value = '*')
     {
         $this->allowedFilters = array_merge_recursive(
             $this->allowedFilters,
-            (
-                $attribute instanceof AllowedFilter
-                    ? $attribute
-                    : AllowedFilter::make($attribute, $value)
-            )->toArray()
+            $attribute instanceof AllowedFilter
+                ? $attribute->toArray()
+                : AllowedFilter::make($attribute, $value)->toArray()
         );
 
         return $this;
@@ -139,13 +166,17 @@ class RequestQueryObject
     /**
      * Allow sparse fields (attributes) for a specific resource type.
      *
-     * @param  string  $type
-     * @param  array  $attributes
+     * @param  \OpenSoutheners\LaravelApiable\Http\AllowedFields|string  $type
+     * @param  array<string>|string  $attributes
      * @return $this
      */
-    public function allowFields($type, array $attributes = ['*'])
+    public function allowFields($type, $attributes)
     {
-        $this->allowedFields[$type] = $attributes;
+        if ($type instanceof AllowedFields) {
+            $this->allowedFields = array_merge($this->allowedFields, $type->toArray());
+        } else {
+            $this->allowedFields[$type] = [$attributes];
+        }
 
         return $this;
     }
@@ -153,7 +184,7 @@ class RequestQueryObject
     /**
      * Alias for allowFields.
      *
-     * @param  string  $type
+     * @param  \OpenSoutheners\LaravelApiable\Http\AllowedFields|string  $type
      * @param  array  $attributes
      * @return $this
      */
@@ -162,28 +193,54 @@ class RequestQueryObject
         return $this->allowFields($type, $attributes);
     }
 
+    /**
+     * Allow include relationship to the response.
+     *
+     * @param  \OpenSoutheners\LaravelApiable\Http\AllowedInclude|string  $relationship
+     * @return $this
+     */
     public function allowInclude($relationship)
     {
-        $this->allowedIncludes[] = $relationship;
+        $this->allowedIncludes[] = (string) $relationship;
 
         return $this;
     }
 
+    /**
+     * Get list of allowed fields.
+     *
+     * @return array<string, string>
+     */
     public function getAllowedFields()
     {
         return $this->allowedFields;
     }
 
+    /**
+     * Get list of allowed filters.
+     *
+     * @return array<string, string>
+     */
     public function getAllowedFilters()
     {
         return $this->allowedFilters;
     }
 
+    /**
+     * Get list of allowed sorts.
+     *
+     * @return array<string, string>
+     */
     public function getAllowedSorts()
     {
         return $this->allowedSorts;
     }
 
+    /**
+     * Get list of allowed includes.
+     *
+     * @return array<string>
+     */
     public function getAllowedIncludes()
     {
         return $this->allowedIncludes;

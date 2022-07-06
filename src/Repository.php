@@ -50,6 +50,17 @@ class Repository
     }
 
     /**
+     * Create new instance of repository from query.
+     *
+     * @param  \Illuminate\Database\Eloquent\Model|class-string<\Illuminate\Database\Eloquent\Model>|\Illuminate\Database\Eloquent\Builder  $query
+     * @return static
+     */
+    public static function from($query)
+    {
+        return new static($query);
+    }
+
+    /**
      * Get query builder instance from whatever is sent.
      *
      * @param  mixed  $query
@@ -121,6 +132,8 @@ class Repository
 
     public function __call($method, array $arguments)
     {
-        return call_user_func_array([$this->requestQueryObject, $method], $arguments);
+        call_user_func_array([$this->requestQueryObject, $method], $arguments);
+
+        return $this;
     }
 }

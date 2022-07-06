@@ -33,10 +33,10 @@ class Builder
                 ? $this->forPage($page, $pageSize)->get($columns)
                 : $this->model->newCollection();
 
-            return $this->paginator($results, $total, $pageSize, $page, [
+            return Apiable::toJsonApi($this->paginator($results, $total, $pageSize, $page, [
                 'path' => Paginator::resolveCurrentPath(),
                 'pageName' => $pageName,
-            ]);
+            ]));
         };
     }
 }

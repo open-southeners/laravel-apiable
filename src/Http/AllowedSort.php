@@ -34,41 +34,41 @@ class AllowedSort implements Arrayable
      * Allow default sort by attribute.
      *
      * @param  string  $attribute
-     * @return \OpenSoutheners\LaravelApiable\Http\AllowedSort
+     * @return static
      */
     public static function make($attribute)
     {
         $defaultDirection = Apiable::config('sorts.default_direction') ?? '*';
 
-        return new self($attribute, $defaultDirection);
+        return new static($attribute, $defaultDirection);
     }
 
     /**
      * Allow sort by attribute as ascendant.
      *
      * @param  string  $attribute
-     * @return \OpenSoutheners\LaravelApiable\Http\AllowedSort
+     * @return static
      */
     public static function ascendant($attribute)
     {
-        return new self($attribute, 'asc');
+        return new static($attribute, 'asc');
     }
 
     /**
      * Allow sort by attribute as descendant.
      *
      * @param  string  $attribute
-     * @return \OpenSoutheners\LaravelApiable\Http\AllowedSort
+     * @return static
      */
     public static function descendant($attribute)
     {
-        return new self($attribute, 'desc');
+        return new static($attribute, 'desc');
     }
 
     /**
      * Get the instance as an array.
      *
-     * @return array<TKey, TValue>
+     * @return array<string, string>
      */
     public function toArray()
     {

@@ -42,13 +42,13 @@ class AllowedFilter implements Arrayable
      *
      * @param  string  $attribute
      * @param  string|array<string>  $values
-     * @return \OpenSoutheners\LaravelApiable\Http\AllowedFilter
+     * @return static
      */
     public static function make($attribute, $values = null)
     {
         $defaultOperator = Apiable::config('filters.default_operator') ?? 'like';
 
-        return new self($attribute, $defaultOperator, $values);
+        return new static($attribute, $defaultOperator, $values);
     }
 
     /**
@@ -56,11 +56,11 @@ class AllowedFilter implements Arrayable
      *
      * @param  string  $attribute
      * @param  string|array<string>  $values
-     * @return \OpenSoutheners\LaravelApiable\Http\AllowedFilter
+     * @return static
      */
     public static function exact($attribute, $values = null)
     {
-        return new self($attribute, '=', $values);
+        return new static($attribute, '=', $values);
     }
 
     /**
@@ -68,17 +68,17 @@ class AllowedFilter implements Arrayable
      *
      * @param  string  $attribute
      * @param  string|array<string>|null  $values
-     * @return \OpenSoutheners\LaravelApiable\Http\AllowedFilter
+     * @return static
      */
     public static function similar($attribute, $values = null)
     {
-        return new self($attribute, 'like', $values);
+        return new static($attribute, 'like', $values);
     }
 
     /**
      * Get the instance as an array.
      *
-     * @return array<TKey, TValue>
+     * @return array<string, array<string, array<string>>>
      */
     public function toArray()
     {

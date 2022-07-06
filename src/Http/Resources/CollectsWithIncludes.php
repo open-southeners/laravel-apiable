@@ -2,7 +2,6 @@
 
 namespace OpenSoutheners\LaravelApiable\Http\Resources;
 
-use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
 /**
@@ -34,7 +33,7 @@ trait CollectsWithIncludes
         )->values()->all();
 
         if (! empty($includesArr)) {
-            Arr::set($this->with, 'include', $includesArr);
+            $this->with = array_merge($this->with, ['include' => $includesArr]);
         }
     }
 }

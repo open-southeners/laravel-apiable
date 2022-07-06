@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use OpenSoutheners\LaravelApiable\Contracts\JsonApiable;
+use OpenSoutheners\LaravelApiable\Exceptions\NotJsonApiableModelException;
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
 
 /**
@@ -76,6 +78,10 @@ trait RelationshipsWithIncludes
      */
     protected function processModelRelation($model)
     {
+        if (! $model instanceof JsonApiable) {
+            NotJsonApiableModelException::forModel($model);
+        }
+
         $modelTransformer = $model->jsonApiableOptions()->transformer;
         /** @var \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource $modelResource */
         $modelResource = new $modelTransformer($model);
