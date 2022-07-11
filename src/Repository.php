@@ -95,8 +95,8 @@ class Repository
         return $this->pipeline->send($this->requestQueryObject)
             ->via('from')
             ->through([
-                ApplyIncludesToQuery::class,
                 ApplyFiltersToQuery::class,
+                ApplyIncludesToQuery::class,
                 ApplyFieldsToQuery::class,
                 ApplySortsToQuery::class,
             ])->thenReturn();
@@ -184,7 +184,7 @@ class Repository
         if ($this->includeAllowedToResponse) {
             $result->additional(['meta' => array_filter([
                 'allowed_filters' => $this->requestQueryObject->getAllowedFilters(),
-                'allowed_sorts' => $this->requestQueryObject->getAllowedSorts()
+                'allowed_sorts' => $this->requestQueryObject->getAllowedSorts(),
             ])]);
         }
 

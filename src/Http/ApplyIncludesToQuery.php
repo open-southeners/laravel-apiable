@@ -32,16 +32,25 @@ class ApplyIncludesToQuery implements HandlesRequestQueries
 
         $this->applyIncludes(
             $requestQueryObject->query,
-            $this->getUserIncludes($includes)
+            $this->getUserIncludes($includes, $requestQueryObject->query)
         );
 
         return $next($requestQueryObject);
     }
 
-    protected function getUserIncludes(array $includes)
+    /**
+     * Get user allowed includes.
+     *
+     * @param  array  $includes
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return array
+     */
+    protected function getUserIncludes(array $includes, $query)
     {
-        return array_filter($includes, function ($include) {
-            return in_array($include, $this->allowed);
+        $queryEagerLoadedRelations = array_keys($query->getEagerLoads());
+
+        return array_filter($includes, function ($include) use ($queryEagerLoadedRelations) {
+            return in_array($include, $this->allowed) && ! in_array($include, $queryEagerLoadedRelations);
         });
     }
 
@@ -54,7 +63,9 @@ class ApplyIncludesToQuery implements HandlesRequestQueries
      */
     protected function applyIncludes(Builder $query, array $includes)
     {
-        $query->with($includes);
+        if (! empty($includes)) {
+            $query->with($includes);
+        }
 
         return $query;
     }

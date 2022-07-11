@@ -5,10 +5,11 @@ namespace OpenSoutheners\LaravelApiable\Http;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use OpenSoutheners\LaravelApiable\Contracts\HandlesRequestQueries;
 use function OpenSoutheners\LaravelHelpers\Classes\class_namespace;
-use Illuminate\Support\Str;
 
 class ApplyFiltersToQuery implements HandlesRequestQueries
 {
@@ -16,6 +17,11 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
      * @var array<array>
      */
     protected $allowed = [];
+
+    /**
+     * @var array
+     */
+    protected $includes = [];
 
     /**
      * Apply modifications to the query based on allowed query fragments.
@@ -27,6 +33,8 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
     public function from(RequestQueryObject $requestQueryObject, Closure $next)
     {
         $filters = $requestQueryObject->filters();
+
+        $this->includes = $requestQueryObject->includes();
 
         if (empty($filters)) {
             return $next($requestQueryObject);
@@ -46,6 +54,7 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
     {
         $filteredFilterValues = [];
 
+        // dump($this->allowed, $filters);
         foreach ($filters as $attribute => $filterValues) {
             $allowedByAttribute = array_key_exists($attribute, $this->allowed);
 
@@ -103,22 +112,47 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
         $queryModel = $query->getModel();
 
         foreach ($filters as $attribute => $values) {
-            if ($this->isAttribute($queryModel, $attribute)) {
-                $this->applyArrayOfFiltersToQuery($query, $attribute, (array) $values);
+            $this->wrapIfRelatedQuery(function ($query, $attribute) use ($queryModel, $values) {
+                if ($this->isAttribute($queryModel, $attribute)) {
+                    return $this->applyArrayOfFiltersToQuery($query, $attribute, (array) $values);
+                }
 
-                continue;
-            }
+                $scopeFn = Str::camel($attribute);
 
-            $attribute = Str::camel($attribute);
-
-            if ($this->isScope($queryModel, $attribute)) {
-                call_user_func([$query, $attribute], $values);
-
-                continue;
-            }
+                if ($this->isScope($queryModel, $scopeFn)) {
+                    return call_user_func([$query, $scopeFn], $values);
+                }
+            }, $query, $attribute);
         }
 
         return $query;
+    }
+
+    /**
+     * Wrap query if relationship found in filter's attribute.
+     *
+     * @param  callable(\Illuminate\Database\Eloquent\Builder, string): mixed  $callback
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  string  $attribute
+     * @return mixed
+     */
+    protected function wrapIfRelatedQuery(callable $callback, Builder $query, string $attribute)
+    {
+        if (! str_contains($attribute, '.')) {
+            return $callback($query, $attribute);
+        }
+
+        [$relationship, $relatedAttribute] = explode('.', $attribute);
+
+        if (in_array($relationship, $this->includes) && App::version() >= '9.16.0') {
+            return $query->withWhereHas($relationship, function ($query) use ($callback, $relatedAttribute) {
+                return $callback($query, $relatedAttribute);
+            });
+        }
+
+        return $query->whereHas($relationship, function ($query) use ($callback, $relatedAttribute) {
+            $callback($query, $relatedAttribute);
+        });
     }
 
     /**
@@ -129,7 +163,7 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
      * @param  array  $filterValues
      * @return void
      */
-    protected function applyArrayOfFiltersToQuery(Builder $query, string $attribute, array $filterValues)
+    protected function applyArrayOfFiltersToQuery($query, string $attribute, array $filterValues)
     {
         for ($i = 0; $i < count($filterValues); $i++) {
             $filterValue = $filterValues[$i];
