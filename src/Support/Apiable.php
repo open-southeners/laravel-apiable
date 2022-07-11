@@ -121,4 +121,19 @@ class Apiable
 
         return response()->json($response, $statusCode);
     }
+
+    /**
+     * Transform attribute to a camelCase (method/scope standarised).
+     *
+     * @param  string  $value
+     * @return string
+     */
+    public static function attributeToScope(string $value)
+    {
+        return lcfirst(
+            implode(
+                array_map(fn ($word) => ucfirst($word), explode(' ', str_replace(['-', '_'], ' ', $value)))
+            )
+        );
+    }
 }

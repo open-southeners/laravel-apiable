@@ -17,7 +17,7 @@ trait CollectsWithIncludes
     protected function withIncludes()
     {
         $collectionIncludes = Collection::make(
-            $this->with['include'] ?? []
+            $this->with['included'] ?? []
         );
 
         /** @var \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource $jsonResource */
@@ -33,7 +33,7 @@ trait CollectsWithIncludes
         )->values()->all();
 
         if (! empty($includesArr)) {
-            $this->with = array_merge($this->with, ['include' => $includesArr]);
+            $this->with = array_merge($this->with, ['included' => $includesArr]);
         }
     }
 }

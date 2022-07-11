@@ -4,7 +4,6 @@ namespace OpenSoutheners\LaravelApiable\Http\Resources;
 
 use Illuminate\Database\Eloquent\Collection as DatabaseCollection;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use OpenSoutheners\LaravelApiable\Contracts\JsonApiable;
@@ -87,7 +86,7 @@ trait RelationshipsWithIncludes
         $modelResource = new $modelTransformer($model);
         $modelIdentifier = $modelResource->getResourceIdentifier();
 
-        if (! empty(Arr::get($modelIdentifier, $model->getKeyName(), null))) {
+        if (! empty($modelIdentifier[$model->getKeyName()] ?? null)) {
             $this->addIncluded($modelResource);
 
             return $modelIdentifier;
@@ -110,12 +109,10 @@ trait RelationshipsWithIncludes
             array_values($resource->getIncluded()),
         ])->flatten();
 
-        $includesArr = $this->checkUniqueness(
-            $includesCol
-        )->values()->all();
+        $includesArr = $this->checkUniqueness($includesCol)->values()->all();
 
         if (! empty($includesArr)) {
-            Arr::set($this->with, 'included', $includesArr);
+            $this->with = array_merge_recursive($this->with, ['included' => $includesArr]);
         }
     }
 

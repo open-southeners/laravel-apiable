@@ -15,7 +15,7 @@ use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource;
 /**
  * @mixin \OpenSoutheners\LaravelApiable\Http\RequestQueryObject
  */
-class Repository
+class JsonApiResponse
 {
     /**
      * @var \Illuminate\Pipeline\Pipeline
@@ -112,6 +112,12 @@ class Repository
         return $this->buildPipeline()->query;
     }
 
+    /**
+     * Add allowed filters and sorts to the response meta.
+     *
+     * @param  bool  $value
+     * @return $this
+     */
     public function includeAllowedToResponse($value = true)
     {
         $this->includeAllowedToResponse = $value;
@@ -167,7 +173,7 @@ class Repository
             // TODO: Or refactor old "transformers" classes with a "plain tree" of resources
             $result->collection->each(function (JsonApiResource $item) use ($filteredUserAppends) {
                 /** @var array<\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource> $resourceIncluded */
-                $resourceIncluded = $item->with['included'];
+                $resourceIncluded = $item->with['included'] ?? [];
 
                 if ($appendsArr = $filteredUserAppends[$item->resource->jsonApiableOptions()->resourceType] ?? null) {
                     $item->append($appendsArr);
@@ -191,9 +197,16 @@ class Repository
         return $result;
     }
 
-    public function __call($method, array $arguments)
+    /**
+     * Call method of RequestQueryObject if not exists on this.
+     *
+     * @param  string  $name
+     * @param  array  $arguments
+     * @return $this
+     */
+    public function __call(string $name, array $arguments)
     {
-        call_user_func_array([$this->requestQueryObject, $method], $arguments);
+        call_user_func_array([$this->requestQueryObject, $name], $arguments);
 
         return $this;
     }

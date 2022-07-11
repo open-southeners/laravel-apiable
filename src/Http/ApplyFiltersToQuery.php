@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Str;
 use OpenSoutheners\LaravelApiable\Contracts\HandlesRequestQueries;
+use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
 use function OpenSoutheners\LaravelHelpers\Classes\class_namespace;
 
 class ApplyFiltersToQuery implements HandlesRequestQueries
@@ -54,7 +54,6 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
     {
         $filteredFilterValues = [];
 
-        // dump($this->allowed, $filters);
         foreach ($filters as $attribute => $filterValues) {
             $allowedByAttribute = array_key_exists($attribute, $this->allowed);
 
@@ -83,18 +82,6 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
 
                 continue;
             }
-
-            // Some filter values patterns are valid, filter by those
-            // TODO: Maintain allowed simple patterns?
-            if ($allowedByAttribute && is_string($allowedAttributeValues) && str_contains($allowedAttributeValues, '*')) {
-                $filterByPatternFn = function ($value) use ($attribute) {
-                    return str_is(head($this->allowed[$attribute]), $value);
-                };
-
-                $filteredFilterValues[$attribute] = is_array($filterValues) ? ! empty(array_filter($filterValues, function ($value) use ($filterByPatternFn) {
-                    return $filterByPatternFn($value);
-                })) : $filterByPatternFn($filterValues);
-            }
         }
 
         return array_filter($filteredFilterValues);
@@ -109,20 +96,20 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
      */
     protected function applyFilters(Builder $query, array $filters)
     {
-        $queryModel = $query->getModel();
+        foreach ($filters as $fullAttribute => $values) {
+            $this->wrapIfRelatedQuery(function ($query, $attribute) use ($fullAttribute, $values) {
+                $queryModel = $query->getModel();
 
-        foreach ($filters as $attribute => $values) {
-            $this->wrapIfRelatedQuery(function ($query, $attribute) use ($queryModel, $values) {
                 if ($this->isAttribute($queryModel, $attribute)) {
-                    return $this->applyArrayOfFiltersToQuery($query, $attribute, (array) $values);
+                    return $this->applyArrayOfFiltersToQuery($query, $attribute, (array) $values, $fullAttribute);
                 }
 
-                $scopeFn = Str::camel($attribute);
+                $scopeFn = Apiable::attributeToScope($attribute);
 
                 if ($this->isScope($queryModel, $scopeFn)) {
                     return call_user_func([$query, $scopeFn], $values);
                 }
-            }, $query, $attribute);
+            }, $query, $fullAttribute);
         }
 
         return $query;
@@ -142,16 +129,20 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
             return $callback($query, $attribute);
         }
 
-        [$relationship, $relatedAttribute] = explode('.', $attribute);
+        $attributePartsArr = explode('.', $attribute);
 
-        if (in_array($relationship, $this->includes) && App::version() >= '9.16.0') {
-            return $query->withWhereHas($relationship, function ($query) use ($callback, $relatedAttribute) {
-                return $callback($query, $relatedAttribute);
+        $relationshipAttribute = array_pop($attributePartsArr);
+
+        $relationship = implode($attributePartsArr);
+
+        if (in_array($relationship, $this->includes) && version_compare(App::version(), '9.16.0', '>=')) {
+            return $query->withWhereHas($relationship, function ($query) use ($callback, $relationshipAttribute) {
+                return $callback($query, $relationshipAttribute);
             });
         }
 
-        return $query->whereHas($relationship, function ($query) use ($callback, $relatedAttribute) {
-            $callback($query, $relatedAttribute);
+        return $query->whereHas($relationship, function ($query) use ($callback, $relationshipAttribute) {
+            return $callback($query, $relationshipAttribute);
         });
     }
 
@@ -163,11 +154,11 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
      * @param  array  $filterValues
      * @return void
      */
-    protected function applyArrayOfFiltersToQuery($query, string $attribute, array $filterValues)
+    protected function applyArrayOfFiltersToQuery($query, string $attribute, array $filterValues, string $fullAttribute)
     {
         for ($i = 0; $i < count($filterValues); $i++) {
             $filterValue = $filterValues[$i];
-            $filterOperator = array_keys($this->allowed[$attribute])[0];
+            $filterOperator = array_keys($this->allowed[$fullAttribute])[0];
 
             if ($filterOperator === 'like') {
                 $filterValue = "%${filterValue}%";
