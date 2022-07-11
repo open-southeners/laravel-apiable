@@ -16,6 +16,9 @@
     <include>
       <directory suffix=".php">./src</directory>
     </include>
+    <exclude>
+      <file>src/Http/SortDirection.php</file>
+    </exclude>
     <report>
       <clover outputFile="clover.xml"/>
     </report>
