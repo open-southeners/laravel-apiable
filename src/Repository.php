@@ -10,6 +10,7 @@ use OpenSoutheners\LaravelApiable\Http\ApplyFiltersToQuery;
 use OpenSoutheners\LaravelApiable\Http\ApplyIncludesToQuery;
 use OpenSoutheners\LaravelApiable\Http\ApplySortsToQuery;
 use OpenSoutheners\LaravelApiable\Http\RequestQueryObject;
+use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource;
 
 /**
  * @mixin \OpenSoutheners\LaravelApiable\Http\RequestQueryObject
@@ -30,6 +31,11 @@ class Repository
      * @var class-string<\OpenSoutheners\LaravelApiable\Contracts\JsonApiable|\Illuminate\Database\Eloquent\Model>
      */
     protected $model;
+
+    /**
+     * @var bool
+     */
+    protected $includeAllowedToResponse = false;
 
     /**
      * Instantiate this class.
@@ -106,6 +112,13 @@ class Repository
         return $this->buildPipeline()->query;
     }
 
+    public function includeAllowedToResponse($value = true)
+    {
+        $this->includeAllowedToResponse = $value;
+
+        return $this;
+    }
+
     /**
      * List resources from a query.
      *
@@ -113,7 +126,7 @@ class Repository
      */
     public function list()
     {
-        return $this->getPipelineQuery()->jsonApiPaginate();
+        return $this->resultPostProcessing($this->getPipelineQuery()->jsonApiPaginate());
     }
 
     /**
@@ -128,6 +141,54 @@ class Repository
         return $this->getPipelineQuery()
             ->where($column, $value)
             ->jsonApiPaginate();
+    }
+
+    /**
+     * Post-process result from query to apply appended attributes.
+     *
+     * @param  \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection  $result
+     * @return \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection
+     */
+    protected function resultPostProcessing($result)
+    {
+        $allowedAppends = $this->requestQueryObject->getAllowedAppends();
+
+        $filteredUserAppends = array_intersect_key(
+            $this->requestQueryObject->fields(),
+            $allowedAppends
+        );
+
+        foreach ($filteredUserAppends as $key => $values) {
+            $filteredUserAppends[$key] = array_intersect($allowedAppends[$key], $values);
+        }
+
+        if (! empty($allowedAppends)) {
+            // TODO: Not really optimised, need to think of a better solution...
+            // TODO: Or refactor old "transformers" classes with a "plain tree" of resources
+            $result->collection->each(function (JsonApiResource $item) use ($filteredUserAppends) {
+                /** @var array<\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource> $resourceIncluded */
+                $resourceIncluded = $item->with['included'];
+
+                if ($appendsArr = $filteredUserAppends[$item->resource->jsonApiableOptions()->resourceType] ?? null) {
+                    $item->append($appendsArr);
+                }
+
+                foreach ($resourceIncluded as $included) {
+                    if ($appendsArr = $filteredUserAppends[$included->resource->jsonApiableOptions()->resourceType] ?? null) {
+                        $included->resource->append($appendsArr);
+                    }
+                }
+            });
+        }
+
+        if ($this->includeAllowedToResponse) {
+            $result->additional(['meta' => array_filter([
+                'allowed_filters' => $this->requestQueryObject->getAllowedFilters(),
+                'allowed_sorts' => $this->requestQueryObject->getAllowedSorts()
+            ])]);
+        }
+
+        return $result;
     }
 
     public function __call($method, array $arguments)

@@ -17,7 +17,7 @@ class Builder
          *
          * @param  int|string  $perPage
          * @param  array  $columns
-         * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+         * @return \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection
          */
         return function ($pageSize = null, $columns = ['*'], $page = null) {
             $pageName = 'page[number]';

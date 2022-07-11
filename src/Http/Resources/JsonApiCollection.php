@@ -4,6 +4,10 @@ namespace OpenSoutheners\LaravelApiable\Http\Resources;
 
 use OpenSoutheners\LaravelApiable\Http\Resources\Json\ResourceCollection;
 
+/**
+ * @template TCollectedResource of \OpenSoutheners\LaravelApiable\Contracts\JsonApiable
+ * @extends ResourceCollection<TCollectedResource>
+ */
 class JsonApiCollection extends ResourceCollection
 {
     use CollectsWithIncludes;
@@ -11,7 +15,7 @@ class JsonApiCollection extends ResourceCollection
     /**
      * Create a new resource instance.
      *
-     * @param  mixed  $resource
+     * @param  TCollectedResource  $resource
      * @param  class-string<\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource>|null  $collects
      * @return void
      */

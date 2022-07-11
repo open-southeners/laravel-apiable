@@ -24,11 +24,11 @@ class ApplyFieldsToQuery implements HandlesRequestQueries
     {
         $fields = $requestQueryObject->fields();
 
-        if (empty($fields)) {
+        $this->allowed = $requestQueryObject->getAllowedFields();
+
+        if (empty($fields) || empty($this->allowed)) {
             return $next($requestQueryObject);
         }
-
-        $this->allowed = $requestQueryObject->getAllowedSorts();
 
         $this->applyFields(
             $requestQueryObject->query,
@@ -40,7 +40,7 @@ class ApplyFieldsToQuery implements HandlesRequestQueries
 
     protected function getUserFields(array $fields)
     {
-        return array_filter($fields, function ($type, $fields) {
+        return array_filter($fields, function ($type, $columns) {
             if (! isset($this->allowed[$type])) {
                 return false;
             }
@@ -49,7 +49,7 @@ class ApplyFieldsToQuery implements HandlesRequestQueries
                 return true;
             }
 
-            return in_array($fields, $this->allowed[$type]);
+            return in_array($columns, $this->allowed[$type]);
         }, ARRAY_FILTER_USE_BOTH);
     }
 
@@ -67,12 +67,12 @@ class ApplyFieldsToQuery implements HandlesRequestQueries
         foreach ($fields as $type => $columns) {
             // TODO: Handle the column not exists in table?
             // TODO: Type to table
-
-            if (in_array($type, $queryEagerLoaded)) {
-                $query->with($type, function (Builder $query) use ($columns) {
-                    $query->select($columns);
-                });
+            if ($type) {
             }
+
+            $query->when(in_array($type, $queryEagerLoaded), fn (Builder $query) => $query
+                ->with($type, fn (Builder $query) => $queryEagerLoaded[$type]($query->select($columns)))
+            );
         }
 
         return $query;

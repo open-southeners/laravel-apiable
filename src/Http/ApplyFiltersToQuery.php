@@ -8,11 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema;
 use OpenSoutheners\LaravelApiable\Contracts\HandlesRequestQueries;
 use function OpenSoutheners\LaravelHelpers\Classes\class_namespace;
+use Illuminate\Support\Str;
 
 class ApplyFiltersToQuery implements HandlesRequestQueries
 {
     /**
-     * @var array
+     * @var array<array>
      */
     protected $allowed = [];
 
@@ -53,6 +54,12 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
             }
 
             $allowedAttributeValues = head($this->allowed[$attribute]);
+
+            if (is_string($filterValues) && is_string($allowedAttributeValues) && $filterValues === $allowedAttributeValues) {
+                $filteredFilterValues[$attribute] = $filterValues;
+
+                continue;
+            }
 
             // All filter values are valid, no modification needed
             if ($allowedByAttribute && $allowedAttributeValues === '*') {
@@ -99,13 +106,15 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
             if ($this->isAttribute($queryModel, $attribute)) {
                 $this->applyArrayOfFiltersToQuery($query, $attribute, (array) $values);
 
-                return false;
+                continue;
             }
+
+            $attribute = Str::camel($attribute);
 
             if ($this->isScope($queryModel, $attribute)) {
                 call_user_func([$query, $attribute], $values);
 
-                return false;
+                continue;
             }
         }
 

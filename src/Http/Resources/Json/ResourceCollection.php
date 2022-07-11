@@ -10,6 +10,10 @@ use IteratorAggregate;
 use OpenSoutheners\LaravelApiable\Http\Resources\CollectsResources;
 use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource;
 
+/**
+ * @template T of \OpenSoutheners\LaravelApiable\Contracts\JsonApiable
+ * @extends JsonApiResource<\Illuminate\Support\Collection<T>>
+ */
 class ResourceCollection extends JsonApiResource implements Countable, IteratorAggregate
 {
     use CollectsResources;
@@ -98,7 +102,7 @@ class ResourceCollection extends JsonApiResource implements Countable, IteratorA
      */
     public function toArray($request)
     {
-        return $this->collection->map->toArray($request)->all();
+        return $this->collection->map->toArray($request);
     }
 
     /**

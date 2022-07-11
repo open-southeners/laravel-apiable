@@ -25,7 +25,12 @@ class RequestQueryObject
     protected $allowedFilters = [];
 
     /**
-     * @var array<string, string>
+     * @var array<string, array<string>>
+     */
+    protected $allowedAppends = [];
+
+    /**
+     * @var array<string, array<string>>
      */
     protected $allowedFields = [];
 
@@ -98,7 +103,13 @@ class RequestQueryObject
      */
     public function fields()
     {
-        return array_filter($this->request->get('fields', []));
+        $fields = $this->request->get('fields', []);
+
+        foreach ($fields as $type => $attributes) {
+            $fields[$type] = explode(',', $attributes);
+        }
+
+        return array_filter($fields);
     }
 
     public function query()
@@ -120,6 +131,7 @@ class RequestQueryObject
                 AllowedFilter::class => $this->allowFilter($allowed),
                 AllowedInclude::class => $this->allowInclude($allowed),
                 AllowedFields::class => $this->allowFields($allowed),
+                AllowedAppends::class => $this->allowAppends($allowed),
             };
         }
 
@@ -131,7 +143,7 @@ class RequestQueryObject
      *
      * @param  \OpenSoutheners\LaravelApiable\Http\AllowedSort|string  $attribute
      * @param  string  $direction
-     * @return void
+     * @return $this
      */
     public function allowSort($attribute, $direction = '*')
     {
@@ -164,33 +176,39 @@ class RequestQueryObject
     }
 
     /**
-     * Allow sparse fields (attributes) for a specific resource type.
+     * Allow sparse fields (columns or accessors) for a specific resource type.
      *
      * @param  \OpenSoutheners\LaravelApiable\Http\AllowedFields|string  $type
-     * @param  array<string>|string  $attributes
+     * @param  array<string>|string|null  $attributes
      * @return $this
      */
-    public function allowFields($type, $attributes)
+    public function allowFields($type, $attributes = null)
     {
         if ($type instanceof AllowedFields) {
             $this->allowedFields = array_merge($this->allowedFields, $type->toArray());
         } else {
-            $this->allowedFields[$type] = [$attributes];
+            $this->allowedFields = array_merge($this->allowedFields, [$type => [$attributes]]);
         }
 
         return $this;
     }
 
     /**
-     * Alias for allowFields.
+     * Allow the include of model accessors (attributes).
      *
-     * @param  \OpenSoutheners\LaravelApiable\Http\AllowedFields|string  $type
+     * @param  \OpenSoutheners\LaravelApiable\Http\AllowedAppends|string  $type
      * @param  array  $attributes
      * @return $this
      */
-    public function allowAppends($type, array $attributes = ['*'])
+    public function allowAppends($type, $attributes = null)
     {
-        return $this->allowFields($type, $attributes);
+        if ($type instanceof AllowedAppends) {
+            $this->allowedAppends = array_merge($this->allowedAppends, $type->toArray());
+        } else {
+            $this->allowedAppends = array_merge($this->allowedAppends, [$type => [$attributes]]);
+        }
+
+        return $this;
     }
 
     /**
@@ -207,13 +225,23 @@ class RequestQueryObject
     }
 
     /**
-     * Get list of allowed fields.
+     * Get list of allowed fields per resource type.
      *
-     * @return array<string, string>
+     * @return array<string, array<string>>
      */
     public function getAllowedFields()
     {
         return $this->allowedFields;
+    }
+
+    /**
+     * Get list of allowed appends per resource type.
+     *
+     * @return array<string, array<string>>
+     */
+    public function getAllowedAppends()
+    {
+        return $this->allowedAppends;
     }
 
     /**

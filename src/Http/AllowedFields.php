@@ -49,7 +49,7 @@ class AllowedFields implements Arrayable
     public function toArray()
     {
         return [
-            $this->type => $this->attributes,
+            $this->type => array_flatten($this->attributes),
         ];
     }
 }

@@ -44,7 +44,7 @@ class AllowedFilter implements Arrayable
      * @param  string|array<string>  $values
      * @return static
      */
-    public static function make($attribute, $values = null)
+    public static function make($attribute, $values = '*')
     {
         $defaultOperator = Apiable::config('filters.default_operator') ?? 'like';
 
@@ -58,7 +58,7 @@ class AllowedFilter implements Arrayable
      * @param  string|array<string>  $values
      * @return static
      */
-    public static function exact($attribute, $values = null)
+    public static function exact($attribute, $values = '*')
     {
         return new static($attribute, '=', $values);
     }
@@ -70,7 +70,7 @@ class AllowedFilter implements Arrayable
      * @param  string|array<string>|null  $values
      * @return static
      */
-    public static function similar($attribute, $values = null)
+    public static function similar($attribute, $values = '*')
     {
         return new static($attribute, 'like', $values);
     }

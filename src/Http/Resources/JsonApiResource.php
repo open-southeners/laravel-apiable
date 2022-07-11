@@ -7,6 +7,9 @@ use Illuminate\Http\Resources\MissingValue;
 use Illuminate\Support\Str;
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
 
+/**
+ * @template TResource of \OpenSoutheners\LaravelApiable\Contracts\JsonApiable
+ */
 class JsonApiResource extends JsonResource
 {
     use RelationshipsWithIncludes;
@@ -14,7 +17,7 @@ class JsonApiResource extends JsonResource
     /**
      * The resource instance.
      *
-     * @var \Illuminate\Database\Eloquent\Model|\Illuminate\Pagination\AbstractPaginator
+     * @var TResource
      */
     public $resource;
 
