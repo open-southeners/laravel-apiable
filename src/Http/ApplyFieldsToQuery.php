@@ -40,17 +40,23 @@ class ApplyFieldsToQuery implements HandlesRequestQueries
 
     protected function getUserFields(array $fields)
     {
-        return array_filter($fields, function ($type, $columns) {
+        $allowedUserFieldsArr = [];
+
+        foreach ($fields as $type => $columns) {
             if (! isset($this->allowed[$type])) {
-                return false;
+                continue;
             }
 
             if ($this->allowed[$type] === '*') {
-                return true;
+                $allowedUserFieldsArr[$type] = $columns;
+
+                continue;
             }
 
-            return in_array($columns, $this->allowed[$type]);
-        }, ARRAY_FILTER_USE_BOTH);
+            $allowedUserFieldsArr[$type] = array_intersect($columns, $this->allowed[$type]);
+        }
+
+        return array_filter($allowedUserFieldsArr);
     }
 
     /**
@@ -62,16 +68,32 @@ class ApplyFieldsToQuery implements HandlesRequestQueries
      */
     protected function applyFields(Builder $query, array $fields)
     {
+        /** @var \OpenSoutheners\LaravelApiable\Contracts\JsonApiable */
+        $mainQueryModel = $query->getModel();
         $queryEagerLoaded = $query->getEagerLoads();
 
+        // TODO: Move this to some class methods
         foreach ($fields as $type => $columns) {
-            // TODO: Handle the column not exists in table?
-            // TODO: Type to table
-            if ($type) {
+            if ($mainQueryModel->jsonApiableOptions()->resourceType === $type) {
+                if (! in_array($mainQueryModel->getKeyName(), $columns)) {
+                    $columns[] = $mainQueryModel->getKeyName();
+                }
+
+                $query->select($columns);
+
+                continue;
             }
 
             $query->when(in_array($type, $queryEagerLoaded), fn (Builder $query) => $query
-                ->with($type, fn (Builder $query) => $queryEagerLoaded[$type]($query->select($columns)))
+                ->with($type, function (Builder $query) use ($queryEagerLoaded, $type, $columns) {
+                    $relatedModel = $query->getModel();
+
+                    if (! in_array($relatedModel->getKeyName(), $columns)) {
+                        $columns[] = $relatedModel->getKeyName();
+                    }
+
+                    $queryEagerLoaded[$type]($query->select($columns));
+                })
             );
         }
 

@@ -4,7 +4,6 @@ namespace OpenSoutheners\LaravelApiable\Tests;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
-use OpenSoutheners\LaravelApiable\Support\Apiable;
 use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
 use OpenSoutheners\LaravelApiable\Tests\Fixtures\Post;
 
@@ -30,7 +29,7 @@ class JsonApiPaginationTest extends TestCase
             Post::create(['status' => 'Published', 'title' => 'Test Title 3']);
             Post::create(['status' => 'Published', 'title' => 'Test Title 4']);
 
-            return Apiable::toJsonApi(Post::jsonApiPaginate(2));
+            return Post::query()->jsonApiPaginate(2);
         });
     }
 

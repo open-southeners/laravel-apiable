@@ -68,7 +68,7 @@ class AssertableJsonApi extends AssertableJson
      */
     public function toArray()
     {
-        return $this->props;
+        return $this->attributes;
     }
 
     /**

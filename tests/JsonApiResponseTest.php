@@ -3,12 +3,16 @@
 namespace OpenSoutheners\LaravelApiable\Tests;
 
 use Illuminate\Support\Facades\Route;
+use OpenSoutheners\LaravelApiable\Http\AllowedAppends;
+use OpenSoutheners\LaravelApiable\Http\AllowedFields;
 use OpenSoutheners\LaravelApiable\Http\AllowedFilter;
 use OpenSoutheners\LaravelApiable\Http\AllowedInclude;
 use OpenSoutheners\LaravelApiable\JsonApiResponse;
+use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
 use OpenSoutheners\LaravelApiable\Tests\Fixtures\Post;
 use OpenSoutheners\LaravelApiable\Tests\Fixtures\PredictableDataGenerator;
 use OpenSoutheners\LaravelApiable\Tests\Fixtures\Tag;
+use OpenSoutheners\LaravelApiable\Tests\Fixtures\User;
 
 class JsonApiResponseTest extends TestCase
 {
@@ -106,5 +110,37 @@ class JsonApiResponseTest extends TestCase
         $response = $this->get('/?include=author&filter[author.name]=Ruben');
 
         $response->assertJsonCount(1, 'data');
+    }
+
+    public function testAddingFieldsAsDbColumns()
+    {
+        Route::get('/', function () {
+            return JsonApiResponse::from(User::class)
+                ->allowing([
+                    AllowedFields::make('client', ['name', 'email_verified_at']),
+                ])->list();
+        });
+
+        $response = $this->get('/?fields[client]=name');
+
+        $response->assertJsonApi(function (AssertableJsonApi $assert) {
+            $assert->at(0)->hasAttribute('name');
+        });
+    }
+
+    public function testAddingFieldsAsModelAppendedAttributes()
+    {
+        Route::get('/', function () {
+            return JsonApiResponse::from(Post::class)
+                ->allowing([
+                    AllowedAppends::make('post', 'is_published'),
+                ])->list();
+        });
+
+        $response = $this->get('/?fields[post]=is_published');
+
+        $response->assertJsonApi(function (AssertableJsonApi $assert) {
+            $assert->at(0)->hasAttribute('is_published');
+        });
     }
 }

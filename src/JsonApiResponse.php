@@ -132,7 +132,9 @@ class JsonApiResponse
      */
     public function list()
     {
-        return $this->resultPostProcessing($this->getPipelineQuery()->jsonApiPaginate());
+        return $this->resultPostProcessing(
+            $this->getPipelineQuery()->jsonApiPaginate()
+        );
     }
 
     /**
@@ -151,6 +153,7 @@ class JsonApiResponse
 
     /**
      * Post-process result from query to apply appended attributes.
+     * TODO: This should be in a new class/trait!
      *
      * @param  \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection  $result
      * @return \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection
@@ -176,12 +179,12 @@ class JsonApiResponse
                 $resourceIncluded = $item->with['included'] ?? [];
 
                 if ($appendsArr = $filteredUserAppends[$item->resource->jsonApiableOptions()->resourceType] ?? null) {
-                    $item->append($appendsArr);
+                    $item->makeVisible($appendsArr)->append($appendsArr);
                 }
 
                 foreach ($resourceIncluded as $included) {
                     if ($appendsArr = $filteredUserAppends[$included->resource->jsonApiableOptions()->resourceType] ?? null) {
-                        $included->resource->append($appendsArr);
+                        $included->resource->makeVisible($appendsArr)->append($appendsArr);
                     }
                 }
             });

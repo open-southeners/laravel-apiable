@@ -12,7 +12,7 @@ class AllowedFields implements Arrayable
     protected $type;
 
     /**
-     * @var string
+     * @var array<string>
      */
     protected $attributes;
 
@@ -26,7 +26,7 @@ class AllowedFields implements Arrayable
     public function __construct(string $type, $attributes)
     {
         $this->type = $type;
-        $this->attributes = [$attributes];
+        $this->attributes = (array) $attributes;
     }
 
     /**
@@ -49,7 +49,9 @@ class AllowedFields implements Arrayable
     public function toArray()
     {
         return [
-            $this->type => array_flatten($this->attributes),
+            $this->type => is_array(head($this->attributes))
+                ? array_merge(...$this->attributes)
+                : $this->attributes,
         ];
     }
 }
