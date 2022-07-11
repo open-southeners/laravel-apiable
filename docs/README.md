@@ -10,11 +10,11 @@ actions:
     link: /comparison.md
     type: secondary
 features:
-  - title: Long Term Support
-    details: Compatible and tested with all the Laravel LTS supported versions.
+  - title: Bleeding edge
+    details: Because dropping legacy versions of both PHP & Laravel benefits in multiple sides.
   - title: Brainless implementation
-    details: Write no code to achieve a basic JSON:API parsing of your models.
-  - title: Built-in policies
-    details: Permissions "out-of-the-box" authorising each resource view or list of resources.
+    details: Write almost no code to achieve a JSON:API in your Laravel application.
+  - title: Built-in query builder
+    details: With a powerful query builder that enforces security and allows many posibilities to your 3rd parties.
 footer: MIT Licensed | Copyright © 2022 Open Southeners
 ---
