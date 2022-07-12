@@ -137,7 +137,7 @@ class JsonApiResponseTest extends TestCase
                 ])->list();
         });
 
-        $response = $this->get('/?fields[post]=is_published');
+        $response = $this->get('/?appends[post]=is_published');
 
         $response->assertJsonApi(function (AssertableJsonApi $assert) {
             $assert->at(0)->hasAttribute('is_published');

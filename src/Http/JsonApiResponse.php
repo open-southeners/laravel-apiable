@@ -142,6 +142,8 @@ class JsonApiResponse
      */
     protected function resultPostProcessing($result)
     {
+        $this->addAppendsToResult($result);
+
         if ($this->includeAllowedToResponse) {
             $result->additional(['meta' => array_filter([
                 'allowed_filters' => $this->requestQueryObject->getAllowedFilters(),

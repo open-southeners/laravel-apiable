@@ -17,11 +17,17 @@ trait AllowsAppends
     /**
      * Get user append attributes from request.
      *
-     * @return mixed
+     * @return array
      */
     public function appends()
     {
-        return $this->request->get('appends');
+        $appends = $this->request->get('appends', []);
+
+        foreach ($appends as $type => $attributes) {
+            $appends[$type] = explode(',', $attributes);
+        }
+
+        return array_filter($appends);
     }
 
     /**

@@ -2,6 +2,8 @@
 
 namespace OpenSoutheners\LaravelApiable\Http\Concerns;
 
+use OpenSoutheners\LaravelApiable\Http\AllowedFields;
+
 /**
  * @mixin \OpenSoutheners\LaravelApiable\Http\RequestQueryObject
  */
@@ -21,8 +23,8 @@ trait AllowsFields
     {
         $fields = $this->request->get('fields', []);
 
-        foreach ($fields as $type => $attributes) {
-            $fields[$type] = explode(',', $attributes);
+        foreach ($fields as $type => $columns) {
+            $fields[$type] = explode(',', $columns);
         }
 
         return array_filter($fields);
