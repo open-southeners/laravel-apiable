@@ -15,7 +15,7 @@ export default defineUserConfig({
   ],
 
   theme: defaultTheme({
-    repo: 'skore/laravel-json-api',
+    repo: 'open-southeners/laravel-apiable',
     
     navbar: [
       {
