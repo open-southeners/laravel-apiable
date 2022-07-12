@@ -3,6 +3,7 @@
 namespace OpenSoutheners\LaravelApiable\Support;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Resources\MissingValue;
 use Illuminate\Http\Response;
@@ -12,6 +13,7 @@ use Illuminate\Validation\ValidationException;
 use OpenSoutheners\LaravelApiable\Contracts\JsonApiable;
 use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection;
 use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource;
+use OpenSoutheners\LaravelApiable\JsonApiResponse;
 use function OpenSoutheners\LaravelHelpers\Classes\class_use;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
@@ -39,6 +41,10 @@ class Apiable
     {
         if (class_use($resource, \OpenSoutheners\LaravelApiable\Concerns\JsonApiable::class)) {
             return $resource->toJsonApi();
+        }
+
+        if ($resource instanceof Builder) {
+            return $resource->jsonApiPaginate();
         }
 
         if ($resource instanceof Collection || $resource instanceof LengthAwarePaginator) {
@@ -135,5 +141,22 @@ class Apiable
                 array_map(fn ($word) => ucfirst($word), explode(' ', str_replace(['-', '_'], ' ', $value)))
             )
         );
+    }
+
+    /**
+     * Prepare response allowing user requests from query.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder|\OpenSoutheners\LaravelApiable\Contracts\JsonApiable  $query
+     * @return \OpenSoutheners\LaravelApiable\JsonApiResponse|\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection
+     */
+    public static function response($query, array $alloweds = [])
+    {
+        $response = JsonApiResponse::from($query);
+
+        if (! empty($alloweds)) {
+            return $response->allowing($alloweds)->list();
+        }
+
+        return $response;
     }
 }

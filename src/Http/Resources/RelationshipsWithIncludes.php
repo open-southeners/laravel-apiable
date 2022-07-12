@@ -11,8 +11,7 @@ use OpenSoutheners\LaravelApiable\Exceptions\NotJsonApiableModelException;
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
 
 /**
- * @property mixed $resource
- * @property array $with
+ * @mixin \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource
  */
 trait RelationshipsWithIncludes
 {
@@ -30,18 +29,17 @@ trait RelationshipsWithIncludes
      */
     protected function withRelationships()
     {
-        return [];
+        return $this->resource->getRelations();
     }
 
     /**
      * Attach relationships to the resource.
      *
-     * @param  \Illuminate\Database\Eloquent\Model  $model
      * @return void
      */
-    protected function attachRelations(Model $model)
+    protected function attachRelations()
     {
-        $relations = array_filter($model->getRelations(), static function ($value, $key) {
+        $relations = array_filter($this->withRelationships(), static function ($value, $key) {
             return $key !== 'pivot' ?: (bool) $value === false;
         }, ARRAY_FILTER_USE_BOTH);
 

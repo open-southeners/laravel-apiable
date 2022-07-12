@@ -17,6 +17,7 @@ class Builder
          *
          * @param  int|string  $perPage
          * @param  array  $columns
+         * @param  int  $page
          * @return \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection
          */
         return function ($pageSize = null, $columns = ['*'], $page = null) {

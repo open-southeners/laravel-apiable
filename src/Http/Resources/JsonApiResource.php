@@ -29,8 +29,6 @@ class JsonApiResource extends JsonResource
     public function __construct($resource)
     {
         $this->resource = $resource;
-
-        $this->withRelationships();
     }
 
     /**
@@ -41,6 +39,10 @@ class JsonApiResource extends JsonResource
      */
     public function toArray($request)
     {
+        if (empty($this->relationships)) {
+            $this->attachRelations($this->resource);
+        }
+
         if ($this->evaluateResponse()) {
             return [
                 $this->merge($this->getResourceIdentifier()),
