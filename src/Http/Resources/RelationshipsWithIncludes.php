@@ -23,27 +23,19 @@ trait RelationshipsWithIncludes
     protected $relationships = [];
 
     /**
-     * Eager-load the following resource model relationships.
-     *
-     * @return array
-     */
-    protected function withRelationships()
-    {
-        return $this->resource->getRelations();
-    }
-
-    /**
      * Attach relationships to the resource.
      *
      * @return void
      */
-    protected function attachRelations()
+    protected function attachModelRelations()
     {
-        $relations = array_filter($this->withRelationships(), static function ($value, $key) {
-            return $key !== 'pivot' ?: (bool) $value === false;
-        }, ARRAY_FILTER_USE_BOTH);
+        $relations = $this->resource->getRelations();
 
         foreach ($relations as $relation => $relationObj) {
+            if ($relation === 'pivot' || ! $relationObj) {
+                continue;
+            }
+
             if (Apiable::config('normalize_relations', false)) {
                 $relation = Str::snake($relation);
             }

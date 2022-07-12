@@ -7,7 +7,7 @@ use OpenSoutheners\LaravelApiable\Http\AllowedAppends;
 use OpenSoutheners\LaravelApiable\Http\AllowedFields;
 use OpenSoutheners\LaravelApiable\Http\AllowedFilter;
 use OpenSoutheners\LaravelApiable\Http\AllowedInclude;
-use OpenSoutheners\LaravelApiable\JsonApiResponse;
+use OpenSoutheners\LaravelApiable\Http\JsonApiResponse;
 use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
 use OpenSoutheners\LaravelApiable\Tests\Fixtures\Post;
 use OpenSoutheners\LaravelApiable\Tests\Fixtures\PredictableDataGenerator;

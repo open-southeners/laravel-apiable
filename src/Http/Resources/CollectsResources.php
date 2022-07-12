@@ -15,7 +15,7 @@ trait CollectsResources
     /**
      * Map the given collection resource into its individual resources.
      *
-     * @param  \Illuminate\Http\Resources\MissingValue|\Illuminate\Database\Eloquent\Collection|\Illuminate\Support\Collection  $resource
+     * @param  \Illuminate\Http\Resources\MissingValue|\Illuminate\Support\Collection<\OpenSoutheners\LaravelApiable\Contracts\JsonApiable>  $resource
      * @return mixed
      */
     protected function collectResource($resource)
@@ -34,8 +34,8 @@ trait CollectsResources
     /**
      * Get resource collection filtered by authorisation.
      *
-     * @param  mixed  $resource
-     * @param  mixed  $collects
+     * @param  \Illuminate\Pagination\AbstractPaginator<\OpenSoutheners\LaravelApiable\Contracts\JsonApiable>|\Illuminate\Support\Collection<\OpenSoutheners\LaravelApiable\Contracts\JsonApiable>  $resource
+     * @param  class-string<\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource>  $collects
      * @return \Illuminate\Support\Collection
      */
     protected function getFiltered($resource, $collects)
@@ -44,9 +44,7 @@ trait CollectsResources
             $resource = $resource->getCollection();
         }
 
-        $collection = $resource->map(fn ($item) => new $collects($item));
-
-        return $collection;
+        return $resource->mapInto($collects);
     }
 
     /**
@@ -87,7 +85,7 @@ trait CollectsResources
     /**
      * Get an iterator for the resource collection.
      *
-     * @return \ArrayIterator
+     * @return \Traversable
      */
     public function getIterator(): Traversable
     {

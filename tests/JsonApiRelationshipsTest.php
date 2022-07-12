@@ -64,8 +64,6 @@ class JsonApiRelationshipsTest extends TestCase
 
         $response->assertSuccessful();
 
-        // var_dump($response->json());
-
         $response->assertJsonApi(function (AssertableJsonApi $jsonApi) {
             $jsonApi->hasAnyRelationships('client', true)
                 ->hasNotAnyRelationships('post', true);

@@ -23,12 +23,14 @@ class JsonApiResource extends JsonResource
     /**
      * Create a new resource instance.
      *
-     * @param  mixed  $resource
+     * @param  TResource  $resource
      * @return void
      */
     public function __construct($resource)
     {
         $this->resource = $resource;
+
+        $this->attachModelRelations();
     }
 
     /**
@@ -39,19 +41,15 @@ class JsonApiResource extends JsonResource
      */
     public function toArray($request)
     {
-        if (empty($this->relationships)) {
-            $this->attachRelations($this->resource);
+        if (! $this->evaluateResponse()) {
+            return $this->resource;
         }
 
-        if ($this->evaluateResponse()) {
-            return [
-                $this->merge($this->getResourceIdentifier()),
-                'attributes' => $this->getAttributes(),
-                'relationships' => $this->when(! empty($this->relationships), $this->relationships),
-            ];
-        }
-
-        return $this->resource;
+        return [
+            $this->merge($this->getResourceIdentifier()),
+            'attributes' => $this->getAttributes(),
+            'relationships' => $this->when(! empty($this->relationships), $this->relationships),
+        ];
     }
 
     /**
