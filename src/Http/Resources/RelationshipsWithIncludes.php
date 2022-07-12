@@ -23,7 +23,7 @@ trait RelationshipsWithIncludes
     protected $relationships = [];
 
     /**
-     * Eagerload with the resource model the following relationships.
+     * Eager-load the following resource model relationships.
      *
      * @return array
      */

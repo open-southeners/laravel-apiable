@@ -2,9 +2,15 @@
 
 Install with the following command:
 
-```sh
+<CodeGroup>
+  <CodeGroupItem title="COMPOSER">
+
+```bash:no-line-numbers
 composer require open-southeners/laravel-apiable
 ```
+
+  </CodeGroupItem>
+</CodeGroup>
 
 ## Getting started
 
@@ -14,7 +20,17 @@ First publish the config file once installed like this:
 php artisan vendor:publish --provider="OpenSoutheners\LaravelApiable\ServiceProvider"
 ```
 
-And use as simple as importing the class `OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection` for collections or `OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource` for resources.
+### Setup your models
+
+This is a bit of manual work, but you need to setup your models in order for them to be JSON:API serializable entities:
+
+```php
+
+```
+
+### Basic transformation usage
+
+And, finally, use as simple as importing the class `OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection` for collections or `OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource` for resources.
 
 ```php
 <?php
@@ -40,3 +56,5 @@ class UserController extends Controller
     }
 }
 ```
+
+For further advance (or even more simple methods), you should [check out Responses section](responses.md).

@@ -1,10 +1,6 @@
-::: tip
-For your frontend stack you've our suggestions on what to use and why. [Check the Frontend section](frontend.md).
-:::
+# Responses
 
-# Usage
-
-How to use this on your Laravel application.
+For your API controllers responses you've multiple ways to transform your models or collection of models to JSON:API, here we list all of them.
 
 ## Custom resource type
 
@@ -82,17 +78,13 @@ use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource;
 class PostResource extends JsonApiResource
 {
     /**
-     * Attach with the resource model relationships.
+     * Eager-load the following resource model relationships.
      *
-     * @return void
+     * @return array
      */
     protected function withRelationships()
     {
-        if ($this->resource) {
-            $this->resource->loadMissing('author');
-        }
-
-        parent::withRelationships();
+        return ['author'];
     }
 
     /**

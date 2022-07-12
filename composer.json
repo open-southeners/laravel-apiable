@@ -25,6 +25,9 @@
         "phpunit/phpunit": "^9.0"
     },
     "autoload": {
+        "files": [
+            "./helpers.php"
+        ],
         "psr-4": {
             "OpenSoutheners\\LaravelApiable\\": "src",
             "OpenSoutheners\\LaravelApiable\\Tests\\": "tests"

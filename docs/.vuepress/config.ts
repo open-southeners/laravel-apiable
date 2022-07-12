@@ -29,15 +29,15 @@ export default defineUserConfig({
             text: 'Installation',
             link: '/guide/README.md'
           },
-          '/guide/usage.md',
+          '/guide/requests.md',
+          '/guide/responses.md',
           '/guide/testing.md',
-          '/guide/frontend.md',
         ],
       },
       {
-        text: 'Comparison',
-        link: '/comparison.md',
-      }
+        text: 'API',
+        link: '/guide/api.md'
+      },
     ],
 
     sidebar: {
@@ -50,9 +50,18 @@ export default defineUserConfig({
               link: '/guide/README.md'
             },
             {
-              text: 'Usage',
-              link: '/guide/usage.md'
+              text: 'Requests',
+              link: '/guide/requests.md'
             },
+            {
+              text: 'Responses',
+              link: '/guide/responses.md'
+            },
+          ]
+        },
+        {
+          text: 'Digging deeper',
+          children: [
             {
               text: 'Testing',
               link: '/guide/testing.md'
@@ -61,7 +70,15 @@ export default defineUserConfig({
               text: 'Frontend',
               link: '/guide/frontend.md'
             },
+            {
+              text: 'Comparison',
+              link: '/guide/comparison.md'
+            },
           ]
+        },
+        {
+          text: 'API',
+          link: '/guide/api.md'
         },
         // {
         //   text: 'Upgrading',
