@@ -2,7 +2,4 @@
 composer.lock
 .phpunit.result.cache
 phpunit.xml
-node_modules
-.cache
-.temp
 .DS_Store
