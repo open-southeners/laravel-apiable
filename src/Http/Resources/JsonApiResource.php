@@ -4,7 +4,6 @@ namespace OpenSoutheners\LaravelApiable\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\MissingValue;
-use Illuminate\Support\Str;
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
 
 /**
@@ -45,8 +44,8 @@ class JsonApiResource extends JsonResource
         if ($this->evaluateResponse()) {
             return [
                 $this->merge($this->getResourceIdentifier()),
-                'attributes'    => $this->getAttributes(),
-                'relationships' => $this->when($this->relationships, $this->relationships),
+                'attributes' => $this->getAttributes(),
+                'relationships' => $this->when(! empty($this->relationships), $this->relationships),
             ];
         }
 
@@ -74,7 +73,7 @@ class JsonApiResource extends JsonResource
     {
         return [
             $this->resource->getKeyName() => (string) $this->resource->getKey(),
-            'type'                        => Apiable::getResourceType($this->resource),
+            'type' => Apiable::getResourceType($this->resource),
         ];
     }
 
@@ -88,7 +87,7 @@ class JsonApiResource extends JsonResource
         return array_filter(
             array_merge($this->resource->attributesToArray(), $this->withAttributes()),
             function ($value, $key) {
-                return ! Str::endsWith($key, '_id') && $key !== $this->resource->getKeyName() && $value !== null;
+                return last(explode('_id', $key)) !== '' && $key !== $this->resource->getKeyName() && $value !== null;
             },
             ARRAY_FILTER_USE_BOTH
         );

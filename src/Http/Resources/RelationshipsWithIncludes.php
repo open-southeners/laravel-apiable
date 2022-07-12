@@ -21,18 +21,16 @@ trait RelationshipsWithIncludes
      *
      * @var array
      */
-    protected $relationships;
+    protected $relationships = [];
 
     /**
-     * Attach with the resource model relationships.
+     * Eagerload with the resource model the following relationships.
      *
-     * @return void
+     * @return array
      */
     protected function withRelationships()
     {
-        if ($this->resource instanceof Model) {
-            $this->attachRelations($this->resource);
-        }
+        return [];
     }
 
     /**

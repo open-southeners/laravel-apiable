@@ -1,26 +1,22 @@
 import { defineUserConfig } from 'vuepress'
-import type { DefaultThemeOptions } from 'vuepress'
+import { defaultTheme } from '@vuepress/theme-default'
+import { searchPlugin } from '@vuepress/plugin-search'
 
-export default defineUserConfig<DefaultThemeOptions>({
-  base: '/laravel-json-api/',
+export default defineUserConfig({
+  base: '/laravel-apiable/',
   lang: 'en-US',
-  title: 'Laravel JSON:API',
-  description: 'Integrate JSON:API resources on Laravel',
+  title: 'Laravel Apiable',
+  description: 'Integrate JSON:API resources on your Laravel API',
 
   plugins: [
-    [
-      '@vuepress/search', {
-        searchMaxSuggestions: 10
-      }
-    ]
+    searchPlugin({
+      maxSuggestions: 10
+    }),
   ],
 
-  theme: '@vuepress/theme-default',
-  themeConfig: {
-    logo: 'https://skore-public-assets.s3.eu-west-2.amazonaws.com/skore-logo-2x.png',
-
+  theme: defaultTheme({
     repo: 'skore/laravel-json-api',
-
+    
     navbar: [
       {
         text: 'Home',
@@ -35,7 +31,7 @@ export default defineUserConfig<DefaultThemeOptions>({
           },
           '/guide/usage.md',
           '/guide/testing.md',
-          '/guide/implementations.md',
+          '/guide/frontend.md',
         ],
       },
       {
@@ -62,8 +58,8 @@ export default defineUserConfig<DefaultThemeOptions>({
               link: '/guide/testing.md'
             },
             {
-              text: 'Implementations',
-              link: '/guide/implementations.md'
+              text: 'Frontend',
+              link: '/guide/frontend.md'
             },
           ]
         },
@@ -73,5 +69,5 @@ export default defineUserConfig<DefaultThemeOptions>({
         // },
       ],
     },
-  },
+  }),
 })
