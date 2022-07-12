@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2022-07-12
+
+### Fixed
+
+- Multiple fixes to tests & package
+
+### Changed
+
+- Appends now needs to be sent as `?appends[type]=my_attribute,another_attribute` as they're completely different from fields
+
+### Removed
+
+- `JsonApiResource::withRelations()` method (bad idea, lots of possible N+1 problems to the dev-user)
+
 ## [0.1.0] - 2022-07-12
 
 ### Added
