@@ -11,9 +11,9 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use OpenSoutheners\LaravelApiable\Contracts\JsonApiable;
+use OpenSoutheners\LaravelApiable\Http\JsonApiResponse;
 use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection;
 use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource;
-use OpenSoutheners\LaravelApiable\JsonApiResponse;
 use function OpenSoutheners\LaravelHelpers\Classes\class_use;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
@@ -132,7 +132,7 @@ class Apiable
      * Prepare response allowing user requests from query.
      *
      * @param  \Illuminate\Database\Eloquent\Builder|\OpenSoutheners\LaravelApiable\Contracts\JsonApiable  $query
-     * @return \OpenSoutheners\LaravelApiable\JsonApiResponse|\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection
+     * @return \OpenSoutheners\LaravelApiable\Http\JsonApiResponse|\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection
      */
     public static function response($query, array $alloweds = [])
     {
