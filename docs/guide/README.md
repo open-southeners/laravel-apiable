@@ -57,4 +57,26 @@ class UserController extends Controller
 }
 ```
 
+### Error handling
+
+When your application returns errors and your frontend only understand JSON:API, then these needs to be transform. So we've you cover, set them up by simply doing the following on your `app/Exceptions/Handler.php`
+
+```php
+/**
+ * Register the exception handling callbacks for the application.
+ *
+ * @return void
+ */
+public function register()
+{
+    $this->renderable(function (Throwable $e, $request) {
+        if ($request->is('api/*') && app()->bound('apiable')) {
+            return apiable()->jsonApiRenderable($e, $request);
+        }
+    });
+
+    // Rest of the register method...
+}
+```
+
 For further advance (or even more simple methods), you should [check out Responses section](responses.md).
