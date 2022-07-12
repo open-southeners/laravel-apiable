@@ -1,9 +1,10 @@
 {
     "name": "open-southeners/laravel-apiable",
-    "description": "Convert your Laravel application into one with a full API support and with extra capabilities",
+    "description": "Integrate JSON:API resources on your Laravel API project.",
+    "homepage": "https://docs.opensoutheners.com/laravel-apiable/",
     "license": "MIT",
     "keywords": [
-        "open-southeners", "apiable", "json-api", "laravel"
+        "open-southeners", "apiable", "json-api", "laravel", "laravel-package"
     ],
     "authors": [
         {

@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use OpenSoutheners\LaravelApiable\Contracts\HandlesRequestQueries;
-use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
 use function OpenSoutheners\LaravelHelpers\Classes\class_namespace;
 
 class ApplyFiltersToQuery implements HandlesRequestQueries
@@ -104,7 +104,7 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
                     return $this->applyArrayOfFiltersToQuery($query, $attribute, (array) $values, $fullAttribute);
                 }
 
-                $scopeFn = Apiable::attributeToScope($attribute);
+                $scopeFn = Str::camel($attribute);
 
                 if ($this->isScope($queryModel, $scopeFn)) {
                     return call_user_func([$query, $scopeFn], $values);

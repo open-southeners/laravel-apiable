@@ -129,21 +129,6 @@ class Apiable
     }
 
     /**
-     * Transform attribute to a camelCase (method/scope standarised).
-     *
-     * @param  string  $value
-     * @return string
-     */
-    public static function attributeToScope(string $value)
-    {
-        return lcfirst(
-            implode(
-                array_map(fn ($word) => ucfirst($word), explode(' ', str_replace(['-', '_'], ' ', $value)))
-            )
-        );
-    }
-
-    /**
      * Prepare response allowing user requests from query.
      *
      * @param  \Illuminate\Database\Eloquent\Builder|\OpenSoutheners\LaravelApiable\Contracts\JsonApiable  $query

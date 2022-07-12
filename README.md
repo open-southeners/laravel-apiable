@@ -1,6 +1,6 @@
 # Laravel Apiable
 
-Convert your Laravel application into one with a full API support and with extra capabilities
+Integrate JSON:API resources on your Laravel API project.
 
 ## Status
 
@@ -11,3 +11,11 @@ Convert your Laravel application into one with a full API support and with extra
 ```
 composer require open-southeners/laravel-apiable
 ```
+
+## Documentation
+
+[Official documentation](https://docs.opensoutheners.com/laravel-json-api)
+
+## License
+
+This package is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
