@@ -41,7 +41,7 @@ trait AllowsSorts
     /**
      * Allow sorting by the following attribute and direction.
      *
-     * @param  \OpenSoutheners\LaravelApiable\Http\AllowedSort|string  $attribute
+     * @param  \OpenSoutheners\LaravelApiable\Http\AllowedSort|array<string>|string  $attribute
      * @param  string  $direction
      * @return $this
      */
@@ -50,7 +50,10 @@ trait AllowsSorts
         if ($attribute instanceof AllowedSort) {
             $this->allowedSorts = array_merge($this->allowedSorts, $attribute->toArray());
         } else {
-            $this->allowedSorts[$attribute] = $direction;
+            $this->allowedSorts = array_merge(
+                $this->allowedSorts,
+                array_map(fn () => $direction, array_flip((array) $attribute))
+            );
         }
 
         return $this;

@@ -33,6 +33,11 @@ class RequestQueryObject
         $this->query = $query;
     }
 
+    /**
+     * Get underlying eloquent query builder instance.
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public function query()
     {
         return $this->query;

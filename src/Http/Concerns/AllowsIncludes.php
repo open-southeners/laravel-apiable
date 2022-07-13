@@ -25,12 +25,12 @@ trait AllowsIncludes
     /**
      * Allow include relationship to the response.
      *
-     * @param  \OpenSoutheners\LaravelApiable\Http\AllowedInclude|string  $relationship
+     * @param  \OpenSoutheners\LaravelApiable\Http\AllowedInclude|array|string  $relationship
      * @return $this
      */
     public function allowInclude($relationship)
     {
-        $this->allowedIncludes[] = (string) $relationship;
+        $this->allowedIncludes[] = array_merge($this->allowedIncludes, (array) $relationship);
 
         return $this;
     }

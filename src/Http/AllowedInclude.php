@@ -2,19 +2,19 @@
 
 namespace OpenSoutheners\LaravelApiable\Http;
 
-use Stringable;
+use Illuminate\Contracts\Support\Arrayable;
 
-class AllowedInclude implements Stringable
+class AllowedInclude implements Arrayable
 {
     /**
-     * @var string
+     * @var string|array
      */
     protected $relationship;
 
     /**
      * Make an instance of this class.
      *
-     * @param  string  $relationship
+     * @param  string|array  $relationship
      * @return void
      */
     public function __construct($relationship)
@@ -25,7 +25,7 @@ class AllowedInclude implements Stringable
     /**
      * Allow include resource relationship.
      *
-     * @param  string  $relationship
+     * @param  string|array  $relationship
      * @return static
      */
     public static function make($relationship)
@@ -34,10 +34,12 @@ class AllowedInclude implements Stringable
     }
 
     /**
-     * @return string
+     * Get the instance as an array.
+     *
+     * @return array
      */
-    public function __toString()
+    public function toArray()
     {
-        return $this->relationship;
+        return (array) $this->relationship;
     }
 }
