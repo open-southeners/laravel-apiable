@@ -5,6 +5,7 @@ namespace OpenSoutheners\LaravelApiable\Http;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Pipeline\Pipeline;
+use function OpenSoutheners\LaravelHelpers\Models\key_from;
 
 /**
  * @mixin \OpenSoutheners\LaravelApiable\Http\RequestQueryObject
@@ -134,11 +135,27 @@ class JsonApiResponse
     }
 
     /**
+     * Get a single resource from a request query object.
+     *
+     * @param  \OpenSoutheners\LaravelApiable\Contracts\JsonApiable|int|string  $key
+     * @return \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource
+     */
+    public function getOne($key)
+    {
+        return $this->resultPostProcessing(
+            $this->getPipelineQuery()
+                ->whereKey(key_from($key))
+                ->first()
+                ->toJsonApi()
+        );
+    }
+
+    /**
      * Post-process result from query to apply appended attributes.
      * TODO: This should be in a new class/trait!
      *
-     * @param  \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection  $result
-     * @return \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection
+     * @param  \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection|\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource  $result
+     * @return \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection|\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource
      */
     protected function resultPostProcessing($result)
     {

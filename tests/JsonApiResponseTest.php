@@ -124,7 +124,7 @@ class JsonApiResponseTest extends TestCase
         $response = $this->get('/?fields[client]=name');
 
         $response->assertJsonApi(function (AssertableJsonApi $assert) {
-            $assert->at(0)->hasAttribute('name');
+            $assert->isCollection()->at(0)->hasAttribute('name');
         });
     }
 
@@ -140,7 +140,23 @@ class JsonApiResponseTest extends TestCase
         $response = $this->get('/?appends[post]=is_published');
 
         $response->assertJsonApi(function (AssertableJsonApi $assert) {
-            $assert->at(0)->hasAttribute('is_published');
+            $assert->isCollection()->at(0)->hasAttribute('is_published');
+        });
+    }
+
+    public function testGetOneReturnsJsonApiResourceAsResponse()
+    {
+        Route::get('/', function () {
+            return JsonApiResponse::from(Post::class)
+                ->allowing([
+                    AllowedAppends::make('post', 'is_published'),
+                ])->getOne(1);
+        });
+
+        $response = $this->get('/?appends[post]=is_published');
+
+        $response->assertJsonApi(function (AssertableJsonApi $assert) {
+            $assert->isResource()->hasAttribute('is_published');
         });
     }
 }

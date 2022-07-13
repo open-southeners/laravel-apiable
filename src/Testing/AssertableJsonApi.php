@@ -44,7 +44,7 @@ class AssertableJsonApi extends AssertableJson
             $data = $content['data'];
             $collection = [];
 
-            if (static::isCollection($data)) {
+            if (static::responseContainsCollection($data)) {
                 $collection = $data;
                 $data = head($data);
             }
@@ -77,9 +77,21 @@ class AssertableJsonApi extends AssertableJson
      * @param  array  $data
      * @return bool
      */
-    public static function isCollection(array $data = [])
+    public static function responseContainsCollection(array $data = [])
     {
         return ! array_key_exists('attributes', $data);
+    }
+
+    /**
+     * Assert that actual response is a resource
+     *
+     * @return $this
+     */
+    public function isResource()
+    {
+        PHPUnit::assertEmpty($this->collection, 'Failed asserting that response is a resource');
+
+        return $this;
     }
 
     /**

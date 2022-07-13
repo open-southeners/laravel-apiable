@@ -15,6 +15,18 @@ trait HasCollections
     protected $atPosition;
 
     /**
+     * Assert that actual response is a collection
+     *
+     * @return $this
+     */
+    public function isCollection()
+    {
+        PHPUnit::assertNotEmpty($this->collection, 'Failed asserting that response is a collection');
+
+        return $this;
+    }
+
+    /**
      * Get resource based on its zero-based position in the collection.
      *
      * @param  int  $position
