@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2022-07-13
+
+### Added
+
+- JsonApiResponse `getOne` method for parse current model instance or model key passed
+- `isCollection` and `isResource` testing methods to `AssertableJsonApi`
+
 ## [0.2.0] - 2022-07-12
 
 ### Fixed
