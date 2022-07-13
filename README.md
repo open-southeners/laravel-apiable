@@ -14,7 +14,7 @@ composer require open-southeners/laravel-apiable
 
 ## Documentation
 
-[Official documentation](https://docs.opensoutheners.com/laravel-json-api)
+[Official documentation](https://docs.opensoutheners.com/laravel-apiable/)
 
 ## License
 
