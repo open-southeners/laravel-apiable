@@ -5,6 +5,7 @@ namespace OpenSoutheners\LaravelApiable\Http;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Pipeline\Pipeline;
+use Illuminate\Support\Traits\ForwardsCalls;
 use function OpenSoutheners\LaravelHelpers\Models\key_from;
 
 /**
@@ -13,6 +14,7 @@ use function OpenSoutheners\LaravelHelpers\Models\key_from;
 class JsonApiResponse
 {
     use Concerns\IteratesResultsAfterQuery;
+    use ForwardsCalls;
 
     /**
      * @var \Illuminate\Pipeline\Pipeline
@@ -180,8 +182,6 @@ class JsonApiResponse
      */
     public function __call(string $name, array $arguments)
     {
-        call_user_func_array([$this->requestQueryObject, $name], $arguments);
-
-        return $this;
+        return $this->forwardDecoratedCallTo($this->requestQueryObject, $name, $arguments);
     }
 }
