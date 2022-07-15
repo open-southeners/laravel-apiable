@@ -1,33 +1,20 @@
 <?php
 
-namespace OpenSoutheners\LaravelApiable\Tests\Fixtures;
+namespace OpenSoutheners\LaravelApiable\Tests\Helpers;
 
-class PredictableDataGenerator
+use OpenSoutheners\LaravelApiable\Tests\Fixtures\Post;
+use OpenSoutheners\LaravelApiable\Tests\Fixtures\Tag;
+use OpenSoutheners\LaravelApiable\Tests\Fixtures\User;
+
+trait GeneratesPredictableTestData
 {
-    /**
-     * @var \Illuminate\Support\Collection<\OpenSoutheners\LaravelHelpers\Tests\Fixtures\User>
-     */
-    public $users;
-
-    /**
-     * @var \Illuminate\Support\Collection<\OpenSoutheners\LaravelHelpers\Tests\Fixtures\Tag>
-     */
-    public $tags;
-
-    /**
-     * @var \Illuminate\Support\Collection<\OpenSoutheners\LaravelHelpers\Tests\Fixtures\Post>
-     */
-    public $posts;
-
     /**
      * Generate a new instance of this class with predictable data.
      *
-     * @return \OpenSoutheners\LaravelApiable\Tests\Fixtures\PredictableDataGenerator
+     * @return $this
      */
-    public static function generate()
+    public function generateTestData()
     {
-        $instance = new self();
-
         User::insert([
             [
                 'name' => 'Aysha',
@@ -47,6 +34,11 @@ class PredictableDataGenerator
             [
                 'name' => 'Perla',
                 'email' => 'perla@example.com',
+                'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+            ],
+            [
+                'name' => 'Ruben',
+                'email' => 'ruben_robles@example.com',
                 'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
             ],
         ]);
@@ -135,6 +127,6 @@ class PredictableDataGenerator
         Post::find(2)->tags()->attach([1, 3, 4, 5]);
         Post::find(3)->tags()->attach(5);
 
-        return $instance;
+        return $this;
     }
 }

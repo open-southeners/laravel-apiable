@@ -10,16 +10,13 @@ use OpenSoutheners\LaravelApiable\Http\AllowedInclude;
 use OpenSoutheners\LaravelApiable\Http\JsonApiResponse;
 use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
 use OpenSoutheners\LaravelApiable\Tests\Fixtures\Post;
-use OpenSoutheners\LaravelApiable\Tests\Fixtures\PredictableDataGenerator;
 use OpenSoutheners\LaravelApiable\Tests\Fixtures\Tag;
 use OpenSoutheners\LaravelApiable\Tests\Fixtures\User;
+use OpenSoutheners\LaravelApiable\Tests\Helpers\GeneratesPredictableTestData;
 
 class JsonApiResponseTest extends TestCase
 {
-    /**
-     * @var \OpenSoutheners\LaravelApiable\Tests\Fixtures\PredictableDataGenerator
-     */
-    protected $generator;
+    use GeneratesPredictableTestData;
 
     /**
      * Setup the test environment.
@@ -30,7 +27,7 @@ class JsonApiResponseTest extends TestCase
     {
         parent::setUp();
 
-        $this->generator = PredictableDataGenerator::generate();
+        $this->generateTestData();
     }
 
     public function testFilteringByNonAllowedAttributeWillGetEverything()
@@ -108,6 +105,23 @@ class JsonApiResponseTest extends TestCase
         });
 
         $response = $this->get('/?include=author&filter[author.name]=Ruben');
+
+        $response->assertJsonCount(1, 'data');
+    }
+
+    // TODO: Need to do this as unit test to know if query is optimal, guess it is...
+    public function testFilteringByTwoDifferentAttributesOfSameRelationship()
+    {
+        Route::get('/', function () {
+            return JsonApiResponse::from(Post::class)
+                ->allowing([
+                    AllowedInclude::make('author'),
+                    AllowedFilter::exact('author.name'),
+                    AllowedFilter::similar('author.email'),
+                ])->list();
+        });
+
+        $response = $this->get('/?include=author&filter[author.name]=Ruben&filter[author.email]=d8vjork');
 
         $response->assertJsonCount(1, 'data');
     }
