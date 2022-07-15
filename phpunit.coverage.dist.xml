@@ -14,9 +14,11 @@
 >
   <coverage processUncoveredFiles="true" cacheDirectory=".coverage-cache">
     <include>
-      <directory suffix=".php">./src</directory>
+      <directory suffix=".php">src</directory>
     </include>
     <exclude>
+      <directory suffix=".php">src/Contracts</directory>
+      <directory suffix=".php">src/Support/Facades</directory>
       <file>src/Http/SortDirection.php</file>
     </exclude>
     <report>
