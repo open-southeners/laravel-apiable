@@ -39,6 +39,10 @@ class Apiable
      */
     public static function toJsonApi($resource)
     {
+        if (! is_object($resource)) {
+            return false;
+        }
+
         if (class_use($resource, \OpenSoutheners\LaravelApiable\Concerns\JsonApiable::class)) {
             return $resource->toJsonApi();
         }
