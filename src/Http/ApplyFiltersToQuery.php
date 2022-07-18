@@ -8,11 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use Illuminate\Support\Traits\ForwardsCalls;
 use OpenSoutheners\LaravelApiable\Contracts\HandlesRequestQueries;
 use function OpenSoutheners\LaravelHelpers\Classes\class_namespace;
 
 class ApplyFiltersToQuery implements HandlesRequestQueries
 {
+    use ForwardsCalls;
+
     /**
      * @var array<array>
      */
@@ -107,7 +110,7 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
                 $scopeFn = Str::camel($attribute);
 
                 if ($this->isScope($queryModel, $scopeFn)) {
-                    return call_user_func([$query, $scopeFn], $values);
+                    return $this->forwardCallTo($query, $scopeFn, $values);
                 }
             }, $query, $fullAttribute);
         }
