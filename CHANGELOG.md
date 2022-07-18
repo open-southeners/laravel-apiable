@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2022-07-18
+
+### Fixed
+
+- Missing autoload-dev, tests were autoloaded with the released version
+- Multiple minor fixes around forwarding calls (methods)
+- Apiable facade `toJsonApi`
+
 ## [0.4.0] - 2022-07-13
 
 ### Added
