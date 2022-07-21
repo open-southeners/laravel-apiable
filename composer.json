@@ -18,8 +18,7 @@
         "open-southeners/laravel-helpers": "^0.6.1"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^3.0",
-        "laravel/pint": "^0.2.1",
+        "laravel/pint": "^1.0",
         "nunomaduro/larastan": "^2.1",
         "orchestra/testbench": "^7.0",
         "phpstan/phpstan": "^1.0",
