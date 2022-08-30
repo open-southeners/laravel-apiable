@@ -4,7 +4,11 @@
     "homepage": "https://docs.opensoutheners.com/laravel-apiable/",
     "license": "MIT",
     "keywords": [
-        "open-southeners", "apiable", "json-api", "laravel", "laravel-package"
+        "open-southeners",
+        "apiable",
+        "json-api",
+        "laravel",
+        "laravel-package"
     ],
     "authors": [
         {
@@ -23,6 +27,9 @@
         "orchestra/testbench": "^7.0",
         "phpstan/phpstan": "^1.0",
         "phpunit/phpunit": "^9.0"
+    },
+    "suggest": {
+        "hammerstone/fast-paginate": "Improves jsonApiPaginate method performance (SQL database query pagination)"
     },
     "autoload": {
         "files": [
