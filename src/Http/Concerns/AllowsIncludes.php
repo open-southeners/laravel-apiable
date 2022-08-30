@@ -30,7 +30,7 @@ trait AllowsIncludes
      */
     public function allowInclude($relationship)
     {
-        $this->allowedIncludes[] = array_merge($this->allowedIncludes, (array) $relationship);
+        $this->allowedIncludes = array_merge($this->allowedIncludes, (array) $relationship);
 
         return $this;
     }
