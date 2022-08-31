@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2022-08-31
+
+### Removed
+
+- Custom transformers (out of package scope / purpose)
+
+### Fixed
+
+- Method `allowIncludes` adds nested array which leads into issues
+
+### Changed
+
+- Model setup not needed (`OpenSoutheners\LaravelApiable\JsonApiOptions` replaced by `OpenSoutheners\LaravelApiable\Facades\Apiable::modelResourceTypeMap` facade method)
+
+### Added
+
+- Support for [laravel/scout](https://github.com/laravel/scout)
+- Support for [hammerstone/fast-paginate](https://github.com/hammerstonedev/fast-paginate)
+
 ## [0.4.1] - 2022-07-18
 
 ### Fixed
