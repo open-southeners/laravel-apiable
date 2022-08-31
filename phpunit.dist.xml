@@ -24,7 +24,6 @@
   </testsuites>
   <php>
     <ini name="memory_limit" value="2048M"/>
-    <env name="DB_CONNECTION" value="sqlite" force="true"/>
-    <env name="DB_DATABASE" value=":memory:" force="true"/>
+    <env name="SCOUT_DRIVER" value="collection" force="true"/>
   </php>
 </phpunit>
