@@ -32,6 +32,8 @@ return new class extends Migration
                 ->nullOnDelete();
 
             $table->timestamps();
+            // TODO: SQLite doesn't support this, needs MySQL
+            // $table->fullText(['title', 'content']);
         });
     }
 

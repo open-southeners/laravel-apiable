@@ -173,4 +173,19 @@ class JsonApiResponseTest extends TestCase
             $assert->isResource()->hasAttribute('is_published');
         });
     }
+
+    public function testListPerformingFulltextSearch()
+    {
+        Route::get('/', function () {
+            return JsonApiResponse::from(Post::class)
+                ->allowSearch()
+                ->list();
+        });
+
+        $response = $this->get('/?q=español');
+
+        $response->assertJsonApi(function (AssertableJsonApi $assert) {
+            $assert->hasSize(1)->hasAttribute('title', 'Y esto en español');
+        });
+    }
 }

@@ -3,12 +3,14 @@
 namespace OpenSoutheners\LaravelApiable\Tests\Fixtures;
 
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
 use OpenSoutheners\LaravelApiable\Concerns\HasJsonApi;
 use OpenSoutheners\LaravelApiable\Contracts\JsonApiable;
 use OpenSoutheners\LaravelApiable\JsonApiableOptions;
 
 class Post extends Model implements JsonApiable
 {
+    use Searchable;
     use HasJsonApi;
 
     /**
@@ -33,6 +35,20 @@ class Post extends Model implements JsonApiable
     public function jsonApiableOptions()
     {
         return JsonApiableOptions::withDefaults(self::class);
+    }
+
+    /**
+     * Get the indexable data array for the model.
+     *
+     * @return array
+     */
+    public function toSearchableArray()
+    {
+        return [
+            'id' => $this->id,
+            'title' => $this->title,
+            'content' => $this->content,
+        ];
     }
 
     /**

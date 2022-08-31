@@ -2,10 +2,13 @@
 
 namespace OpenSoutheners\LaravelApiable\Http;
 
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Traits\ForwardsCalls;
+use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
+use function OpenSoutheners\LaravelHelpers\Classes\class_use;
 use function OpenSoutheners\LaravelHelpers\Models\key_from;
 
 /**
@@ -94,6 +97,7 @@ class JsonApiResponse
         return $this->pipeline->send($this->requestQueryObject)
             ->via('from')
             ->through([
+                ApplyFulltextSearchToQuery::class,
                 ApplyFiltersToQuery::class,
                 ApplyIncludesToQuery::class,
                 ApplyFieldsToQuery::class,

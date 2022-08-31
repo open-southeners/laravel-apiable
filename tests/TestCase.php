@@ -2,6 +2,7 @@
 
 namespace OpenSoutheners\LaravelApiable\Tests;
 
+use Laravel\Scout\ScoutServiceProvider;
 use OpenSoutheners\LaravelApiable\ServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 
@@ -10,6 +11,7 @@ abstract class TestCase extends Orchestra
     protected function getPackageProviders($app)
     {
         return [
+            ScoutServiceProvider::class,
             ServiceProvider::class,
         ];
     }
@@ -41,6 +43,7 @@ abstract class TestCase extends Orchestra
      */
     protected function defineDatabaseMigrations()
     {
+        $this->loadLaravelMigrations();
         $this->loadMigrationsFrom(__DIR__.'/database');
     }
 }

@@ -9,6 +9,7 @@ class RequestQueryObject
     use Concerns\AllowsFilters;
     use Concerns\AllowsIncludes;
     use Concerns\AllowsSorts;
+    use Concerns\AllowsSearch;
 
     /**
      * @var \Illuminate\Http\Request
