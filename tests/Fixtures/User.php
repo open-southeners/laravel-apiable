@@ -5,7 +5,6 @@ namespace OpenSoutheners\LaravelApiable\Tests\Fixtures;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use OpenSoutheners\LaravelApiable\Concerns\HasJsonApi;
 use OpenSoutheners\LaravelApiable\Contracts\JsonApiable;
-use OpenSoutheners\LaravelApiable\JsonApiableOptions;
 
 class User extends Authenticatable implements JsonApiable
 {
@@ -43,15 +42,4 @@ class User extends Authenticatable implements JsonApiable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
-
-    /**
-     * Set options for model to be serialize with JSON:API.
-     *
-     * @return \OpenSoutheners\LaravelApiable\JsonApiableOptions
-     */
-    public function jsonApiableOptions()
-    {
-        return JsonApiableOptions::withDefaults(self::class)
-            ->resourceType('client');
-    }
 }

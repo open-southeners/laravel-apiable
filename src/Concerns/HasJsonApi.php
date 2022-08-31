@@ -2,9 +2,8 @@
 
 namespace OpenSoutheners\LaravelApiable\Concerns;
 
-/**
- * @mixin \OpenSoutheners\LaravelApiable\JsonApiableOptions
- */
+use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource;
+
 trait HasJsonApi
 {
     /**
@@ -14,8 +13,6 @@ trait HasJsonApi
      */
     public function toJsonApi()
     {
-        $transformerClass = $this->jsonApiableOptions()->transformer;
-
-        return new $transformerClass($this);
+        return new JsonApiResource($this);
     }
 }

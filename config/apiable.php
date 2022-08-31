@@ -26,4 +26,11 @@ return [
         'default_size' => 50,
     ],
 
+    /**
+     * Resource type model map.
+     *
+     * @see https://docs.opensoutheners.com/laravel-apiable/guide/#getting-started
+     */
+    'resource_type_map' => [],
+
 ];

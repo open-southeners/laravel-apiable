@@ -14,7 +14,9 @@ class ServiceProvider extends BaseServiceProvider
      */
     public function boot()
     {
-        //
+        if (! empty(Apiable::config('resource_type_map'))) {
+            Apiable::modelResourceTypeMap(Apiable::config('resource_type_map'));
+        }
     }
 
     /**

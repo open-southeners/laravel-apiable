@@ -4,10 +4,20 @@ namespace OpenSoutheners\LaravelApiable\Tests;
 
 use Laravel\Scout\ScoutServiceProvider;
 use OpenSoutheners\LaravelApiable\ServiceProvider;
+use OpenSoutheners\LaravelApiable\Tests\Fixtures\Plan;
+use OpenSoutheners\LaravelApiable\Tests\Fixtures\Post;
+use OpenSoutheners\LaravelApiable\Tests\Fixtures\Tag;
+use OpenSoutheners\LaravelApiable\Tests\Fixtures\User;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 abstract class TestCase extends Orchestra
 {
+    /**
+     * Get package providers.
+     *
+     * @param  \Illuminate\Foundation\Application  $app
+     * @return array<int, class-string>
+     */
     protected function getPackageProviders($app)
     {
         return [
@@ -34,6 +44,12 @@ abstract class TestCase extends Orchestra
 
         // Setup package own config (statuses)
         $app['config']->set('apiable', include_once __DIR__.'/../config/apiable.php');
+        $app['config']->set('apiable.resource_type_map', [
+            Plan::class => 'plan',
+            Post::class => 'post',
+            Tag::class => 'label',
+            User::class => 'client',
+        ]);
     }
 
     /**

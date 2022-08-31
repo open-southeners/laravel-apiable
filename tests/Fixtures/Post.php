@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 use Laravel\Scout\Searchable;
 use OpenSoutheners\LaravelApiable\Concerns\HasJsonApi;
 use OpenSoutheners\LaravelApiable\Contracts\JsonApiable;
-use OpenSoutheners\LaravelApiable\JsonApiableOptions;
 
 class Post extends Model implements JsonApiable
 {
@@ -26,16 +25,6 @@ class Post extends Model implements JsonApiable
      * @var string[]
      */
     protected $guarded = [];
-
-    /**
-     * Set options for model to be serialize with JSON:API.
-     *
-     * @return \OpenSoutheners\LaravelApiable\JsonApiableOptions
-     */
-    public function jsonApiableOptions()
-    {
-        return JsonApiableOptions::withDefaults(self::class);
-    }
 
     /**
      * Get the indexable data array for the model.

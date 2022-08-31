@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Collection as DatabaseCollection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use OpenSoutheners\LaravelApiable\Contracts\JsonApiable;
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
 
 /**
@@ -64,12 +63,8 @@ trait RelationshipsWithIncludes
      */
     protected function processModelRelation($model)
     {
-        $modelTransformer = $model instanceof JsonApiable
-            ? $model->jsonApiableOptions()->transformer
-            : self::class;
-
         /** @var \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource $modelResource */
-        $modelResource = new $modelTransformer($model);
+        $modelResource = new self($model);
         $modelIdentifier = $modelResource->getResourceIdentifier();
 
         if (! empty($modelIdentifier[$model->getKeyName()] ?? null)) {

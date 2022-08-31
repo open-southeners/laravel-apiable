@@ -5,6 +5,7 @@ namespace OpenSoutheners\LaravelApiable\Http;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use OpenSoutheners\LaravelApiable\Contracts\HandlesRequestQueries;
+use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
 
 class ApplyFieldsToQuery implements HandlesRequestQueries
 {
@@ -70,22 +71,22 @@ class ApplyFieldsToQuery implements HandlesRequestQueries
     {
         /** @var \OpenSoutheners\LaravelApiable\Contracts\JsonApiable */
         $mainQueryModel = $query->getModel();
+        $mainQueryResourceType = Apiable::getResourceType($mainQueryModel);
         $queryEagerLoaded = $query->getEagerLoads();
 
         // TODO: Move this to some class methods
         foreach ($fields as $type => $columns) {
-            if ($mainQueryModel->jsonApiableOptions()->resourceType === $type) {
-                if (! in_array($mainQueryModel->getKeyName(), $columns)) {
-                    $columns[] = $mainQueryModel->getKeyName();
-                }
+            $typeModel = Apiable::getModelFromResourceType($type);
 
-                $query->select($columns);
+            $matchedFn = match (true) {
+                $mainQueryResourceType === $type => function () use ($query, $mainQueryModel, $columns) {
+                    if (! in_array($mainQueryModel->getKeyName(), $columns)) {
+                        $columns[] = $mainQueryModel->getKeyName();
+                    }
 
-                continue;
-            }
-
-            $query->when(in_array($type, $queryEagerLoaded), fn (Builder $query) => $query
-                ->with($type, function (Builder $query) use ($queryEagerLoaded, $type, $columns) {
+                    $query->select($columns);
+                },
+                in_array($typeModel, $queryEagerLoaded) => fn () => $query->with($type, function (Builder $query) use ($queryEagerLoaded, $type, $columns) {
                     $relatedModel = $query->getModel();
 
                     if (! in_array($relatedModel->getKeyName(), $columns)) {
@@ -93,8 +94,11 @@ class ApplyFieldsToQuery implements HandlesRequestQueries
                     }
 
                     $queryEagerLoaded[$type]($query->select($columns));
-                })
-            );
+                }),
+                default => fn () => null,
+            };
+
+            $matchedFn();
         }
 
         return $query;

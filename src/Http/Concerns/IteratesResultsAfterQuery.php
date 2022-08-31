@@ -4,6 +4,7 @@ namespace OpenSoutheners\LaravelApiable\Http\Concerns;
 
 use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection;
 use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource;
+use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
 
 /**
  * @mixin \OpenSoutheners\LaravelApiable\Http\JsonApiResponse
@@ -41,7 +42,7 @@ trait IteratesResultsAfterQuery
     /**
      * Append array of attributes to the resulted JSON:API resource.
      *
-     * @param  JsonApiResource  $resource
+     * @param  \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource  $resource
      * @param array appends
      * @return void
      */
@@ -49,13 +50,16 @@ trait IteratesResultsAfterQuery
     {
         /** @var array<\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource> $resourceIncluded */
         $resourceIncluded = $resource->with['included'] ?? [];
+        $resourceType = Apiable::getResourceType($resource->resource);
 
-        if ($appendsArr = $appends[$resource->resource->jsonApiableOptions()->resourceType] ?? null) {
+        if ($appendsArr = $appends[$resourceType] ?? null) {
             $resource->makeVisible($appendsArr)->append($appendsArr);
         }
 
         foreach ($resourceIncluded as $included) {
-            if ($appendsArr = $appends[$included->resource->jsonApiableOptions()->resourceType] ?? null) {
+            $includedResourceType = Apiable::getResourceType($included->resource);
+
+            if ($appendsArr = $appends[$includedResourceType] ?? null) {
                 $included->resource->makeVisible($appendsArr)->append($appendsArr);
             }
         }
