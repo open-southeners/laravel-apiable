@@ -30,11 +30,13 @@ class Builder
                 $pageSize = $requestedPageSize;
             }
 
+            // @codeCoverageIgnoreStart
             if (class_exists("Hammerstone\FastPaginate\FastPaginate")) {
                 return Apiable::toJsonApi(
                     $this->fastPaginate($pageSize, $columns, 'page[number]', (int) request('page.number'))
                 );
             }
+            // @codeCoverageIgnoreEnd
 
             $results = ($total = $this->toBase()->getCountForPagination())
                 ? $this->forPage($page, $pageSize)->get($columns)

@@ -7,6 +7,7 @@ use OpenSoutheners\LaravelApiable\Http\AllowedAppends;
 use OpenSoutheners\LaravelApiable\Http\AllowedFields;
 use OpenSoutheners\LaravelApiable\Http\AllowedFilter;
 use OpenSoutheners\LaravelApiable\Http\AllowedInclude;
+use OpenSoutheners\LaravelApiable\Http\AllowedSort;
 use OpenSoutheners\LaravelApiable\Http\JsonApiResponse;
 use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
 use OpenSoutheners\LaravelApiable\Tests\Fixtures\Post;
@@ -139,6 +140,38 @@ class JsonApiResponseTest extends TestCase
 
         $response->assertJsonApi(function (AssertableJsonApi $assert) {
             $assert->isCollection()->at(0)->hasAttribute('name');
+        });
+    }
+
+    public function testSortingFieldsAsDescendant()
+    {
+        Route::get('/', function () {
+            return JsonApiResponse::from(User::class)
+                ->allowing([
+                    AllowedSort::descendant('name'),
+                ])->list();
+        });
+
+        $response = $this->get('/?sort=-name');
+
+        $response->assertJsonApi(function (AssertableJsonApi $assert) {
+            $assert->isCollection()->at(0)->hasAttribute('name', 'Ruben');
+        });
+    }
+
+    public function testSortingFieldsAsAscendant()
+    {
+        Route::get('/', function () {
+            return JsonApiResponse::from(User::class)
+                ->allowing([
+                    AllowedSort::ascendant('name'),
+                ])->list();
+        });
+
+        $response = $this->get('/?sort=name');
+
+        $response->assertJsonApi(function (AssertableJsonApi $assert) {
+            $assert->isCollection()->at(0)->hasAttribute('name', 'Aysha');
         });
     }
 

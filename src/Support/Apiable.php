@@ -44,27 +44,14 @@ class Apiable
      */
     public static function toJsonApi($resource)
     {
-        if (! is_object($resource)) {
-            return false;
-        }
-
-        if (class_use($resource, \OpenSoutheners\LaravelApiable\Concerns\JsonApiable::class)) {
-            return $resource->toJsonApi();
-        }
-
-        if ($resource instanceof Builder) {
-            return $resource->jsonApiPaginate();
-        }
-
-        if ($resource instanceof Collection || $resource instanceof LengthAwarePaginator) {
-            return new JsonApiCollection($resource);
-        }
-
-        if ($resource instanceof Model || $resource instanceof MissingValue) {
-            return new JsonApiResource($resource);
-        }
-
-        return false;
+        return match (true) {
+            ! is_object($resource) => false,
+            $resource instanceof Collection, class_use($resource, \OpenSoutheners\LaravelApiable\Concerns\JsonApiable::class) => $resource->toJsonApi(),
+            $resource instanceof Builder => $resource->jsonApiPaginate(),
+            $resource instanceof LengthAwarePaginator => new JsonApiCollection($resource),
+            $resource instanceof Model || $resource instanceof MissingValue => new JsonApiResource($resource),
+            default => false,
+        };
     }
 
     /**
@@ -137,7 +124,8 @@ class Apiable
     /**
      * Prepare response allowing user requests from query.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder|\OpenSoutheners\LaravelApiable\Contracts\JsonApiable  $query
+     * @param  \Illuminate\Database\Eloquent\Builder|\OpenSoutheners\LaravelApiable\Contracts\JsonApiable|class-string<\OpenSoutheners\LaravelApiable\Contracts\JsonApiable>  $query
+     * @param  array  $alloweds
      * @return \OpenSoutheners\LaravelApiable\Http\JsonApiResponse|\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection
      */
     public static function response($query, array $alloweds = [])

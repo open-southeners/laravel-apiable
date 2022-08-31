@@ -2,6 +2,7 @@
 
 namespace OpenSoutheners\LaravelApiable\Tests;
 
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Route;
 use OpenSoutheners\LaravelApiable\Support\Apiable;
 use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
@@ -103,5 +104,32 @@ class JsonApiCollectionTest extends TestCase
             $this->assertIsArray($responseArray);
             $this->assertFalse(empty($responseArray), 'toArray() should not be empty');
         });
+    }
+
+    public function testCollectionsWithPreserveQueryWillReturnPaginationLinksWithSimilarParams()
+    {
+        Route::get('/posts', function () {
+            $postsCollection = collect([
+                new Post([
+                    'id' => 5,
+                    'status' => 'Published',
+                    'title' => 'Test Title',
+                    'abstract' => 'Test abstract',
+                ]),
+                new Post([
+                    'id' => 6,
+                    'status' => 'Published',
+                    'title' => 'Test Title 2',
+                ]),
+            ]);
+
+            return Apiable::toJsonApi(
+                new LengthAwarePaginator($postsCollection, $postsCollection->count(), 1)
+            )->preserveQuery();
+        });
+
+        $response = $this->get('/posts?filter[title]=test', ['Accept' => 'application/json']);
+
+        $response->assertJsonFragment(['url' => '/?filter%5Btitle%5D=test&page=2']);
     }
 }
