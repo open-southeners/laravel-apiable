@@ -28,9 +28,6 @@ class ApplyFulltextSearchToQuery implements HandlesRequestQueries
             return $next($requestQueryObject);
         }
 
-        print_r(compact('userSearchQuery'));
-        print_r($queryModel::search('Porque si')->keys()->toArray());
-
         $requestQueryObject->query->whereKey($queryModel::search($userSearchQuery)->keys()->toArray());
 
         return $next($requestQueryObject);
