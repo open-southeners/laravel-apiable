@@ -7,7 +7,7 @@ return [
     /**
      * Default options for request query filters, sorts, etc.
      *
-     * @see https://docs.open-southeners.com/laravel-apiable/requests
+     * @see https://docs.opensoutheners.com/laravel-apiable/guide/requests.html
      */
     'filters' => [
         'default_operator' => 'like',
@@ -20,7 +20,7 @@ return [
     /**
      * Pagination options.
      *
-     * @see https://docs.open-southeners.com/laravel-apiable/reponses
+     * @see https://docs.opensoutheners.com/laravel-apiable/guide/responses.html
      */
     'pagination' => [
         'default_size' => 50,
