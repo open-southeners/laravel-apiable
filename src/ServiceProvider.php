@@ -17,6 +17,12 @@ class ServiceProvider extends BaseServiceProvider
         if (! empty(Apiable::config('resource_type_map'))) {
             Apiable::modelResourceTypeMap(Apiable::config('resource_type_map'));
         }
+
+        if ($this->app->runningInConsole()) {
+            $this->publishes([
+                __DIR__.'/../config/apiable.php' => config_path('apiable.php'),
+            ], 'config');
+        }
     }
 
     /**
