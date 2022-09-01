@@ -2,7 +2,9 @@
 
 namespace OpenSoutheners\LaravelApiable\Http\Concerns;
 
+use Illuminate\Database\Eloquent\Model;
 use OpenSoutheners\LaravelApiable\Http\AllowedAppends;
+use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
 
 /**
  * @mixin \OpenSoutheners\LaravelApiable\Http\RequestQueryObject
@@ -33,7 +35,7 @@ trait AllowsAppends
     /**
      * Allow the include of model accessors (attributes).
      *
-     * @param  \OpenSoutheners\LaravelApiable\Http\AllowedAppends|string  $type
+     * @param  \OpenSoutheners\LaravelApiable\Http\AllowedAppends|class-string<\Illuminate\Database\Eloquent\Model>|string  $type
      * @param  array  $attributes
      * @return $this
      */
@@ -41,9 +43,15 @@ trait AllowsAppends
     {
         if ($type instanceof AllowedAppends) {
             $this->allowedAppends = array_merge($this->allowedAppends, $type->toArray());
-        } else {
-            $this->allowedAppends = array_merge($this->allowedAppends, [$type => [$attributes]]);
+
+            return $this;
         }
+
+        if (class_exists($type) && is_subclass_of($type, Model::class)) {
+            $type = Apiable::getResourceType($type);
+        }
+
+        $this->allowedAppends = array_merge($this->allowedAppends, [$type => [$attributes]]);
 
         return $this;
     }

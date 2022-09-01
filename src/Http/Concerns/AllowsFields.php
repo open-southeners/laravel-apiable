@@ -2,7 +2,9 @@
 
 namespace OpenSoutheners\LaravelApiable\Http\Concerns;
 
+use Illuminate\Database\Eloquent\Model;
 use OpenSoutheners\LaravelApiable\Http\AllowedFields;
+use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
 
 /**
  * @mixin \OpenSoutheners\LaravelApiable\Http\RequestQueryObject
@@ -33,7 +35,7 @@ trait AllowsFields
     /**
      * Allow sparse fields (columns or accessors) for a specific resource type.
      *
-     * @param  \OpenSoutheners\LaravelApiable\Http\AllowedFields|string  $type
+     * @param  \OpenSoutheners\LaravelApiable\Http\AllowedFields|class-string<\Illuminate\Database\Eloquent\Model>|string  $type
      * @param  array<string>|string|null  $attributes
      * @return $this
      */
@@ -41,9 +43,15 @@ trait AllowsFields
     {
         if ($type instanceof AllowedFields) {
             $this->allowedFields = array_merge($this->allowedFields, $type->toArray());
-        } else {
-            $this->allowedFields = array_merge($this->allowedFields, [$type => [$attributes]]);
+
+            return $this;
         }
+
+        if (class_exists($type) && is_subclass_of($type, Model::class)) {
+            $type = Apiable::getResourceType($type);
+        }
+
+        $this->allowedFields = array_merge($this->allowedFields, [$type => [$attributes]]);
 
         return $this;
     }
