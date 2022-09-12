@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2022-09-12
+
+### Added
+
+- `AllowedFilter::scoped` method for Laravel query scopes filters to specify the filter is not an actual attribute but a query builder scope
+- `enforce_scoped_names` to `config/apiable.php` to be used so they rename scoped filters in case there are attributes with the same name on the model **(remember to use `vendor:publish` artisan command to update the config file)**
+- `include_allowed` to `config/apiable.php` to be used so any `JsonApiResponse` will include allowed filters and sorts (like using `JsonApiResponse::includeAllowedToResponse` but on all requests)
+- `AssertableJsonApi::hasNotAttribute` and `AssertableJsonApi::hasNotAttributes` methods for negative test assertions (counter part of `AssertableJsonApi::hasAttribute` and `AssertableJsonApi::hasAttributes`)
+
+### Fixed
+
+- Scoped filters now can be allowed & applied to requested response
+- Issue with `allowAppends` & `allowFields` sending array of attributes will wrongly parse them
+
 ## [1.0.2] - 2022-09-01
 
 ### Added
