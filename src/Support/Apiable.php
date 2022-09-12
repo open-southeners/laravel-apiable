@@ -174,4 +174,15 @@ class Apiable
     {
         return array_flip(static::$modelResourceTypeMap)[$type] ?? false;
     }
+
+    /**
+     * Add suffix to filter attribute/scope name.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    public static function scopedFilterSuffix(string $value)
+    {
+        return "${value}_scoped";
+    }
 }

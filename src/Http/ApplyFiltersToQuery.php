@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\ForwardsCalls;
 use OpenSoutheners\LaravelApiable\Contracts\HandlesRequestQueries;
+use OpenSoutheners\LaravelApiable\Support\Apiable;
 use function OpenSoutheners\LaravelHelpers\Classes\class_namespace;
 
 class ApplyFiltersToQuery implements HandlesRequestQueries
@@ -58,13 +59,22 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
         $filteredFilterValues = [];
 
         foreach ($filters as $attribute => $filterValues) {
-            $allowedByAttribute = array_key_exists($attribute, $this->allowed);
+            $allowedAttribute = $this->allowed[$attribute] ?? null;
 
-            if (! isset($this->allowed[$attribute])) {
+            if (is_null($allowedAttribute) || empty($allowedAttribute)) {
                 continue;
             }
 
-            $allowedAttributeValues = head($this->allowed[$attribute]);
+            // FIXME: Merging filter different values under same attribute
+            $allowedAttributeValues = head($allowedAttribute);
+            // FIXME: Merging filter different operators (different values under same attribute)
+            $allowedAttributeOperator = head(array_keys($allowedAttribute));
+
+            if ($allowedAttribute && $allowedAttributeOperator === 'scope') {
+                $filteredFilterValues[$attribute] = array_intersect((array) $allowedAttributeValues, (array) explode(',', $filterValues));
+
+                continue;
+            }
 
             if (is_string($filterValues) && is_string($allowedAttributeValues) && $filterValues === $allowedAttributeValues) {
                 $filteredFilterValues[$attribute] = $filterValues;
@@ -73,14 +83,14 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
             }
 
             // All filter values are valid, no modification needed
-            if ($allowedByAttribute && $allowedAttributeValues === '*') {
+            if ($allowedAttribute && $allowedAttributeValues === '*') {
                 $filteredFilterValues[$attribute] = $filterValues;
 
                 continue;
             }
 
             // Some filter values are valid, intersect those valid ones
-            if ($allowedByAttribute && is_array($allowedAttributeValues)) {
+            if ($allowedAttribute && is_array($allowedAttributeValues)) {
                 $filteredFilterValues[$attribute] = array_intersect($allowedAttributeValues, explode(',', $filterValues));
 
                 continue;
@@ -99,18 +109,20 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
      */
     protected function applyFilters(Builder $query, array $filters)
     {
+        $enforceScopeNames = Apiable::config('requests.filters.enforce_scoped_names');
+
         foreach ($filters as $fullAttribute => $values) {
-            $this->wrapIfRelatedQuery(function ($query, $attribute) use ($fullAttribute, $values) {
+            $this->wrapIfRelatedQuery(function ($query, $attribute) use ($fullAttribute, $values, $enforceScopeNames) {
                 $queryModel = $query->getModel();
 
                 if ($this->isAttribute($queryModel, $attribute)) {
                     return $this->applyArrayOfFiltersToQuery($query, $attribute, (array) $values, $fullAttribute);
                 }
 
-                $scopeFn = Str::camel($attribute);
+                $scopeName = Str::camel($enforceScopeNames ? str_replace('_scoped', '', $attribute) : $attribute);
 
-                if ($this->isScope($queryModel, $scopeFn)) {
-                    return $this->forwardCallTo($query, $scopeFn, $values);
+                if ($this->isScope($queryModel, $scopeName)) {
+                    return $this->forwardCallTo($query, $scopeName, (array) $values);
                 }
             }, $query, $fullAttribute);
         }

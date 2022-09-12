@@ -51,7 +51,7 @@ trait AllowsAppends
             $type = Apiable::getResourceType($type);
         }
 
-        $this->allowedAppends = array_merge($this->allowedAppends, [$type => [$attributes]]);
+        $this->allowedAppends = array_merge($this->allowedAppends, [$type => (array) $attributes]);
 
         return $this;
     }

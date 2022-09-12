@@ -2,6 +2,7 @@
 
 namespace OpenSoutheners\LaravelApiable\Tests\Fixtures;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Scout\Searchable;
 use OpenSoutheners\LaravelApiable\Concerns\HasJsonApi;
@@ -78,5 +79,28 @@ class Post extends Model implements JsonApiable
     public function getIsPublishedAttribute()
     {
         return true;
+    }
+
+    /**
+     * Query posts by active status.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  string  $value
+     * @return void
+     */
+    public function scopeStatus(Builder $query, $value)
+    {
+        $query->where('status', $value);
+    }
+
+    /**
+     * Query posts by active status.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return void
+     */
+    public function scopeActive(Builder $query)
+    {
+        $query->where('status', 'Active');
     }
 }

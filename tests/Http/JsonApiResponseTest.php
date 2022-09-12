@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenSoutheners\LaravelApiable\Tests;
+namespace OpenSoutheners\LaravelApiable\Tests\Http;
 
 use Illuminate\Support\Facades\Route;
 use OpenSoutheners\LaravelApiable\Http\AllowedAppends;
@@ -14,6 +14,7 @@ use OpenSoutheners\LaravelApiable\Tests\Fixtures\Post;
 use OpenSoutheners\LaravelApiable\Tests\Fixtures\Tag;
 use OpenSoutheners\LaravelApiable\Tests\Fixtures\User;
 use OpenSoutheners\LaravelApiable\Tests\Helpers\GeneratesPredictableTestData;
+use OpenSoutheners\LaravelApiable\Tests\TestCase;
 
 class JsonApiResponseTest extends TestCase
 {
@@ -71,6 +72,36 @@ class JsonApiResponseTest extends TestCase
         $response->assertJsonCount(2, 'data');
     }
 
+    public function testFilteringByAllowedScope()
+    {
+        Route::get('/', function () {
+            return JsonApiResponse::from(Post::class)
+                ->allowing([
+                    AllowedFilter::scoped('active'),
+                ])->list();
+        });
+
+        $response = $this->get('/?filter[active]=1');
+
+        $response->assertJsonCount(2, 'data');
+    }
+
+    public function testFilteringByAllowedScopeUsingEnforcedNames()
+    {
+        config(['apiable.requests.filters.enforce_scoped_names' => true]);
+
+        Route::get('/', function () {
+            return JsonApiResponse::from(Post::class)
+                ->allowing([
+                    AllowedFilter::scoped('status', ['Active']),
+                ])->list();
+        });
+
+        $response = $this->get('/?filter[status_scoped]=Active');
+
+        $response->assertJsonCount(2, 'data');
+    }
+
     public function testAllowedFiltersAddedToResponseMeta()
     {
         Route::get('/', function () {
@@ -78,6 +109,29 @@ class JsonApiResponseTest extends TestCase
                 ->allowing([
                     AllowedFilter::exact('status', ['Active', 'Archived']),
                 ])->includeAllowedToResponse()->list();
+        });
+
+        $response = $this->get('/?filter[status]=Active,Inactive');
+
+        $response->assertJsonCount(1, 'meta.allowed_filters');
+        $response->assertJsonFragment([
+            'allowed_filters' => [
+                'status' => [
+                    '=' => ['Active', 'Archived'],
+                ],
+            ],
+        ]);
+    }
+
+    public function testAllowedFiltersAddedToResponseMetaThroughConfig()
+    {
+        config(['apiable.responses.include_allowed' => true]);
+
+        Route::get('/', function () {
+            return JsonApiResponse::from(Post::class)
+                ->allowing([
+                    AllowedFilter::exact('status', ['Active', 'Archived']),
+                ])->list();
         });
 
         $response = $this->get('/?filter[status]=Active,Inactive');
@@ -127,12 +181,12 @@ class JsonApiResponseTest extends TestCase
         $response->assertJsonCount(1, 'data');
     }
 
-    public function testAddingFieldsAsDbColumns()
+    public function testSparseFieldset()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(User::class)
                 ->allowing([
-                    AllowedFields::make('client', ['name', 'email_verified_at']),
+                    AllowedFields::make('client', ['name', 'email']),
                 ])->list();
         });
 
@@ -140,6 +194,24 @@ class JsonApiResponseTest extends TestCase
 
         $response->assertJsonApi(function (AssertableJsonApi $assert) {
             $assert->isCollection()->at(0)->hasAttribute('name');
+        });
+    }
+
+    public function testSparseFieldsetReturningOnlyAllowedColumns()
+    {
+        Route::get('/', function () {
+            return JsonApiResponse::from(User::class)
+                ->allowing([
+                    AllowedFields::make('client', ['name', 'email']),
+                ])->list();
+        });
+
+        $response = $this->get('/?fields[client]=name,email_verified_at');
+
+        $response->assertJsonApi(function (AssertableJsonApi $assert) {
+            $assert->isCollection()->at(0)
+                ->hasAttribute('name')
+                ->hasNotAttribute('email_verified_at');
         });
     }
 

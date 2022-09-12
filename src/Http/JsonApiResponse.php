@@ -2,13 +2,11 @@
 
 namespace OpenSoutheners\LaravelApiable\Http;
 
-use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Traits\ForwardsCalls;
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
-use function OpenSoutheners\LaravelHelpers\Classes\class_use;
 use function OpenSoutheners\LaravelHelpers\Models\key_from;
 
 /**
@@ -35,9 +33,9 @@ class JsonApiResponse
     protected $model;
 
     /**
-     * @var bool
+     * @var bool|null
      */
-    protected $includeAllowedToResponse = false;
+    protected $includeAllowedToResponse = null;
 
     /**
      * Instantiate this class.
@@ -118,7 +116,7 @@ class JsonApiResponse
     /**
      * Add allowed filters and sorts to the response meta.
      *
-     * @param  bool  $value
+     * @param  bool|null  $value
      * @return $this
      */
     public function includeAllowedToResponse($value = true)
@@ -167,7 +165,11 @@ class JsonApiResponse
     {
         $this->addAppendsToResult($result);
 
-        if ($this->includeAllowedToResponse) {
+        $includeAllowed = is_null($this->includeAllowedToResponse)
+            ? Apiable::config('responses.include_allowed')
+            : $this->includeAllowedToResponse;
+
+        if ($includeAllowed) {
             $result->additional(['meta' => array_filter([
                 'allowed_filters' => $this->requestQueryObject->getAllowedFilters(),
                 'allowed_sorts' => $this->requestQueryObject->getAllowedSorts(),

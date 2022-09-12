@@ -1,12 +1,13 @@
 <?php
 
-namespace OpenSoutheners\LaravelApiable\Tests;
+namespace OpenSoutheners\LaravelApiable\Tests\Http\Resources;
 
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Route;
 use OpenSoutheners\LaravelApiable\Support\Apiable;
 use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
 use OpenSoutheners\LaravelApiable\Tests\Fixtures\Post;
+use OpenSoutheners\LaravelApiable\Tests\TestCase;
 use PHPUnit\Framework\AssertionFailedError;
 
 class JsonApiCollectionTest extends TestCase

@@ -2,7 +2,12 @@
 
 return [
 
-    'normalize_relations' => false,
+    /**
+     * Resource type model map.
+     *
+     * @see https://docs.opensoutheners.com/laravel-apiable/guide/#getting-started
+     */
+    'resource_type_map' => [],
 
     /**
      * Default options for request query filters, sorts, etc.
@@ -17,20 +22,25 @@ return [
         'default_direction' => '*',
     ],
 
-    /**
-     * Pagination options.
-     *
-     * @see https://docs.opensoutheners.com/laravel-apiable/guide/responses.html
-     */
-    'pagination' => [
-        'default_size' => 50,
+    'requests' => [
+        'filters' => [
+            'enforce_scoped_names' => false,
+        ],
     ],
 
     /**
-     * Resource type model map.
+     * Default options for responses like: normalize relations names, include allowed filters and sorts, etc.
      *
-     * @see https://docs.opensoutheners.com/laravel-apiable/guide/#getting-started
+     * @see https://docs.opensoutheners.com/laravel-apiable/guide/responses.html
      */
-    'resource_type_map' => [],
+    'normalize_relations' => false,
+
+    'responses' => [
+        'include_allowed' => false,
+    ],
+
+    'pagination' => [
+        'default_size' => 50,
+    ],
 
 ];

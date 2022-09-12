@@ -21,7 +21,7 @@ trait AllowsFilters
      */
     public function filters()
     {
-        return array_filter($this->request->get('filter', []));
+        return $this->request->get('filter', []);
     }
 
     /**
@@ -38,6 +38,23 @@ trait AllowsFilters
             $attribute instanceof AllowedFilter
                 ? $attribute->toArray()
                 : AllowedFilter::make($attribute, $value)->toArray()
+        );
+
+        return $this;
+    }
+
+    /**
+     * Allow filter by scope and pattern of value(s).
+     *
+     * @param  string  $attribute
+     * @param  array<string>|string  $value
+     * @return $this
+     */
+    public function allowScopedFilter($attribute, $value = '*')
+    {
+        $this->allowedFilters = array_merge_recursive(
+            $this->allowedFilters,
+            AllowedFilter::scopedValue($attribute, $value)->toArray()
         );
 
         return $this;

@@ -76,6 +76,22 @@ class AllowedFilter implements Arrayable
     }
 
     /**
+     * Allow similar attribute-value(s) filter.
+     *
+     * @param  string  $attribute
+     * @param  string|array<string>  $values
+     * @return static
+     */
+    public static function scoped($attribute, $values = '1')
+    {
+        return new static(
+            Apiable::config('requests.filters.enforce_scoped_names') ? Apiable::scopedFilterSuffix($attribute) : $attribute,
+            'scope',
+            $values
+        );
+    }
+
+    /**
      * Get the instance as an array.
      *
      * @return array<string, array<string, array<string>>>

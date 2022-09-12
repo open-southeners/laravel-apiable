@@ -33,6 +33,24 @@ trait HasAttributes
     }
 
     /**
+     * Assert that a resource does not has an attribute with name and value (optional).
+     *
+     * @param  int|string  $name
+     * @param  array<string>|string  $value
+     * @return $this
+     */
+    public function hasNotAttribute($name, $value = null)
+    {
+        PHPUnit::assertArrayNotHasKey($name, $this->attributes, sprintf('JSON:API response does not have an attribute named "%s"', $name));
+
+        if ($value) {
+            PHPUnit::assertNotContains($value, $this->attributes, sprintf('JSON:API response does not have an attribute named "%s" with value "%s"', $name, json_encode($value)));
+        }
+
+        return $this;
+    }
+
+    /**
      * Assert that a resource has an array of attributes with names and values (optional).
      *
      * @param  mixed  $attributes
@@ -42,6 +60,21 @@ trait HasAttributes
     {
         foreach ($attributes as $name => $value) {
             $this->hasAttribute($name, $value);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that a resource does not has an array of attributes with names and values (optional).
+     *
+     * @param  mixed  $attributes
+     * @return $this
+     */
+    public function hasNotAttributes($attributes)
+    {
+        foreach ($attributes as $name => $value) {
+            $this->hasNotAttribute($name, $value);
         }
 
         return $this;

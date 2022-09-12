@@ -51,7 +51,7 @@ trait AllowsFields
             $type = Apiable::getResourceType($type);
         }
 
-        $this->allowedFields = array_merge($this->allowedFields, [$type => [$attributes]]);
+        $this->allowedFields = array_merge($this->allowedFields, [$type => (array) $attributes]);
 
         return $this;
     }

@@ -68,26 +68,4 @@ class ApplySortsToQuery implements HandlesRequestQueries
 
         return $query;
     }
-
-    /**
-     * Applies where/orWhere to all filtered values.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @param  string  $attribute
-     * @param  array  $filterValues
-     * @return void
-     */
-    protected function applyArrayOfFiltersToQuery(Builder $query, string $attribute, array $filterValues)
-    {
-        for ($i = 0; $i < count($filterValues); $i++) {
-            $filterValue = $filterValues[$i];
-            $filterOperator = array_keys($this->allowed[$attribute])[0];
-
-            if ($filterOperator === 'like') {
-                $filterValue = "%${filterValue}%";
-            }
-
-            $query->where($attribute, $filterOperator, $filterValue, $i === 0 ? 'and' : 'or');
-        }
-    }
 }

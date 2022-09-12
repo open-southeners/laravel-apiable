@@ -1,11 +1,12 @@
 <?php
 
-namespace OpenSoutheners\LaravelApiable\Tests;
+namespace OpenSoutheners\LaravelApiable\Tests\Http\Resources;
 
 use Illuminate\Support\Facades\Route;
 use OpenSoutheners\LaravelApiable\Support\Apiable;
 use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
 use OpenSoutheners\LaravelApiable\Tests\Fixtures\Post;
+use OpenSoutheners\LaravelApiable\Tests\TestCase;
 
 class JsonApiResourceTest extends TestCase
 {

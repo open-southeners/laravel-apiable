@@ -19,6 +19,7 @@
     <exclude>
       <directory suffix=".php">src/Contracts</directory>
       <directory suffix=".php">src/Support/Facades</directory>
+      <file>src/Http/AllowedAppends.php</file>
       <file>src/Http/SortDirection.php</file>
     </exclude>
     <report>
