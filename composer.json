@@ -17,12 +17,12 @@
         }
     ],
     "require": {
-        "php": "^8.0",
+        "php": "^8.0|^8.1",
         "illuminate/support": "^9.0",
         "open-southeners/laravel-helpers": "^0.8.0"
     },
     "require-dev": {
-        "laravel/pint": "^1.0",
+        "laravel/pint": "^1.1",
         "laravel/scout": "^9.0",
         "nunomaduro/larastan": "^2.1",
         "orchestra/testbench": "^7.0",
