@@ -45,6 +45,42 @@ class RequestQueryObject
     }
 
     /**
+     * Allows the following user operations.
+     *
+     * @param  array  $sorts
+     * @param  array  $filters
+     * @param  array  $includes
+     * @param  array  $fields
+     * @param  array  $appends
+     * @return $this
+     */
+    public function allows(
+        array $sorts = [],
+        array $filters = [],
+        array $includes = [],
+        array $fields = [],
+        array $appends = []
+    ) {
+        $allowedArr = compact('sorts', 'filters', 'includes', 'fields', 'appends');
+
+        foreach ($allowedArr as $allowedKey => $alloweds) {
+            foreach ($alloweds as $allowedItem) {
+                $allowedItemAsArg = (array) $allowedItem;
+
+                match ($allowedKey) {
+                    'sorts' => $this->allowSort(...$allowedItemAsArg),
+                    'filters' => $this->allowFilter(...$allowedItemAsArg),
+                    'includes' => $this->allowInclude(...$allowedItemAsArg),
+                    'fields' => $this->allowFields(...$allowedItemAsArg),
+                    'appends' => $this->allowAppends(...$allowedItemAsArg),
+                };
+            }
+        }
+
+        return $this;
+    }
+
+    /**
      * Process query object allowing the following user operations.
      *
      * @param  array  $alloweds

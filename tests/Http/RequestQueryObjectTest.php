@@ -10,6 +10,7 @@ use OpenSoutheners\LaravelApiable\Http\AllowedInclude;
 use OpenSoutheners\LaravelApiable\Http\AllowedSort;
 use OpenSoutheners\LaravelApiable\Http\RequestQueryObject;
 use OpenSoutheners\LaravelApiable\Tests\Fixtures\Post;
+use OpenSoutheners\LaravelApiable\Tests\Fixtures\User;
 use OpenSoutheners\LaravelApiable\Tests\TestCase;
 
 class RequestQueryObjectTest extends TestCase
@@ -182,5 +183,35 @@ class RequestQueryObjectTest extends TestCase
         $this->assertIsArray($allowedAttributes);
         $this->assertNotEmpty($allowedAttributes);
         $this->assertTrue(empty(array_diff(['parent'], $allowedAttributes)));
+    }
+
+    public function testRequestQueryObjectAllowsSendingMixedArgs()
+    {
+        $requestQueryObject = $this->newRequestQueryObject()
+            ->allows(
+                sorts: ['title', ['created_at', 'desc']],
+                fields: [
+                    [Post::class, ['title', 'content', 'created_at']],
+                    [User::class, ['name', 'email']],
+                ]
+            );
+
+        $allowedSorts = $requestQueryObject->getAllowedSorts();
+
+        $this->assertIsArray($allowedSorts);
+        $this->assertNotEmpty($allowedSorts);
+        $this->assertEquals(
+            json_encode(['title' => '*', 'created_at' => 'desc']),
+            json_encode($allowedSorts)
+        );
+
+        $allowedFields = $requestQueryObject->getAllowedFields();
+
+        $this->assertIsArray($allowedFields);
+        $this->assertNotEmpty($allowedFields);
+        $this->assertEquals(
+            json_encode(['post' => ['title', 'content', 'created_at'], 'client' => ['name', 'email']]),
+            json_encode($allowedFields)
+        );
     }
 }

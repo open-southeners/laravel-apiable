@@ -133,7 +133,7 @@ class Apiable
         $response = JsonApiResponse::from($query);
 
         if (! empty($alloweds)) {
-            return $response->allowing($alloweds)->list();
+            return $response->allows($alloweds)->list();
         }
 
         return $response;
