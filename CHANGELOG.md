@@ -9,10 +9,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.2.0] - 2022-09-13
 
-### Changed
-
-- Method `Apiable::response` now accepts more for the second argument (now reusing `RequestQueryObject::allows` method)
-
 ### Added
 
 - Method `RequestQueryObject::allows` to be able to group everything in the same method call without needing to use class methods (`AllowedFilters`, `AllowedFields`, etc...)

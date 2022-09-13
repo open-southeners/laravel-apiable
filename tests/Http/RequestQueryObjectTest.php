@@ -193,7 +193,8 @@ class RequestQueryObjectTest extends TestCase
                 fields: [
                     [Post::class, ['title', 'content', 'created_at']],
                     [User::class, ['name', 'email']],
-                ]
+                ],
+                includes: ['parent']
             );
 
         $allowedSorts = $requestQueryObject->getAllowedSorts();
@@ -213,5 +214,11 @@ class RequestQueryObjectTest extends TestCase
             json_encode(['post' => ['title', 'content', 'created_at'], 'client' => ['name', 'email']]),
             json_encode($allowedFields)
         );
+
+        $allowedIncludes = $requestQueryObject->getAllowedIncludes();
+
+        $this->assertIsArray($allowedIncludes);
+        $this->assertNotEmpty($allowedIncludes);
+        $this->assertTrue(empty(array_diff(['parent'], $allowedIncludes)));
     }
 }
