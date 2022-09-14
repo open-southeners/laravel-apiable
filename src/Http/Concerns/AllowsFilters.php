@@ -29,13 +29,13 @@ trait AllowsFilters
      *
      * @param  \OpenSoutheners\LaravelApiable\Http\AllowedFilter|string  $attribute
      * @param  array<string>|string  $operator
-     * @param  array<string>|string  $value
+     * @param  array<string>|string  $values
      * @return $this
      */
-    public function allowFilter($attribute, $operator = ['*'], $value = ['*'])
+    public function allowFilter($attribute, $operator = ['*'], $values = ['*'])
     {
-        if (is_array($operator)) {
-            $value = $operator;
+        if (is_array($operator) || (is_string($operator) && ! in_array($operator, AllowedFilter::OPERATORS))) {
+            $values = $operator;
 
             $operator = null;
         }
@@ -44,7 +44,7 @@ trait AllowsFilters
             $this->allowedFilters,
             $attribute instanceof AllowedFilter
                 ? $attribute->toArray()
-                : (new AllowedFilter($attribute, $operator, $value))->toArray()
+                : (new AllowedFilter($attribute, $operator, $values))->toArray()
         );
 
         return $this;

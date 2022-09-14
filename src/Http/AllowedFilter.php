@@ -7,6 +7,8 @@ use OpenSoutheners\LaravelApiable\Support\Apiable;
 
 class AllowedFilter implements Arrayable
 {
+    public const OPERATORS = ['=', 'like', 'scope'];
+
     /**
      * @var string
      */
@@ -26,14 +28,20 @@ class AllowedFilter implements Arrayable
      * Make an instance of this class.
      *
      * @param  string  $attribute
-     * @param  string  $operator
+     * @param  string|null  $operator
      * @param  string|array<string>  $values
      * @return void
      */
-    public function __construct($attribute, $operator, $values = '*')
+    public function __construct($attribute, $operator = null, $values = '*')
     {
+        if (! is_null($operator) && ! in_array($operator, static::OPERATORS)) {
+            throw new \Exception(
+                sprintf('Operator value "%s" for filtered attribute "%s" is not valid', $operator, $attribute)
+            );
+        }
+
         $this->attribute = $attribute;
-        $this->operator = $operator;
+        $this->operator = $operator ?? Apiable::config('filters.default_operator') ?? 'like';
         $this->values = $values;
     }
 
@@ -46,9 +54,7 @@ class AllowedFilter implements Arrayable
      */
     public static function make($attribute, $values = '*')
     {
-        $defaultOperator = Apiable::config('filters.default_operator') ?? 'like';
-
-        return new static($attribute, $defaultOperator, $values);
+        return new static($attribute, null, $values);
     }
 
     /**

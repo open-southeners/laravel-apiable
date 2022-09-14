@@ -70,11 +70,6 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
             // FIXME: Merging filter different operators (different values under same attribute)
             $allowedAttributeOperator = head(array_keys($allowedAttribute));
 
-            if ($allowedAttribute && $allowedAttributeOperator === 'scope') {
-                $filteredFilterValues[$attribute] = array_intersect((array) $allowedAttributeValues, (array) explode(',', $filterValues));
-
-                continue;
-            }
 
             if (is_string($filterValues) && is_string($allowedAttributeValues) && $filterValues === $allowedAttributeValues) {
                 $filteredFilterValues[$attribute] = $filterValues;
@@ -82,15 +77,25 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
                 continue;
             }
 
+            if (! $allowedAttribute) {
+                continue;
+            }
+
+            if ($allowedAttributeOperator === 'scope') {
+                $filteredFilterValues[$attribute] = array_intersect((array) $allowedAttributeValues, (array) explode(',', $filterValues));
+
+                continue;
+            }
+
             // All filter values are valid, no modification needed
-            if ($allowedAttribute && $allowedAttributeValues === '*') {
+            if ($allowedAttributeValues === '*' || (count($allowedAttributeValues) === 1  && head($allowedAttributeValues) === '*')) {
                 $filteredFilterValues[$attribute] = $filterValues;
 
                 continue;
             }
 
             // Some filter values are valid, intersect those valid ones
-            if ($allowedAttribute && is_array($allowedAttributeValues)) {
+            if (is_array($allowedAttributeValues)) {
                 $filteredFilterValues[$attribute] = array_intersect($allowedAttributeValues, explode(',', $filterValues));
 
                 continue;
