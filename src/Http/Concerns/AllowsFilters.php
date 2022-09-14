@@ -28,16 +28,23 @@ trait AllowsFilters
      * Allow filter by attribute and pattern of value(s).
      *
      * @param  \OpenSoutheners\LaravelApiable\Http\AllowedFilter|string  $attribute
+     * @param  array<string>|string  $operator
      * @param  array<string>|string  $value
      * @return $this
      */
-    public function allowFilter($attribute, $value = '*')
+    public function allowFilter($attribute, $operator = ['*'], $value = ['*'])
     {
+        if (is_array($operator)) {
+            $value = $operator;
+
+            $operator = null;
+        }
+
         $this->allowedFilters = array_merge_recursive(
             $this->allowedFilters,
             $attribute instanceof AllowedFilter
                 ? $attribute->toArray()
-                : AllowedFilter::make($attribute, $value)->toArray()
+                : (new AllowedFilter($attribute, $operator, $value))->toArray()
         );
 
         return $this;
