@@ -54,7 +54,7 @@ trait AllowsFilters
     {
         $this->allowedFilters = array_merge_recursive(
             $this->allowedFilters,
-            AllowedFilter::scopedValue($attribute, $value)->toArray()
+            AllowedFilter::scoped($attribute, $value)->toArray()
         );
 
         return $this;
