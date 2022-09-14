@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2022-09-14
+
+### Changed
+
+- `RequestQueryObject::allowFilter` method now accepts 3 arguments (attribute, operator/values, values)
+
+### Fixed
+
+- `AllowedFilter::scopedValue` method was removed and accidentally pushed onto `RequestQueryObject::allowScopedFilter`
+
 ## [1.2.0] - 2022-09-13
 
 ### Added
