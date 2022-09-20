@@ -2,6 +2,7 @@
 
 namespace OpenSoutheners\LaravelApiable\Http;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Pipeline\Pipeline;
@@ -106,11 +107,14 @@ class JsonApiResponse
     /**
      * Get query from request query object pipeline.
      *
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param  \Closure|null  $callback
+     * @return \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource|\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection
      */
-    protected function getPipelineQuery()
+    public function getPipelineQuery($callback = null)
     {
-        return $this->buildPipeline()->query;
+        $pipelineQuery = $this->buildPipeline()->query;
+
+        return $this->resultPostProcessing($callback ? $callback($pipelineQuery) : $pipelineQuery);
     }
 
     /**
@@ -133,9 +137,7 @@ class JsonApiResponse
      */
     public function list()
     {
-        return $this->resultPostProcessing(
-            $this->getPipelineQuery()->jsonApiPaginate()
-        );
+        return $this->getPipelineQuery(fn (Builder $query) => $query->jsonApiPaginate());
     }
 
     /**
@@ -146,11 +148,10 @@ class JsonApiResponse
      */
     public function getOne($key)
     {
-        return $this->resultPostProcessing(
-            $this->getPipelineQuery()
-                ->whereKey(key_from($key))
-                ->first()
-                ->toJsonApi()
+        return $this->getPipelineQuery(fn (Builder $query) => $query
+            ->whereKey(key_from($key))
+            ->first()
+            ->toJsonApi()
         );
     }
 
