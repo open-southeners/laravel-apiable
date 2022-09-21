@@ -30,7 +30,13 @@ trait IteratesResultsAfterQuery
             $filteredUserAppends[$key] = array_intersect($allowedAppends[$key], $values);
         }
 
-        if (! empty($allowedAppends)) {
+        // This are forced by the application owner / developer...
+        // So the values are bypassing allowed appends
+        if (! empty($this->forceAppends)) {
+            $filteredUserAppends = array_merge_recursive($filteredUserAppends, $this->forceAppends);
+        }
+
+        if (! empty($filteredUserAppends)) {
             // TODO: Not really optimised, need to think of a better solution...
             // TODO: Or refactor old "transformers" classes with a "plain tree" of resources
             $result instanceof JsonApiCollection

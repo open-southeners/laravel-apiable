@@ -39,6 +39,11 @@ class JsonApiResponse
     protected $includeAllowedToResponse = null;
 
     /**
+     * @var array<string>
+     */
+    protected $forceAppends = [];
+
+    /**
      * Instantiate this class.
      *
      * @param  \Illuminate\Database\Eloquent\Model|class-string<\Illuminate\Database\Eloquent\Model>|\Illuminate\Database\Eloquent\Builder  $query
@@ -84,6 +89,16 @@ class JsonApiResponse
         }
 
         return $query;
+    }
+
+    /**
+     * Get class string from model.
+     *
+     * @return string
+     */
+    protected function getModelClass()
+    {
+        return is_string($this->model) ? $this->model : get_class($this->model);
     }
 
     /**
@@ -153,6 +168,28 @@ class JsonApiResponse
             ->first()
             ->toJsonApi()
         );
+    }
+
+    /**
+     * Force append attributes to be included without being allowed.
+     *
+     * @param  string|array|class-string<\Illuminate\Database\Eloquent\Model>  $type
+     * @param  array  $attributes
+     * @return JsonApiResponse
+     */
+    public function forceAppend($type, array $attributes = [])
+    {
+        if (is_array($type)) {
+            $attributes = $type;
+
+            $type = $this->getModelClass($this->model);
+        }
+
+        $resourceType = class_exists($type) ? Apiable::getResourceType($type) : $type;
+
+        $this->forceAppends = array_merge_recursive($this->forceAppends, [$resourceType => $attributes]);
+
+        return $this;
     }
 
     /**
