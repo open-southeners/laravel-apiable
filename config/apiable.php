@@ -1,4 +1,5 @@
 <?php
+
 use OpenSoutheners\LaravelApiable\Http\AllowedFilter;
 use OpenSoutheners\LaravelApiable\Http\AllowedSort;
 
