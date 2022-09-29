@@ -34,7 +34,7 @@ trait RelationshipsWithIncludes
                 continue;
             }
 
-            if (Apiable::config('normalize_relations', false)) {
+            if (Apiable::config('responses.normalize_relations') ?? false) {
                 $relation = Str::snake($relation);
             }
 
