@@ -16,6 +16,10 @@ composer require open-southeners/laravel-apiable
 
 [Official documentation](https://docs.opensoutheners.com/laravel-apiable/)
 
+## Partners
+
+[![skore logo](https://github.com/open-southeners/partners/raw/main/logos/skore_logo.png)](https://getskore.com)
+
 ## License
 
 This package is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
