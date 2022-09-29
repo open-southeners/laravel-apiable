@@ -13,12 +13,12 @@ class JsonApiResourceTest extends TestCase
     public function testResourcesMayBeConvertedToJsonApi()
     {
         Route::get('/', function () {
-            return Apiable::toJsonApi(new Post([
+            return (new Post([
                 'id' => 5,
                 'status' => 'Published',
                 'title' => 'Test Title',
                 'abstract' => 'Test abstract',
-            ]));
+            ]))->toJsonApi();
         });
 
         $response = $this->get('/', ['Accept' => 'application/json']);

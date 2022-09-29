@@ -17,26 +17,23 @@ class ApplyFieldsToQuery implements HandlesRequestQueries
     /**
      * Apply modifications to the query based on allowed query fragments.
      *
-     * @param  \OpenSoutheners\LaravelApiable\Http\RequestQueryObject  $requestQueryObject
+     * @param  \OpenSoutheners\LaravelApiable\Http\RequestQueryObject  $request
      * @param  \Closure  $next
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function from(RequestQueryObject $requestQueryObject, Closure $next)
+    public function from(RequestQueryObject $request, Closure $next)
     {
-        $fields = $requestQueryObject->fields();
+        $fields = $request->fields();
 
-        $this->allowed = $requestQueryObject->getAllowedFields();
+        $this->allowed = $request->getAllowedFields();
 
         if (empty($fields) || empty($this->allowed)) {
-            return $next($requestQueryObject);
+            return $next($request);
         }
 
-        $this->applyFields(
-            $requestQueryObject->query,
-            $this->getUserFields($fields)
-        );
+        $this->applyFields($request->query, $this->getUserFields($fields));
 
-        return $next($requestQueryObject);
+        return $next($request);
     }
 
     protected function getUserFields(array $fields)

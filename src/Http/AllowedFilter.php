@@ -7,7 +7,11 @@ use OpenSoutheners\LaravelApiable\Support\Apiable;
 
 class AllowedFilter implements Arrayable
 {
-    public const OPERATORS = ['=', 'like', 'scope'];
+    public const SIMILAR = 1;
+
+    public const EXACT = 2;
+
+    public const SCOPE = 3;
 
     /**
      * @var string
@@ -15,7 +19,7 @@ class AllowedFilter implements Arrayable
     protected $attribute;
 
     /**
-     * @var string
+     * @var int
      */
     protected $operator;
 
@@ -28,20 +32,20 @@ class AllowedFilter implements Arrayable
      * Make an instance of this class.
      *
      * @param  string  $attribute
-     * @param  string|null  $operator
+     * @param  int|null  $operator
      * @param  string|array<string>  $values
      * @return void
      */
     public function __construct($attribute, $operator = null, $values = '*')
     {
-        if (! is_null($operator) && ! in_array($operator, static::OPERATORS)) {
+        if (! is_null($operator) && ! in_array($operator, [static::SIMILAR, static::EXACT, static::SCOPE])) {
             throw new \Exception(
                 sprintf('Operator value "%s" for filtered attribute "%s" is not valid', $operator, $attribute)
             );
         }
 
         $this->attribute = $attribute;
-        $this->operator = $operator ?? Apiable::config('filters.default_operator') ?? 'like';
+        $this->operator = $operator ?? Apiable::config('requests.filters.default_operator') ?? static::SIMILAR;
         $this->values = $values;
     }
 
@@ -66,7 +70,7 @@ class AllowedFilter implements Arrayable
      */
     public static function exact($attribute, $values = '*')
     {
-        return new static($attribute, '=', $values);
+        return new static($attribute, static::EXACT, $values);
     }
 
     /**
@@ -78,7 +82,7 @@ class AllowedFilter implements Arrayable
      */
     public static function similar($attribute, $values = '*')
     {
-        return new static($attribute, 'like', $values);
+        return new static($attribute, static::SIMILAR, $values);
     }
 
     /**
@@ -92,7 +96,7 @@ class AllowedFilter implements Arrayable
     {
         return new static(
             Apiable::config('requests.filters.enforce_scoped_names') ? Apiable::scopedFilterSuffix($attribute) : $attribute,
-            'scope',
+            static::SCOPE,
             $values
         );
     }
@@ -106,7 +110,12 @@ class AllowedFilter implements Arrayable
     {
         return [
             $this->attribute => [
-                $this->operator => $this->values,
+                'operator' => match ($this->operator) {
+                    static::EXACT => '=',
+                    static::SIMILAR => 'like',
+                    static::SCOPE => 'scope'
+                },
+                'values' => $this->values,
             ],
         ];
     }

@@ -28,13 +28,13 @@ trait AllowsFilters
      * Allow filter by attribute and pattern of value(s).
      *
      * @param  \OpenSoutheners\LaravelApiable\Http\AllowedFilter|string  $attribute
-     * @param  array<string>|string  $operator
+     * @param  array<string>|string|int  $operator
      * @param  array<string>|string  $values
      * @return $this
      */
     public function allowFilter($attribute, $operator = ['*'], $values = ['*'])
     {
-        if (is_array($operator) || (is_string($operator) && ! in_array($operator, AllowedFilter::OPERATORS))) {
+        if (is_array($operator) || is_string($operator)) {
             $values = $operator;
 
             $operator = null;

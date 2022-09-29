@@ -30,30 +30,33 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
     /**
      * Apply modifications to the query based on allowed query fragments.
      *
-     * @param  \OpenSoutheners\LaravelApiable\Http\RequestQueryObject  $requestQueryObject
+     * @param  \OpenSoutheners\LaravelApiable\Http\RequestQueryObject  $request
      * @param  \Closure  $next
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function from(RequestQueryObject $requestQueryObject, Closure $next)
+    public function from(RequestQueryObject $request, Closure $next)
     {
-        $filters = $requestQueryObject->filters();
+        $filters = $request->filters();
 
-        $this->includes = $requestQueryObject->includes();
+        $this->includes = $request->includes();
 
         if (empty($filters)) {
-            return $next($requestQueryObject);
+            return $next($request);
         }
 
-        $this->allowed = $requestQueryObject->getAllowedFilters();
+        $this->allowed = $request->getAllowedFilters();
 
-        $this->applyFilters(
-            $requestQueryObject->query,
-            $this->getUserFilters($filters)
-        );
+        $this->applyFilters($request->query, $this->getUserFilters($filters));
 
-        return $next($requestQueryObject);
+        return $next($request);
     }
 
+    /**
+     * Get user allowed filters.
+     * 
+     * @param array $filters
+     * @return array
+     */
     protected function getUserFilters(array $filters)
     {
         $filteredFilterValues = [];
@@ -66,10 +69,9 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
             }
 
             // FIXME: Merging filter different values under same attribute
-            $allowedAttributeValues = head($allowedAttribute);
+            $allowedAttributeValues = $allowedAttribute['values'] ?? [];
             // FIXME: Merging filter different operators (different values under same attribute)
-            $allowedAttributeOperator = head(array_keys($allowedAttribute));
-
+            $allowedAttributeOperator = $allowedAttribute['operator'];
 
             if (is_string($filterValues) && is_string($allowedAttributeValues) && $filterValues === $allowedAttributeValues) {
                 $filteredFilterValues[$attribute] = $filterValues;
@@ -178,7 +180,7 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
     {
         for ($i = 0; $i < count($filterValues); $i++) {
             $filterValue = $filterValues[$i];
-            $filterOperator = array_keys($this->allowed[$fullAttribute])[0];
+            $filterOperator = $this->allowed[$fullAttribute]['operator'];
 
             if ($filterOperator === 'like') {
                 $filterValue = "%${filterValue}%";

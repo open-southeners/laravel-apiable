@@ -126,14 +126,14 @@ class Apiable
      *
      * @param  \Illuminate\Database\Eloquent\Builder|\OpenSoutheners\LaravelApiable\Contracts\JsonApiable|class-string<\OpenSoutheners\LaravelApiable\Contracts\JsonApiable>  $query
      * @param  array  $alloweds
-     * @return \OpenSoutheners\LaravelApiable\Http\JsonApiResponse|\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection
+     * @return \OpenSoutheners\LaravelApiable\Http\JsonApiResponse
      */
     public static function response($query, array $alloweds = [])
     {
         $response = JsonApiResponse::from($query);
 
         if (! empty($alloweds)) {
-            return $response->allowing($alloweds)->list();
+            return $response->allowing($alloweds);
         }
 
         return $response;

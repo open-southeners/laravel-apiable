@@ -1,4 +1,6 @@
 <?php
+use OpenSoutheners\LaravelApiable\Http\AllowedFilter;
+use OpenSoutheners\LaravelApiable\Http\AllowedSort;
 
 return [
 
@@ -7,6 +9,7 @@ return [
      *
      * @see https://docs.opensoutheners.com/laravel-apiable/guide/#getting-started
      */
+
     'resource_type_map' => [],
 
     /**
@@ -14,17 +17,15 @@ return [
      *
      * @see https://docs.opensoutheners.com/laravel-apiable/guide/requests.html
      */
-    'filters' => [
-        'default_operator' => 'like',
-    ],
-
-    'sorts' => [
-        'default_direction' => '*',
-    ],
-
+    
     'requests' => [
         'filters' => [
+            'default_operator' => AllowedFilter::SIMILAR,
             'enforce_scoped_names' => false,
+        ],
+        
+        'sorts' => [
+            'default_direction' => AllowedSort::BOTH,
         ],
     ],
 
@@ -33,14 +34,15 @@ return [
      *
      * @see https://docs.opensoutheners.com/laravel-apiable/guide/responses.html
      */
-    'normalize_relations' => false,
 
     'responses' => [
-        'include_allowed' => false,
-    ],
+        'normalize_relations' => false,
 
-    'pagination' => [
-        'default_size' => 50,
+        'include_allowed' => false,
+        
+        'pagination' => [
+            'default_size' => 50,
+        ],
     ],
 
 ];

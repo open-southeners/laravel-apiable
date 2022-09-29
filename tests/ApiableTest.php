@@ -38,7 +38,7 @@ class ApiableTest extends TestCase
         $this->assertTrue(
             Apiable::response(Post::query(), [
                 AllowedAppends::make('post', ['abstract']),
-            ]) instanceof JsonApiCollection
+            ]) instanceof JsonApiResponse
         );
 
         $this->assertCount(

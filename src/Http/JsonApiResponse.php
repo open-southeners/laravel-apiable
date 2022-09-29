@@ -9,13 +9,24 @@ use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Traits\ForwardsCalls;
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
 use function OpenSoutheners\LaravelHelpers\Models\key_from;
+use Illuminate\Contracts\Support\Responsable;
+use ReflectionClass;
+use ReflectionAttribute;
+use OpenSoutheners\LaravelApiable\Attributes\QueryParam;
+use Illuminate\Support\Facades\Route;
+use ReflectionMethod;
+use Exception;
+use OpenSoutheners\LaravelApiable\Attributes\SortQueryParam;
+use OpenSoutheners\LaravelApiable\Attributes\FilterQueryParam;
+use OpenSoutheners\LaravelApiable\Attributes\IncludeQueryParam;
 
 /**
  * @mixin \OpenSoutheners\LaravelApiable\Http\RequestQueryObject
  */
-class JsonApiResponse
+class JsonApiResponse implements Responsable
 {
     use Concerns\IteratesResultsAfterQuery;
+    use Concerns\ResolvesFromRouteAction;
     use ForwardsCalls;
 
     /**
@@ -24,12 +35,12 @@ class JsonApiResponse
     protected $pipeline;
 
     /**
-     * @var \OpenSoutheners\LaravelApiable\Http\RequestQueryObject
+     * @var \OpenSoutheners\LaravelApiable\Http\RequestQueryObject|null
      */
-    protected $requestQueryObject;
+    protected $request;
 
     /**
-     * @var class-string<\OpenSoutheners\LaravelApiable\Contracts\JsonApiable|\Illuminate\Database\Eloquent\Model>
+     * @var class-string<\Illuminate\Database\Eloquent\Model>
      */
     protected $model;
 
@@ -39,6 +50,11 @@ class JsonApiResponse
     protected $includeAllowedToResponse = null;
 
     /**
+     * @var bool
+     */
+    protected $singleResourceResponse = false;
+
+    /**
      * @var array<string>
      */
     protected $forceAppends = [];
@@ -46,59 +62,62 @@ class JsonApiResponse
     /**
      * Instantiate this class.
      *
-     * @param  \Illuminate\Database\Eloquent\Model|class-string<\Illuminate\Database\Eloquent\Model>|\Illuminate\Database\Eloquent\Builder  $query
      * @param  \Illuminate\Http\Request|null  $request
      * @return void
      */
-    public function __construct($query, ?Request $request = null)
+    public function __construct(?Request $request = null)
     {
+        $this->request = new RequestQueryObject($request);
+
         $this->pipeline = app(Pipeline::class);
 
-        $query = $this->getQuery($query);
-
-        $this->requestQueryObject = new RequestQueryObject($request ?: app(Request::class), $query);
-
-        $this->model = $query->getModel();
+        $this->resolveFromRoute();
     }
 
     /**
      * Create new instance of repository from query.
      *
-     * @param  \Illuminate\Database\Eloquent\Model|class-string<\Illuminate\Database\Eloquent\Model>|\Illuminate\Database\Eloquent\Builder  $query
+     * @param  class-string<\Illuminate\Database\Eloquent\Model>|\Illuminate\Database\Eloquent\Builder $modelOrQuery
      * @return static
      */
-    public static function from($query)
+    public static function from($modelOrQuery)
     {
-        return new static($query);
+        $instance = new static();
+
+        return $instance->using($modelOrQuery);
+    }
+
+    /**
+     * Use the specified model for this JSON:API response.
+     * 
+     * @param class-string<\Illuminate\Database\Eloquent\Model>|\Illuminate\Database\Eloquent\Builder $modelOrQuery
+     * @return \OpenSoutheners\LaravelApiable\Http\JsonApiResponse
+     */
+    public function using($modelOrQuery)
+    {
+        if (is_string($modelOrQuery)) {
+            $this->model = $modelOrQuery;
+        } else {
+            $this->model = $modelOrQuery->getModel();
+
+            $this->request->setQuery($modelOrQuery);
+        }
+
+        return $this;
     }
 
     /**
      * Get query builder instance from whatever is sent.
      *
-     * @param  mixed  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    protected function getQuery($query)
+    protected function queryFromModel()
     {
-        if (is_string($query) && method_exists($query, 'query')) {
-            return $query::query();
+        if (! $this->model) {
+            throw new Exception('Model is required for JsonApiResponse to be resolved as response.');
         }
 
-        if ($query instanceof Model) {
-            return $query->newQuery();
-        }
-
-        return $query;
-    }
-
-    /**
-     * Get class string from model.
-     *
-     * @return string
-     */
-    protected function getModelClass()
-    {
-        return is_string($this->model) ? $this->model : get_class($this->model);
+        return $this->model::query();
     }
 
     /**
@@ -108,7 +127,11 @@ class JsonApiResponse
      */
     protected function buildPipeline()
     {
-        return $this->pipeline->send($this->requestQueryObject)
+        if (! $this->request->query) {
+            $this->request->setQuery($this->queryFromModel());
+        }
+
+        return $this->pipeline->send($this->request)
             ->via('from')
             ->through([
                 ApplyFulltextSearchToQuery::class,
@@ -120,16 +143,15 @@ class JsonApiResponse
     }
 
     /**
-     * Get query from request query object pipeline.
-     *
-     * @param  \Closure|null  $callback
-     * @return \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource|\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection
+     * Get single resource from response.
+     * 
+     * @return $this
      */
-    public function getPipelineQuery($callback = null)
+    public function gettingOne()
     {
-        $pipelineQuery = $this->buildPipeline()->query;
+        $this->singleResourceResponse = true;
 
-        return $this->resultPostProcessing($callback ? $callback($pipelineQuery) : $pipelineQuery);
+        return $this;
     }
 
     /**
@@ -146,28 +168,20 @@ class JsonApiResponse
     }
 
     /**
-     * List resources from a query.
+     * Create an HTTP response that represents the object.
      *
-     * @return \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function list()
+    public function toResponse($request)
     {
-        return $this->getPipelineQuery(fn (Builder $query) => $query->jsonApiPaginate());
-    }
-
-    /**
-     * Get a single resource from a request query object.
-     *
-     * @param  \OpenSoutheners\LaravelApiable\Contracts\JsonApiable|int|string  $key
-     * @return \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource
-     */
-    public function getOne($key)
-    {
-        return $this->getPipelineQuery(fn (Builder $query) => $query
-            ->whereKey(key_from($key))
-            ->first()
-            ->toJsonApi()
-        );
+        return $this->resultPostProcessing(
+            Apiable::toJsonApi(
+                $this->singleResourceResponse
+                    ? $this->buildPipeline()->query->first()
+                    : $this->buildPipeline()->query
+            )
+        )->toResponse($request);
     }
 
     /**
@@ -193,31 +207,6 @@ class JsonApiResponse
     }
 
     /**
-     * Post-process result from query to apply appended attributes.
-     * TODO: This should be in a new class/trait!
-     *
-     * @param  \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection|\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource  $result
-     * @return \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection|\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource
-     */
-    protected function resultPostProcessing($result)
-    {
-        $this->addAppendsToResult($result);
-
-        $includeAllowed = is_null($this->includeAllowedToResponse)
-            ? Apiable::config('responses.include_allowed')
-            : $this->includeAllowedToResponse;
-
-        if ($includeAllowed) {
-            $result->additional(['meta' => array_filter([
-                'allowed_filters' => $this->requestQueryObject->getAllowedFilters(),
-                'allowed_sorts' => $this->requestQueryObject->getAllowedSorts(),
-            ])]);
-        }
-
-        return $result;
-    }
-
-    /**
      * Call method of RequestQueryObject if not exists on this.
      *
      * @param  string  $name
@@ -226,6 +215,6 @@ class JsonApiResponse
      */
     public function __call(string $name, array $arguments)
     {
-        return $this->forwardDecoratedCallTo($this->requestQueryObject, $name, $arguments);
+        return $this->forwardDecoratedCallTo($this->request, $name, $arguments);
     }
 }

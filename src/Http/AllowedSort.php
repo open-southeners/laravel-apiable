@@ -7,6 +7,12 @@ use OpenSoutheners\LaravelApiable\Support\Apiable;
 
 class AllowedSort implements Arrayable
 {
+    public const BOTH = 1;
+
+    public const ASCENDANT = 2;
+
+    public const DESCENDANT = 3;
+
     /**
      * @var string
      */
@@ -21,13 +27,13 @@ class AllowedSort implements Arrayable
      * Make an instance of this class.
      *
      * @param  string  $attribute
-     * @param  string  $direction
+     * @param  int|null  $direction
      * @return void
      */
-    public function __construct($attribute, $direction)
+    public function __construct($attribute, $direction = null)
     {
         $this->attribute = $attribute;
-        $this->direction = $direction;
+        $this->direction = $direction ?? Apiable::config('requests.sorts.default_direction') ?? static::BOTH;
     }
 
     /**
@@ -38,9 +44,7 @@ class AllowedSort implements Arrayable
      */
     public static function make($attribute)
     {
-        $defaultDirection = Apiable::config('sorts.default_direction') ?? '*';
-
-        return new static($attribute, $defaultDirection);
+        return new static($attribute);
     }
 
     /**
@@ -51,7 +55,7 @@ class AllowedSort implements Arrayable
      */
     public static function ascendant($attribute)
     {
-        return new static($attribute, 'asc');
+        return new static($attribute, static::ASCENDANT);
     }
 
     /**
@@ -62,7 +66,7 @@ class AllowedSort implements Arrayable
      */
     public static function descendant($attribute)
     {
-        return new static($attribute, 'desc');
+        return new static($attribute, static::DESCENDANT);
     }
 
     /**
@@ -73,7 +77,13 @@ class AllowedSort implements Arrayable
     public function toArray()
     {
         return [
-            $this->attribute => $this->direction,
+            'attribute' => $this->attribute,
+            'direction' => match ($this->direction) {
+                default => '*',
+                AllowedSort::BOTH => '*',
+                AllowedSort::ASCENDANT => 'asc',
+                AllowedSort::DESCENDANT => 'desc',
+            },
         ];
     }
 }

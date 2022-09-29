@@ -38,18 +38,26 @@ class ApplySortsToQuery implements HandlesRequestQueries
         return $next($requestQueryObject);
     }
 
+    /**
+     * Get user allowed filters.
+     * 
+     * @param array $filters
+     * @return array
+     */
     protected function getUserSorts(array $sorts)
     {
         return array_filter($sorts, function ($direction, $attribute) {
-            if (! isset($this->allowed[$attribute])) {
+            $allowed = $this->allowed[array_search($attribute, array_column($this->allowed, 'attribute'))] ?? null;
+
+            if (! $allowed) {
                 return false;
             }
 
-            if ($this->allowed[$attribute] === '*') {
+            if ($allowed['direction'] === '*') {
                 return true;
             }
 
-            return $this->allowed[$attribute] === $direction;
+            return $allowed['direction'] === $direction;
         }, ARRAY_FILTER_USE_BOTH);
     }
 

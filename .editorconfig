@@ -13,3 +13,7 @@ insert_final_newline = true
 
 [*.yml]
 indent_size = 2
+
+[*.php]
+php_diagnostic_php1409=false
+php_diagnostic = true

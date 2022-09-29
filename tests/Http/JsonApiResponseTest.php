@@ -35,7 +35,7 @@ class JsonApiResponseTest extends TestCase
     public function testFilteringByNonAllowedAttributeWillGetEverything()
     {
         Route::get('/', function () {
-            return JsonApiResponse::from(Tag::class)->list();
+            return JsonApiResponse::from(Tag::class);
         });
 
         $response = $this->get('/?filter[name]=in');
@@ -48,7 +48,7 @@ class JsonApiResponseTest extends TestCase
     public function testFilteringByAllowedAttributeWillGetFilteredResults()
     {
         Route::get('/', function () {
-            return JsonApiResponse::from(Tag::class)->allowFilter('name')->list();
+            return JsonApiResponse::from(Tag::class)->allowFilter('name');
         });
 
         $response = $this->get('/?filter[name]=in');
@@ -64,7 +64,7 @@ class JsonApiResponseTest extends TestCase
             return JsonApiResponse::from(Post::class)
                 ->allowing([
                     AllowedFilter::exact('status', ['Active', 'Archived']),
-                ])->list();
+                ]);
         });
 
         $response = $this->get('/?filter[status]=Active,Inactive');
@@ -78,7 +78,7 @@ class JsonApiResponseTest extends TestCase
             return JsonApiResponse::from(Post::class)
                 ->allowing([
                     AllowedFilter::scoped('active'),
-                ])->list();
+                ]);
         });
 
         $response = $this->get('/?filter[active]=1');
@@ -94,7 +94,7 @@ class JsonApiResponseTest extends TestCase
             return JsonApiResponse::from(Post::class)
                 ->allowing([
                     AllowedFilter::scoped('status', ['Active']),
-                ])->list();
+                ]);
         });
 
         $response = $this->get('/?filter[status_scoped]=Active');
@@ -108,7 +108,7 @@ class JsonApiResponseTest extends TestCase
             return JsonApiResponse::from(Post::class)
                 ->allowing([
                     AllowedFilter::exact('status', ['Active', 'Archived']),
-                ])->includeAllowedToResponse()->list();
+                ])->includeAllowedToResponse();
         });
 
         $response = $this->get('/?filter[status]=Active,Inactive');
@@ -117,7 +117,8 @@ class JsonApiResponseTest extends TestCase
         $response->assertJsonFragment([
             'allowed_filters' => [
                 'status' => [
-                    '=' => ['Active', 'Archived'],
+                    'operator' => '=',
+                    'values' => ['Active', 'Archived'],
                 ],
             ],
         ]);
@@ -131,7 +132,7 @@ class JsonApiResponseTest extends TestCase
             return JsonApiResponse::from(Post::class)
                 ->allowing([
                     AllowedFilter::exact('status', ['Active', 'Archived']),
-                ])->list();
+                ]);
         });
 
         $response = $this->get('/?filter[status]=Active,Inactive');
@@ -140,7 +141,8 @@ class JsonApiResponseTest extends TestCase
         $response->assertJsonFragment([
             'allowed_filters' => [
                 'status' => [
-                    '=' => ['Active', 'Archived'],
+                    'operator' => '=',
+                    'values' => ['Active', 'Archived'],
                 ],
             ],
         ]);
@@ -156,7 +158,7 @@ class JsonApiResponseTest extends TestCase
                 ->allowing([
                     AllowedInclude::make('author'),
                     AllowedFilter::exact('author.name'),
-                ])->list();
+                ]);
         });
 
         $response = $this->get('/?include=author&filter[author.name]=Ruben');
@@ -173,7 +175,7 @@ class JsonApiResponseTest extends TestCase
                     AllowedInclude::make('author'),
                     AllowedFilter::exact('author.name'),
                     AllowedFilter::similar('author.email'),
-                ])->list();
+                ]);
         });
 
         $response = $this->get('/?include=author&filter[author.name]=Ruben&filter[author.email]=d8vjork');
@@ -187,7 +189,7 @@ class JsonApiResponseTest extends TestCase
             return JsonApiResponse::from(User::class)
                 ->allowing([
                     AllowedFields::make('client', ['name', 'email']),
-                ])->list();
+                ]);
         });
 
         $response = $this->get('/?fields[client]=name');
@@ -203,7 +205,7 @@ class JsonApiResponseTest extends TestCase
             return JsonApiResponse::from(User::class)
                 ->allowing([
                     AllowedFields::make('client', ['name', 'email']),
-                ])->list();
+                ]);
         });
 
         $response = $this->get('/?fields[client]=name,email_verified_at');
@@ -221,7 +223,7 @@ class JsonApiResponseTest extends TestCase
             return JsonApiResponse::from(User::class)
                 ->allowing([
                     AllowedSort::descendant('name'),
-                ])->list();
+                ]);
         });
 
         $response = $this->get('/?sort=-name');
@@ -237,10 +239,10 @@ class JsonApiResponseTest extends TestCase
             return JsonApiResponse::from(User::class)
                 ->allowing([
                     AllowedSort::ascendant('name'),
-                ])->list();
+                ]);
         });
 
-        $response = $this->get('/?sort=name');
+        $response = $this->getJson('/?sort=name');
 
         $response->assertJsonApi(function (AssertableJsonApi $assert) {
             $assert->isCollection()->at(0)->hasAttribute('name', 'Aysha');
@@ -253,7 +255,7 @@ class JsonApiResponseTest extends TestCase
             return JsonApiResponse::from(Post::class)
                 ->allowing([
                     AllowedAppends::make('post', 'is_published'),
-                ])->list();
+                ]);
         });
 
         $response = $this->get('/?appends[post]=is_published');
@@ -266,10 +268,10 @@ class JsonApiResponseTest extends TestCase
     public function testGetOneReturnsJsonApiResourceAsResponse()
     {
         Route::get('/', function () {
-            return JsonApiResponse::from(Post::class)
+            return JsonApiResponse::from(Post::whereKey(1))
                 ->allowing([
                     AllowedAppends::make('post', 'is_published'),
-                ])->getOne(1);
+                ])->gettingOne();
         });
 
         $response = $this->get('/?appends[post]=is_published');
@@ -284,7 +286,7 @@ class JsonApiResponseTest extends TestCase
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
                 ->allowSearch()
-                ->list();
+                ;
         });
 
         $response = $this->get('/?q=español');

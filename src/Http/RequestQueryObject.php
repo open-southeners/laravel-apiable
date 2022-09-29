@@ -2,6 +2,8 @@
 
 namespace OpenSoutheners\LaravelApiable\Http;
 
+use Illuminate\Http\Request;
+
 class RequestQueryObject
 {
     use Concerns\AllowsAppends;
@@ -24,24 +26,25 @@ class RequestQueryObject
     /**
      * Construct the request query object.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  \Illuminate\Http\Request|null  $request
      * @return void
      */
-    public function __construct($request, $query)
+    public function __construct($request = null)
     {
-        $this->request = $request;
-        $this->query = $query;
+        $this->request = $request ?? app(Request::class);
     }
 
     /**
-     * Get underlying eloquent query builder instance.
-     *
-     * @return \Illuminate\Database\Eloquent\Builder
+     * Set query for this request query object.
+     * 
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return $this
      */
-    public function query()
+    public function setQuery($query)
     {
-        return $this->query;
+        $this->query = $query;
+
+        return $this;
     }
 
     /**
