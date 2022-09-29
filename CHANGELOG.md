@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2022-09-29
+
+### Removed
+
+- `JsonApiResponse::list` and `JsonApiResponse::getOne` methods as **isn't the responsibility of this package** to act as query repository so **it makes easier to encapsulate it** into repository or whatever design pattern you're using. **Use `JsonApiResponse::using` instead sending the query as its parameter**.
+
+### Added
+
+- PHP 8 attributes for QueryParams:
+  - `OpenSoutheners\LaravelApiable\Attributes\FilterQueryParam`
+  - `OpenSoutheners\LaravelApiable\Attributes\IncludeQueryParam`
+  - `OpenSoutheners\LaravelApiable\Attributes\AppendsQueryParam`
+  - `OpenSoutheners\LaravelApiable\Attributes\FieldsQueryParam`
+  - `OpenSoutheners\LaravelApiable\Attributes\SortQueryParam`
+  - `OpenSoutheners\LaravelApiable\Attributes\SearchQueryParam`
+- Method `JsonApiResponse::from` can now be non-statically called as `JsonApiResponse::using` (for dependency injection usage in controllers, etc)
+
+### Changed
+
+- Constructor from `JsonApiResponse` now only accepts 1 optional parameter (being the query parameter removed in favor of manually setting this by calling `JsonApiResponse::using` method)
+- Constructor from `RequestQueryObject` now only accepts 1 optional parameter (being the query parameter removed in favor of manually setting this by calling `RequestQueryObject::setQuery` method)
+
 ## [1.3.2] - 2022-09-21
 
 ### Added
