@@ -7,7 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2022-09-29
+
+⚠️ **Please make sure to run `php artisan vendor:publish --force --provider="OpenSoutheners\LaravelApiable\ServiceProvider"`** ⚠️
+
+### Fixed
+
+- Getting wrong config keys
+
 ## [2.0.0] - 2022-09-29
+
+⚠️ **Please make sure to run `php artisan vendor:publish --force --provider="OpenSoutheners\LaravelApiable\ServiceProvider"`** ⚠️
 
 ### Removed
 
@@ -26,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Config file changes. **Please make sure to run `php artisan vendor:publish --force --provider="OpenSoutheners\LaravelApiable\ServiceProvider"`**
 - Constructor from `JsonApiResponse` now only accepts 1 optional parameter (being the query parameter removed in favor of manually setting this by calling `JsonApiResponse::using` method)
 - Constructor from `RequestQueryObject` now only accepts 1 optional parameter (being the query parameter removed in favor of manually setting this by calling `RequestQueryObject::setQuery` method)
 
