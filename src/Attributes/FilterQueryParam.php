@@ -9,6 +9,6 @@ class FilterQueryParam extends QueryParam
 {
     public function __construct(public string $attribute, public int|null $type = null, public $values = '*')
     {
-        // 
+        //
     }
 }

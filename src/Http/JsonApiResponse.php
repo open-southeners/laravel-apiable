@@ -2,23 +2,16 @@
 
 namespace OpenSoutheners\LaravelApiable\Http;
 
-use Illuminate\Database\Eloquent\Builder;
+use Exception;
+use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Traits\ForwardsCalls;
+use OpenSoutheners\LaravelApiable\Contracts\ViewableBuilder;
+use OpenSoutheners\LaravelApiable\Contracts\ViewQueryable;
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
-use function OpenSoutheners\LaravelHelpers\Models\key_from;
-use Illuminate\Contracts\Support\Responsable;
-use ReflectionClass;
-use ReflectionAttribute;
-use OpenSoutheners\LaravelApiable\Attributes\QueryParam;
-use Illuminate\Support\Facades\Route;
-use ReflectionMethod;
-use Exception;
-use OpenSoutheners\LaravelApiable\Attributes\SortQueryParam;
-use OpenSoutheners\LaravelApiable\Attributes\FilterQueryParam;
-use OpenSoutheners\LaravelApiable\Attributes\IncludeQueryParam;
+use function OpenSoutheners\LaravelHelpers\Classes\class_implement;
 
 /**
  * @mixin \OpenSoutheners\LaravelApiable\Http\RequestQueryObject
@@ -77,47 +70,34 @@ class JsonApiResponse implements Responsable
     /**
      * Create new instance of repository from query.
      *
-     * @param  class-string<\Illuminate\Database\Eloquent\Model>|\Illuminate\Database\Eloquent\Builder $modelOrQuery
+     * @param  class-string<\Illuminate\Database\Eloquent\Model>|\Illuminate\Database\Eloquent\Builder  $modelOrQuery
      * @return static
      */
     public static function from($modelOrQuery)
     {
-        $instance = new static();
-
-        return $instance->using($modelOrQuery);
+        return (new static())->using($modelOrQuery);
     }
 
     /**
      * Use the specified model for this JSON:API response.
-     * 
-     * @param class-string<\Illuminate\Database\Eloquent\Model>|\Illuminate\Database\Eloquent\Builder $modelOrQuery
+     *
+     * @param  class-string<\Illuminate\Database\Eloquent\Model>|\Illuminate\Database\Eloquent\Builder  $modelOrQuery
      * @return \OpenSoutheners\LaravelApiable\Http\JsonApiResponse
      */
     public function using($modelOrQuery)
     {
-        if (is_string($modelOrQuery)) {
-            $this->model = $modelOrQuery;
-        } else {
-            $this->model = $modelOrQuery->getModel();
+        $this->model = is_string($modelOrQuery) ? $modelOrQuery : $modelOrQuery->getModel();
 
-            $this->request->setQuery($modelOrQuery);
+        /** @var \Illuminate\Database\Eloquent\Builder $query */
+        $query = is_string($modelOrQuery) ? $modelOrQuery::query() : clone $modelOrQuery;
+
+        if (class_implement($this->model, ViewQueryable::class) || class_implement($query, ViewableBuilder::class)) {
+            $query->viewable();
         }
+
+        $this->request->setQuery($query);
 
         return $this;
-    }
-
-    /**
-     * Get query builder instance from whatever is sent.
-     *
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    protected function queryFromModel()
-    {
-        if (! $this->model) {
-            throw new Exception('Model is required for JsonApiResponse to be resolved as response.');
-        }
-
-        return $this->model::query();
     }
 
     /**
@@ -128,7 +108,7 @@ class JsonApiResponse implements Responsable
     protected function buildPipeline()
     {
         if (! $this->request->query) {
-            $this->request->setQuery($this->queryFromModel());
+            throw new Exception('RequestQueryObject needs a base query to work, none provided');
         }
 
         return $this->pipeline->send($this->request)
@@ -144,7 +124,7 @@ class JsonApiResponse implements Responsable
 
     /**
      * Get single resource from response.
-     * 
+     *
      * @return $this
      */
     public function gettingOne()

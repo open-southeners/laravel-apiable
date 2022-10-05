@@ -53,8 +53,8 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
 
     /**
      * Get user allowed filters.
-     * 
-     * @param array $filters
+     *
+     * @param  array  $filters
      * @return array
      */
     protected function getUserFilters(array $filters)
@@ -90,7 +90,7 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
             }
 
             // All filter values are valid, no modification needed
-            if ($allowedAttributeValues === '*' || (count($allowedAttributeValues) === 1  && head($allowedAttributeValues) === '*')) {
+            if ($allowedAttributeValues === '*' || (count($allowedAttributeValues) === 1 && head($allowedAttributeValues) === '*')) {
                 $filteredFilterValues[$attribute] = $filterValues;
 
                 continue;

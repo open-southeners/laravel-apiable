@@ -10,7 +10,6 @@ return [
      *
      * @see https://docs.opensoutheners.com/laravel-apiable/guide/#getting-started
      */
-
     'resource_type_map' => [],
 
     /**
@@ -18,13 +17,12 @@ return [
      *
      * @see https://docs.opensoutheners.com/laravel-apiable/guide/requests.html
      */
-    
     'requests' => [
         'filters' => [
             'default_operator' => AllowedFilter::SIMILAR,
             'enforce_scoped_names' => false,
         ],
-        
+
         'sorts' => [
             'default_direction' => AllowedSort::BOTH,
         ],
@@ -35,15 +33,16 @@ return [
      *
      * @see https://docs.opensoutheners.com/laravel-apiable/guide/responses.html
      */
-
     'responses' => [
         'normalize_relations' => false,
 
         'include_allowed' => false,
-        
+
         'pagination' => [
             'default_size' => 50,
         ],
+
+        'viewable' => true,
     ],
 
 ];

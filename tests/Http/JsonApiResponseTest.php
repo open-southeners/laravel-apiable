@@ -285,8 +285,7 @@ class JsonApiResponseTest extends TestCase
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
-                ->allowSearch()
-                ;
+                ->allowSearch();
         });
 
         $response = $this->get('/?q=español');

@@ -52,7 +52,7 @@ trait AllowsSorts
             [
                 $attribute instanceof AllowedSort
                     ? $attribute->toArray()
-                    : (new AllowedSort($attribute, $direction))->toArray()
+                    : (new AllowedSort($attribute, $direction))->toArray(),
             ]
         );
 

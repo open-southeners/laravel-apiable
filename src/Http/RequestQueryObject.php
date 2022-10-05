@@ -36,7 +36,7 @@ class RequestQueryObject
 
     /**
      * Set query for this request query object.
-     * 
+     *
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return $this
      */

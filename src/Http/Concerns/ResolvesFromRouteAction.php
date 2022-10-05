@@ -3,16 +3,16 @@
 namespace OpenSoutheners\LaravelApiable\Http\Concerns;
 
 use Illuminate\Support\Facades\Route;
+use OpenSoutheners\LaravelApiable\Attributes\AppendsQueryParam;
+use OpenSoutheners\LaravelApiable\Attributes\FieldsQueryParam;
 use OpenSoutheners\LaravelApiable\Attributes\FilterQueryParam;
-use OpenSoutheners\LaravelApiable\Attributes\SortQueryParam;
 use OpenSoutheners\LaravelApiable\Attributes\IncludeQueryParam;
-use ReflectionClass;
-use ReflectionMethod;
-use ReflectionAttribute;
 use OpenSoutheners\LaravelApiable\Attributes\QueryParam;
 use OpenSoutheners\LaravelApiable\Attributes\SearchQueryParam;
-use OpenSoutheners\LaravelApiable\Attributes\FieldsQueryParam;
-use OpenSoutheners\LaravelApiable\Attributes\AppendsQueryParam;
+use OpenSoutheners\LaravelApiable\Attributes\SortQueryParam;
+use ReflectionAttribute;
+use ReflectionClass;
+use ReflectionMethod;
 
 /**
  * @mixin \OpenSoutheners\LaravelApiable\Http\JsonApiResponse
@@ -21,7 +21,7 @@ trait ResolvesFromRouteAction
 {
     /**
      * Resolves allowed query parameters from current route if possible.
-     * 
+     *
      * @return void
      */
     protected function resolveFromRoute()
@@ -41,8 +41,8 @@ trait ResolvesFromRouteAction
 
     /**
      * Get PHP query param attributes from reflected class or method.
-     * 
-     * @param \ReflectionClass|\ReflectionMethod $reflected
+     *
+     * @param  \ReflectionClass|\ReflectionMethod  $reflected
      * @return void
      */
     protected function resolveAttributesFrom($reflected)

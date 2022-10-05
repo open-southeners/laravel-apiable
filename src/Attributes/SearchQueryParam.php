@@ -9,6 +9,6 @@ class SearchQueryParam extends QueryParam
 {
     public function __construct(public bool $allowSearch = true)
     {
-        // 
+        //
     }
 }

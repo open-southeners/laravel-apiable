@@ -40,8 +40,8 @@ class ApplySortsToQuery implements HandlesRequestQueries
 
     /**
      * Get user allowed filters.
-     * 
-     * @param array $filters
+     *
+     * @param  array  $filters
      * @return array
      */
     protected function getUserSorts(array $sorts)

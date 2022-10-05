@@ -9,6 +9,6 @@ class AppendsQueryParam extends QueryParam
 {
     public function __construct(public string $type, public array $attributes)
     {
-        // 
+        //
     }
 }

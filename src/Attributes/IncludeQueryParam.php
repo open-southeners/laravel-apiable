@@ -9,6 +9,6 @@ class IncludeQueryParam extends QueryParam
 {
     public function __construct(public string|array $relationships)
     {
-        // 
+        //
     }
 }

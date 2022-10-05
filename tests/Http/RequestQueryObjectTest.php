@@ -216,7 +216,7 @@ class RequestQueryObjectTest extends TestCase
         $this->assertEquals(
             json_encode([
                 ['attribute' => 'title', 'direction' => '*'],
-                ['attribute' => 'created_at', 'direction' => 'desc']
+                ['attribute' => 'created_at', 'direction' => 'desc'],
             ]),
             json_encode($allowedSorts)
         );

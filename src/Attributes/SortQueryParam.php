@@ -10,6 +10,6 @@ class SortQueryParam extends QueryParam
 {
     public function __construct(public string $attribute, public int|null $direction = AllowedSort::BOTH)
     {
-        // 
+        //
     }
 }

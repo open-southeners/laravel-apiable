@@ -9,6 +9,6 @@ class FieldsQueryParam extends QueryParam
 {
     public function __construct(public string $type, public array $fields)
     {
-        // 
+        //
     }
 }
