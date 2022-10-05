@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0] - 2022-10-05
+
+### Added
+
+- `OpenSoutheners\LaravelApiable\Contracts\ViewQueryable` and `OpenSoutheners\LaravelApiable\Contracts\ViewableBuilder` classes for models & [custom query builders](https://martinjoo.dev/build-your-own-laravel-query-builders) now functional with `JsonApiResponse` (can be disabled by config see `config/apiable.php`)
+
 ## [2.0.1] - 2022-09-29
 
 ⚠️ **Please make sure to run `php artisan vendor:publish --force --provider="OpenSoutheners\LaravelApiable\ServiceProvider"`** ⚠️
