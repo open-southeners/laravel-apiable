@@ -45,11 +45,12 @@ class JsonApiResource extends JsonResource
             return $this->resource;
         }
 
-        return [
-            $this->merge($this->getResourceIdentifier()),
+        $responseArray = $this->getResourceIdentifier();
+
+        return array_merge($responseArray, [
             'attributes' => $this->getAttributes(),
             'relationships' => $this->when(! empty($this->relationships), $this->relationships),
-        ];
+        ]);
     }
 
     /**

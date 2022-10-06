@@ -3,6 +3,7 @@
 namespace OpenSoutheners\LaravelApiable\Http;
 
 use Exception;
+use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -16,7 +17,7 @@ use function OpenSoutheners\LaravelHelpers\Classes\class_implement;
 /**
  * @mixin \OpenSoutheners\LaravelApiable\Http\RequestQueryObject
  */
-class JsonApiResponse implements Responsable
+class JsonApiResponse implements Responsable, Arrayable
 {
     use Concerns\IteratesResultsAfterQuery;
     use Concerns\ResolvesFromRouteAction;
@@ -148,12 +149,11 @@ class JsonApiResponse implements Responsable
     }
 
     /**
-     * Create an HTTP response that represents the object.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Symfony\Component\HttpFoundation\Response
+     * Get results from processing RequestQueryObject pipeline.
+     * 
+     * @return \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection|\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource
      */
-    public function toResponse($request)
+    protected function getResults()
     {
         return $this->resultPostProcessing(
             Apiable::toJsonApi(
@@ -161,7 +161,28 @@ class JsonApiResponse implements Responsable
                     ? $this->buildPipeline()->query->first()
                     : $this->buildPipeline()->query
             )
-        )->toResponse($request);
+        );
+    }
+
+    /**
+     * Create an HTTP response that represents the object.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function toResponse($request)
+    {
+        return $this->getResults()->toResponse($request);
+    }
+
+    /**
+     * Get the instance as an array.
+     *
+     * @return array<string>
+     */
+    public function toArray()
+    {
+        return (array) $this->getResults();
     }
 
     /**
