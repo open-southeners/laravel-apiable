@@ -48,6 +48,16 @@ class RequestQueryObject
     }
 
     /**
+     * Get the underlying request object.
+     * 
+     * @return Request|null
+     */
+    public function getRequest()
+    {
+        return $this->request;
+    }
+
+    /**
      * Allows the following user operations.
      *
      * @param  array  $sorts

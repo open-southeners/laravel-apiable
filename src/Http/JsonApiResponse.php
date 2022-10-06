@@ -11,6 +11,7 @@ use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Traits\ForwardsCalls;
 use OpenSoutheners\LaravelApiable\Contracts\ViewableBuilder;
 use OpenSoutheners\LaravelApiable\Contracts\ViewQueryable;
+use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection;
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
 use function OpenSoutheners\LaravelHelpers\Classes\class_implement;
 
@@ -172,6 +173,10 @@ class JsonApiResponse implements Responsable, Arrayable
      */
     public function toResponse($request)
     {
+        if ($request->hasMacro('inertia') && $request->inertia()) {
+            return $this->toArray($request);
+        }
+
         return $this->getResults()->toResponse($request);
     }
 
@@ -182,7 +187,23 @@ class JsonApiResponse implements Responsable, Arrayable
      */
     public function toArray()
     {
-        return (array) $this->getResults();
+        $results = $this->getResults();
+
+        if (! ($results instanceof JsonApiCollection)) {
+            return $results->toArray($this->getRequest());
+        }
+
+        $responseArray = ['data' => $results->collection->map->toArray($this->getRequest())];
+
+        foreach (array_filter($results->with) as $key => $value) {
+            $responseArray[$key] = $value;
+        }
+
+        if (! empty($results->additional)) {
+            $responseArray = array_merge_recursive($responseArray, $results->additional);
+        }
+
+        return $responseArray;
     }
 
     /**

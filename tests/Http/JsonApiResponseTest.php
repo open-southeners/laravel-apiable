@@ -2,6 +2,7 @@
 
 namespace OpenSoutheners\LaravelApiable\Tests\Http;
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use OpenSoutheners\LaravelApiable\Http\AllowedAppends;
 use OpenSoutheners\LaravelApiable\Http\AllowedFields;
@@ -293,5 +294,58 @@ class JsonApiResponseTest extends TestCase
         $response->assertJsonApi(function (AssertableJsonApi $assert) {
             $assert->hasSize(1)->hasAttribute('title', 'Y esto en español');
         });
+    }
+
+    public function testResponseAsArrayGetsAllContent()
+    {
+        // Yeah, we need to enforce this macro to "fake" Inertia so force toArray response behaviour
+        Request::macro('inertia', fn () => true);
+
+        config(['apiable.responses.include_allowed' => true]);
+
+        Route::get('/', function () {
+            return response()->json(JsonApiResponse::from(Post::with('tags'))->allowing([
+                AllowedFilter::exact('status', ['Active', 'Archived']),
+            ]));
+        });
+
+        $response = $this->getJson('/');
+
+        $response->assertJsonCount(4, 'data');
+        $response->assertJsonCount(1, 'meta.allowed_filters');
+        $response->assertJsonFragment([
+            'allowed_filters' => [
+                'status' => [
+                    'operator' => '=',
+                    'values' => ['Active', 'Archived'],
+                ],
+            ],
+        ]);
+        $response->assertJsonFragment([
+            'id' => '1',
+            'type' => 'post',
+            'relationships' => [
+                'tags' => [
+                    'data' => [
+                        [
+                            'id' => '1',
+                            'type' => 'label'
+                        ],
+                        [
+                            'id' => '3',
+                            'type' => 'label'
+                        ],
+                        [
+                            'id' => '4',
+                            'type' => 'label'
+                        ]
+                    ]
+                ]
+            ]
+        ]);
+        $response->assertJsonFragment([
+            'id' => '1',
+            'type' => 'post',
+        ]);
     }
 }

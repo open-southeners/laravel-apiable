@@ -102,17 +102,7 @@ class ResourceCollection extends JsonApiResource implements Countable, IteratorA
      */
     public function toArray($request)
     {
-        $responseArray = ['data' => $this->collection->map->toArray($request)];
-
-        foreach (array_filter($this->with) as $key => $value) {
-            $responseArray[$key] = $value;
-        }
-
-        if (! empty($this->additional)) {
-            $responseArray = array_merge($responseArray, array_filter($this->additional));
-        }
-
-        return $responseArray;
+        return $this->collection->map->toArray($request);
     }
 
     /**
