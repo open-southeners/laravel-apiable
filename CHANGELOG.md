@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.1] - 2022-10-06
+
+### Added
+
+- `Illuminate\Contracts\Support\Arrayable` interface to `JsonApiResponse` so it can be used in Inertia responses (as an example).
+
 ## [2.1.0] - 2022-10-05
 
 ### Added
