@@ -11,8 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `requests.validate_params` config option to `apiable.php` for enforcing validation. **Requires to publish or manually copy**
-- Additional filter operators like `gte` (greater or equal than), `gt` (greater than), `lte` (lower or equal than), `lt` (lower than)
+- `requests.validate_params` config option to `apiable.php` for enforcing validation. **Requires to publish or manually copy** [#7]
+- Additional filter operators like `gte` (greater or equal than), `gt` (greater than), `lte` (lower or equal than), `lt` (lower than) [#5]
 
 ### Changed
 
