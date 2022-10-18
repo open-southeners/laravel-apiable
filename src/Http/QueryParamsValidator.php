@@ -51,14 +51,16 @@ class QueryParamsValidator
      */
     public function whenPatternMatches($exception, array $patterns = [])
     {
-        return $this->when(function ($key, $modifiers, $values, $rules) use ($patterns) {
+        return $this->when(function ($key, $modifiers, $values, $rules, &$valids) use ($patterns) {
             $paramPattern = $patterns[$key]['values'] ?? $rules['values'];
 
             if ($paramPattern === '*') {
                 return true;
             }
 
-            return Str::is($paramPattern, $values);
+            $valids = array_filter($values, fn ($value) => Str::is($paramPattern, $value));
+
+            return count($values) === count($valids);
         }, $exception);
     }
 
@@ -92,7 +94,11 @@ class QueryParamsValidator
                 $valids = [];
                 $rulesForKey = $this->rules === false ? $this->rules : ($this->rules[$key] ?? null);
                 $queryParamValues = Arr::isAssoc((array) $values) ? array_values($values) : $values;
-                $queryParamModifiers = Arr::isAssoc((array) $values) ? array_keys($values) : null;
+                $queryParamModifiers = Arr::isAssoc((array) $values) ? array_keys($values) : [];
+
+                if (is_string($queryParamValues) && Str::contains($queryParamValues, ',')) {
+                    $queryParamValues = explode(',', $values);
+                }
 
                 $conditionResult = is_null($rulesForKey)
                     ? false

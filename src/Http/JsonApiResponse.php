@@ -151,7 +151,7 @@ class JsonApiResponse implements Responsable, Arrayable
 
     /**
      * Get results from processing RequestQueryObject pipeline.
-     * 
+     *
      * @return \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection|\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource
      */
     protected function getResults()

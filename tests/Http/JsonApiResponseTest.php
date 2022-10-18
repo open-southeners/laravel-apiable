@@ -118,7 +118,7 @@ class JsonApiResponseTest extends TestCase
         $response->assertJsonFragment([
             'allowed_filters' => [
                 'status' => [
-                    'operator' => '=',
+                    'operator' => 'equal',
                     'values' => ['Active', 'Archived'],
                 ],
             ],
@@ -142,7 +142,7 @@ class JsonApiResponseTest extends TestCase
         $response->assertJsonFragment([
             'allowed_filters' => [
                 'status' => [
-                    'operator' => '=',
+                    'operator' => 'equal',
                     'values' => ['Active', 'Archived'],
                 ],
             ],
@@ -316,7 +316,7 @@ class JsonApiResponseTest extends TestCase
         $response->assertJsonFragment([
             'allowed_filters' => [
                 'status' => [
-                    'operator' => '=',
+                    'operator' => 'equal',
                     'values' => ['Active', 'Archived'],
                 ],
             ],
@@ -329,19 +329,19 @@ class JsonApiResponseTest extends TestCase
                     'data' => [
                         [
                             'id' => '1',
-                            'type' => 'label'
+                            'type' => 'label',
                         ],
                         [
                             'id' => '3',
-                            'type' => 'label'
+                            'type' => 'label',
                         ],
                         [
                             'id' => '4',
-                            'type' => 'label'
-                        ]
-                    ]
-                ]
-            ]
+                            'type' => 'label',
+                        ],
+                    ],
+                ],
+            ],
         ]);
         $response->assertJsonFragment([
             'id' => '1',

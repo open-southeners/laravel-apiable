@@ -117,7 +117,7 @@ class RequestQueryObjectTest extends TestCase
         $this->assertIsArray($allowedAttributes);
         $this->assertNotEmpty($allowedAttributes);
         $this->assertEquals(
-            json_encode([['attribute' => 'created_at', 'direction' => '*']]),
+            json_encode(['created_at' => '*']),
             json_encode($allowedAttributes)
         );
     }
@@ -130,7 +130,7 @@ class RequestQueryObjectTest extends TestCase
 
         $this->assertIsArray($allowedAttributes);
         $this->assertNotEmpty($allowedAttributes);
-        $this->assertEquals(json_encode([['attribute' => 'created_at', 'direction' => 'desc']]), json_encode($allowedAttributes));
+        $this->assertEquals(json_encode(['created_at' => 'desc']), json_encode($allowedAttributes));
     }
 
     public function testRequestQueryObjectAllowsFiltersSendingRawWithStringValue()
@@ -170,7 +170,7 @@ class RequestQueryObjectTest extends TestCase
         $this->assertIsArray($allowedAttributes);
         $this->assertNotEmpty($allowedAttributes);
         $this->assertEquals(
-            json_encode(['status' => ['operator' => '=', 'values' => '*']]),
+            json_encode(['status' => ['operator' => 'equal', 'values' => '*']]),
             json_encode($allowedAttributes)
         );
     }
@@ -215,8 +215,8 @@ class RequestQueryObjectTest extends TestCase
         $this->assertNotEmpty($allowedSorts);
         $this->assertEquals(
             json_encode([
-                ['attribute' => 'title', 'direction' => '*'],
-                ['attribute' => 'created_at', 'direction' => 'desc'],
+                'title' => '*',
+                'created_at' => 'desc',
             ]),
             json_encode($allowedSorts)
         );
