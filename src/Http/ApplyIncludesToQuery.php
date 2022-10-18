@@ -9,11 +9,6 @@ use OpenSoutheners\LaravelApiable\Contracts\HandlesRequestQueries;
 class ApplyIncludesToQuery implements HandlesRequestQueries
 {
     /**
-     * @var array
-     */
-    protected $allowed = [];
-
-    /**
      * Apply modifications to the query based on allowed query fragments.
      *
      * @param  \OpenSoutheners\LaravelApiable\Http\RequestQueryObject  $requestQueryObject
@@ -22,36 +17,16 @@ class ApplyIncludesToQuery implements HandlesRequestQueries
      */
     public function from(RequestQueryObject $requestQueryObject, Closure $next)
     {
-        $includes = $requestQueryObject->includes();
-
-        if (empty($includes)) {
+        if (empty($requestQueryObject->includes())) {
             return $next($requestQueryObject);
         }
 
-        $this->allowed = $requestQueryObject->getAllowedIncludes();
-
         $this->applyIncludes(
             $requestQueryObject->query,
-            $this->getUserIncludes($includes, $requestQueryObject->query)
+            $requestQueryObject->userAllowedIncludes()
         );
 
         return $next($requestQueryObject);
-    }
-
-    /**
-     * Get user allowed includes.
-     *
-     * @param  array  $includes
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return array
-     */
-    protected function getUserIncludes(array $includes, $query)
-    {
-        $queryEagerLoadedRelations = array_keys($query->getEagerLoads());
-
-        return array_filter($includes, function ($include) use ($queryEagerLoadedRelations) {
-            return in_array($include, $this->allowed) && ! in_array($include, $queryEagerLoadedRelations);
-        });
     }
 
     /**
@@ -63,6 +38,9 @@ class ApplyIncludesToQuery implements HandlesRequestQueries
      */
     protected function applyIncludes(Builder $query, array $includes)
     {
+        $eagerLoadedRelationships = $query->getEagerLoads();
+        $includes = array_filter($includes, fn ($include) => ! in_array($include, $eagerLoadedRelationships));
+
         if (! empty($includes)) {
             $query->with($includes);
         }

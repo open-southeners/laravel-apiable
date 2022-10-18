@@ -2,6 +2,7 @@
 
 namespace OpenSoutheners\LaravelApiable\Http\Concerns;
 
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 use OpenSoutheners\LaravelApiable\Http\AllowedFields;
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
@@ -54,6 +55,21 @@ trait AllowsFields
         $this->allowedFields = array_merge($this->allowedFields, [$type => (array) $attributes]);
 
         return $this;
+    }
+
+    public function userAllowedFields()
+    {
+        return $this->validator($this->fields())
+            ->givingRules($this->allowedFields)
+            ->when(
+                function ($key, $modifiers, $values, $rules, &$valids) {
+                    $valids = array_intersect($values, $rules);
+
+                    return empty(array_diff($values, $rules));
+                },
+                fn ($key, $values) => throw new Exception(sprintf('"%s" fields for resource type "%s" cannot be sparsed', implode(', ', $values), $key))
+            )
+            ->validate();
     }
 
     /**

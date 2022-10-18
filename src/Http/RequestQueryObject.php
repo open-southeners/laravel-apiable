@@ -12,6 +12,7 @@ class RequestQueryObject
     use Concerns\AllowsIncludes;
     use Concerns\AllowsSorts;
     use Concerns\AllowsSearch;
+    use Concerns\ValidatesParams;
 
     /**
      * @var \Illuminate\Http\Request
@@ -49,7 +50,7 @@ class RequestQueryObject
 
     /**
      * Get the underlying request object.
-     * 
+     *
      * @return Request|null
      */
     public function getRequest()

@@ -9,56 +9,24 @@ use OpenSoutheners\LaravelApiable\Contracts\HandlesRequestQueries;
 class ApplySortsToQuery implements HandlesRequestQueries
 {
     /**
-     * @var array
-     */
-    protected $allowed = [];
-
-    /**
      * Apply modifications to the query based on allowed query fragments.
      *
-     * @param  \OpenSoutheners\LaravelApiable\Http\RequestQueryObject  $requestQueryObject
+     * @param  \OpenSoutheners\LaravelApiable\Http\RequestQueryObject  $request
      * @param  \Closure  $next
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function from(RequestQueryObject $requestQueryObject, Closure $next)
+    public function from(RequestQueryObject $request, Closure $next)
     {
-        $sorts = $requestQueryObject->sorts();
-
-        if (empty($sorts)) {
-            return $next($requestQueryObject);
+        if (empty($request->sorts())) {
+            return $next($request);
         }
 
-        $this->allowed = $requestQueryObject->getAllowedSorts();
-
         $this->applySorts(
-            $requestQueryObject->query,
-            $this->getUserSorts($sorts)
+            $request->query,
+            $request->userAllowedSorts()
         );
 
-        return $next($requestQueryObject);
-    }
-
-    /**
-     * Get user allowed filters.
-     *
-     * @param  array  $filters
-     * @return array
-     */
-    protected function getUserSorts(array $sorts)
-    {
-        return array_filter($sorts, function ($direction, $attribute) {
-            $allowed = $this->allowed[array_search($attribute, array_column($this->allowed, 'attribute'))] ?? null;
-
-            if (! $allowed) {
-                return false;
-            }
-
-            if ($allowed['direction'] === '*') {
-                return true;
-            }
-
-            return $allowed['direction'] === $direction;
-        }, ARRAY_FILTER_USE_BOTH);
+        return $next($request);
     }
 
     /**

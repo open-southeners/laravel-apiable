@@ -10,11 +10,6 @@ use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
 class ApplyFieldsToQuery implements HandlesRequestQueries
 {
     /**
-     * @var array
-     */
-    protected $allowed = [];
-
-    /**
      * Apply modifications to the query based on allowed query fragments.
      *
      * @param  \OpenSoutheners\LaravelApiable\Http\RequestQueryObject  $request
@@ -23,38 +18,13 @@ class ApplyFieldsToQuery implements HandlesRequestQueries
      */
     public function from(RequestQueryObject $request, Closure $next)
     {
-        $fields = $request->fields();
-
-        $this->allowed = $request->getAllowedFields();
-
-        if (empty($fields) || empty($this->allowed)) {
+        if (empty($request->fields()) || empty($request->getAllowedFields())) {
             return $next($request);
         }
 
-        $this->applyFields($request->query, $this->getUserFields($fields));
+        $this->applyFields($request->query, $request->userAllowedFields());
 
         return $next($request);
-    }
-
-    protected function getUserFields(array $fields)
-    {
-        $allowedUserFieldsArr = [];
-
-        foreach ($fields as $type => $columns) {
-            if (! isset($this->allowed[$type])) {
-                continue;
-            }
-
-            if ($this->allowed[$type] === '*') {
-                $allowedUserFieldsArr[$type] = $columns;
-
-                continue;
-            }
-
-            $allowedUserFieldsArr[$type] = array_intersect($columns, $this->allowed[$type]);
-        }
-
-        return array_filter($allowedUserFieldsArr);
     }
 
     /**

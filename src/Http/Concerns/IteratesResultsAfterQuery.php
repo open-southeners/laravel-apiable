@@ -2,9 +2,11 @@
 
 namespace OpenSoutheners\LaravelApiable\Http\Concerns;
 
+use Exception;
+use OpenSoutheners\LaravelApiable\Http\QueryParamsValidator;
 use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection;
 use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource;
-use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
+use OpenSoutheners\LaravelApiable\Support\Apiable;
 
 /**
  * @mixin \OpenSoutheners\LaravelApiable\Http\JsonApiResponse
@@ -43,16 +45,18 @@ trait IteratesResultsAfterQuery
      */
     protected function addAppendsToResult($result)
     {
-        $allowedAppends = $this->request->getAllowedAppends();
-
-        $filteredUserAppends = array_intersect_key(
+        $filteredUserAppends = (new QueryParamsValidator(
             $this->request->appends(),
-            $allowedAppends
-        );
+            $this->request->enforcesValidation(),
+            $this->request->getAllowedAppends()
+        ))->when(
+            function ($key, $modifiers, $values, $rules, &$valids) {
+                $valids = array_intersect($values, $rules);
 
-        foreach ($filteredUserAppends as $key => $values) {
-            $filteredUserAppends[$key] = array_intersect($allowedAppends[$key], $values);
-        }
+                return empty(array_diff($values, $rules));
+            },
+            fn ($key, $values) => throw new Exception(sprintf('"%s" fields for resource type "%s" cannot be appended', implode(', ', $values), $key))
+        )->validate();
 
         // This are forced by the application owner / developer...
         // So the values are bypassing allowed appends

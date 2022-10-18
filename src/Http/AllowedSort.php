@@ -77,8 +77,7 @@ class AllowedSort implements Arrayable
     public function toArray()
     {
         return [
-            'attribute' => $this->attribute,
-            'direction' => match ($this->direction) {
+            $this->attribute => match ($this->direction) {
                 default => '*',
                 AllowedSort::BOTH => '*',
                 AllowedSort::ASCENDANT => 'asc',

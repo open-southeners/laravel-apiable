@@ -5,6 +5,7 @@ namespace OpenSoutheners\LaravelApiable\Http;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
@@ -36,75 +37,18 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
      */
     public function from(RequestQueryObject $request, Closure $next)
     {
-        $filters = $request->filters();
-
-        $this->includes = $request->includes();
-
-        if (empty($filters)) {
+        if (empty($request->filters())) {
             return $next($request);
         }
 
         $this->allowed = $request->getAllowedFilters();
 
-        $this->applyFilters($request->query, $this->getUserFilters($filters));
+        // We need this to be able to add withWhereHas at this step
+        $this->includes = $request->includes();
+
+        $this->applyFilters($request->query, $request->userAllowedFilters());
 
         return $next($request);
-    }
-
-    /**
-     * Get user allowed filters.
-     *
-     * @param  array  $filters
-     * @return array
-     */
-    protected function getUserFilters(array $filters)
-    {
-        $filteredFilterValues = [];
-
-        foreach ($filters as $attribute => $filterValues) {
-            $allowedAttribute = $this->allowed[$attribute] ?? null;
-
-            if (is_null($allowedAttribute) || empty($allowedAttribute)) {
-                continue;
-            }
-
-            // FIXME: Merging filter different values under same attribute
-            $allowedAttributeValues = $allowedAttribute['values'] ?? [];
-            // FIXME: Merging filter different operators (different values under same attribute)
-            $allowedAttributeOperator = $allowedAttribute['operator'];
-
-            if (is_string($filterValues) && is_string($allowedAttributeValues) && $filterValues === $allowedAttributeValues) {
-                $filteredFilterValues[$attribute] = $filterValues;
-
-                continue;
-            }
-
-            if (! $allowedAttribute) {
-                continue;
-            }
-
-            if ($allowedAttributeOperator === 'scope') {
-                $filteredFilterValues[$attribute] = array_intersect((array) $allowedAttributeValues, (array) explode(',', $filterValues));
-
-                continue;
-            }
-
-            // All filter values are valid, no modification needed
-            if ($allowedAttributeValues === '*' || (count($allowedAttributeValues) === 1 && head($allowedAttributeValues) === '*')) {
-                $filteredFilterValues[$attribute] = $filterValues;
-
-                continue;
-            }
-
-            // Some filter values are valid, intersect those valid ones
-            if (is_array($allowedAttributeValues)) {
-                $filteredFilterValues[$attribute] = array_intersect($allowedAttributeValues, explode(',', $filterValues));
-
-                continue;
-            }
-        }
-
-        return array_filter($filteredFilterValues);
     }
 
     /**
@@ -178,15 +122,34 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
      */
     protected function applyArrayOfFiltersToQuery($query, string $attribute, array $filterValues, string $fullAttribute)
     {
+        $hasModifiers = Arr::isAssoc($filterValues);
+
         for ($i = 0; $i < count($filterValues); $i++) {
-            $filterValue = $filterValues[$i];
-            $filterOperator = $this->allowed[$fullAttribute]['operator'];
+            $filterValue = array_values($filterValues)[$i];
+            $filterOperator = array_keys($filterValues)[$i];
+            $filterBoolean = $i === 0 || $hasModifiers ? 'and' : 'or';
+
+            if (! is_string($filterOperator)) {
+                $filterOperator = $this->allowed[$fullAttribute]['operator'];
+            }
 
             if ($filterOperator === 'like') {
                 $filterValue = "%${filterValue}%";
             }
 
-            $query->where($attribute, $filterOperator, $filterValue, $i === 0 ? 'and' : 'or');
+            $query->where(
+                $attribute,
+                match ($filterOperator) {
+                    'gt' => '>',
+                    'gte' => '>=',
+                    'lt' => '<',
+                    'lte' => '<=',
+                    'like' => 'LIKE',
+                    'equal' => '=',
+                },
+                $filterValue,
+                $filterBoolean
+            );
         }
     }
 

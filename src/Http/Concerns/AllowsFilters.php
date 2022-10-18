@@ -2,7 +2,9 @@
 
 namespace OpenSoutheners\LaravelApiable\Http\Concerns;
 
+use Exception;
 use OpenSoutheners\LaravelApiable\Http\AllowedFilter;
+use OpenSoutheners\LaravelApiable\Support\Apiable;
 
 /**
  * @mixin \OpenSoutheners\LaravelApiable\Http\RequestQueryObject
@@ -34,7 +36,7 @@ trait AllowsFilters
      */
     public function allowFilter($attribute, $operator = ['*'], $values = ['*'])
     {
-        if (is_array($operator) || is_string($operator)) {
+        if ($values === ['*'] && (is_array($operator) || is_string($operator))) {
             $values = $operator;
 
             $operator = null;
@@ -65,6 +67,27 @@ trait AllowsFilters
         );
 
         return $this;
+    }
+
+    /**
+     * Get user requested filters filtered by allowed ones.
+     *
+     * @return array
+     */
+    public function userAllowedFilters()
+    {
+        $defaultFilterOperator = Apiable::config('requests.filters.default_operator');
+        $throwOnValidationError = fn ($key) => throw new Exception(sprintf('"%s" is not filterable or contains invalid values', $key));
+
+        return $this->validator($this->filters())
+            ->givingRules($this->allowedFilters)
+            ->whenPatternMatches($throwOnValidationError)
+            ->when(function ($key, $modifiers, $values, $rules) use ($defaultFilterOperator) {
+                $allowedOperators = (array) $rules['operator'] ?? $defaultFilterOperator;
+
+                return ! empty(array_intersect($modifiers, $allowedOperators));
+            }, $throwOnValidationError)
+            ->validate();
     }
 
     /**

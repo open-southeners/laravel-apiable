@@ -28,8 +28,27 @@ class ApplyFulltextSearchToQuery implements HandlesRequestQueries
             return $next($requestQueryObject);
         }
 
-        $requestQueryObject->query->whereKey($queryModel::search($userSearchQuery)->keys()->toArray());
+        $scoutBuilder = $queryModel::search($userSearchQuery);
+
+        // TODO: Search filters & sorts
+        // if ($requestQueryObject->hasSearchFilters()) {
+        //     $scoutBuilder->where('');
+        // }
+
+        $requestQueryObject->query->whereKey($scoutBuilder->keys()->toArray());
 
         return $next($requestQueryObject);
+    }
+
+    protected function applyFilters(RequestQueryObject $request)
+    {
+        $allowedFilters = $request->getAllowedSearchFilters();
+
+        $userFilters = $request->filters();
+    }
+
+    protected function applySorts()
+    {
+        // code...
     }
 }

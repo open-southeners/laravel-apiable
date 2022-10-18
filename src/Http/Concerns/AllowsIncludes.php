@@ -2,6 +2,8 @@
 
 namespace OpenSoutheners\LaravelApiable\Http\Concerns;
 
+use Exception;
+
 /**
  * @mixin \OpenSoutheners\LaravelApiable\Http\RequestQueryObject
  */
@@ -33,6 +35,17 @@ trait AllowsIncludes
         $this->allowedIncludes = array_merge($this->allowedIncludes, (array) $relationship);
 
         return $this;
+    }
+
+    public function userAllowedIncludes()
+    {
+        return $this->validator($this->includes())
+            ->givingRules(false)
+            ->when(
+                fn ($key, $modifiers, $values, $rules) => in_array($values, $this->allowedIncludes),
+                fn ($key, $values) => throw new Exception(sprintf('"%s" cannot be included', $values))
+            )
+            ->validate();
     }
 
     /**

@@ -18,6 +18,8 @@ return [
      * @see https://docs.opensoutheners.com/laravel-apiable/guide/requests.html
      */
     'requests' => [
+        'validate_params' => false,
+
         'filters' => [
             'default_operator' => AllowedFilter::SIMILAR,
             'enforce_scoped_names' => false,

@@ -2,6 +2,7 @@
 
 namespace OpenSoutheners\LaravelApiable\Http\Concerns;
 
+use Exception;
 use OpenSoutheners\LaravelApiable\Http\AllowedSort;
 
 /**
@@ -47,16 +48,29 @@ trait AllowsSorts
      */
     public function allowSort($attribute, $direction = null)
     {
-        $this->allowedSorts = array_merge_recursive(
+        $this->allowedSorts = array_merge(
             $this->allowedSorts,
-            [
-                $attribute instanceof AllowedSort
-                    ? $attribute->toArray()
-                    : (new AllowedSort($attribute, $direction))->toArray(),
-            ]
+            $attribute instanceof AllowedSort
+                ? $attribute->toArray()
+                : (new AllowedSort($attribute, $direction))->toArray(),
+
         );
 
         return $this;
+    }
+
+    public function userAllowedSorts()
+    {
+        return $this->validator($this->sorts())
+            ->givingRules($this->allowedSorts)
+            ->when(function ($key, $modifiers, $values, $rules) {
+                if ($rules === '*') {
+                    return true;
+                }
+
+                return $values === $rules;
+            }, fn ($key) => new Exception(sprintf('"%s" is not sortable', $key)))
+            ->validate();
     }
 
     /**
