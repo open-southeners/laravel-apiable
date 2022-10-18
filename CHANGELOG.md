@@ -7,11 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.0] - 2022-10-18
+
+### Added
+
+- `requests.validate_params` config option to `apiable.php` for enforcing validation. **Requires to publish or manually copy**
+- Additional filter operators like `gte` (greater or equal than), `gt` (greater than), `lte` (lower or equal than), `lt` (lower than)
+
+### Changed
+
+- Get allowed fields methods from apply query params pipeline classes moved to `OpenSoutheners\LaravelApiable\Http\QueryParamsValidator`
+- Operators from `allowed_filters` included to meta data are now URL-safe
+- `allowed_sorts` structure is now based on `['attribute' => 'allowed_direction']`
+- Allow filters methods/attribute now accepts array with multiple operators
+
 ## [2.1.1] - 2022-10-06
 
 ### Added
 
-- `Illuminate\Contracts\Support\Arrayable` interface to `JsonApiResponse` so it can be used in Inertia responses (as an example).
+- `Illuminate\Contracts\Support\Arrayable` interface to `JsonApiResponse` so it can be used in Inertia responses (as an example)
 
 ## [2.1.0] - 2022-10-05
 
