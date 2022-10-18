@@ -58,6 +58,8 @@ class QueryParamsValidator
                 return true;
             }
 
+            $values = (array) $values;
+
             $valids = array_filter($values, fn ($value) => Str::is($paramPattern, $value));
 
             return count($values) === count($valids);
