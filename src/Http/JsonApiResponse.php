@@ -88,7 +88,7 @@ class JsonApiResponse implements Responsable, Arrayable
      */
     public function using($modelOrQuery)
     {
-        $this->model = is_string($modelOrQuery) ? $modelOrQuery : $modelOrQuery->getModel();
+        $this->model = is_string($modelOrQuery) ? $modelOrQuery : get_class($modelOrQuery->getModel());
 
         /** @var \Illuminate\Database\Eloquent\Builder $query */
         $query = is_string($modelOrQuery) ? $modelOrQuery::query() : clone $modelOrQuery;
@@ -218,7 +218,7 @@ class JsonApiResponse implements Responsable, Arrayable
         if (is_array($type)) {
             $attributes = $type;
 
-            $type = $this->getModelClass($this->model);
+            $type = $this->model;
         }
 
         $resourceType = class_exists($type) ? Apiable::getResourceType($type) : $type;
