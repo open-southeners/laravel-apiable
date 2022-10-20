@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.2] - 2022-10-20
+
+### Fixed
+
+- `JsonApiResponse::toArray` returning wrong formatted JSON:API array
+
 ## [2.2.1] - 2022-10-19
 
 ### Fixed
