@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.3] - 2022-10-20
+
+### Fixed
+
+- Fix `resolveFromRoute` when using invokable controller `JsonApiResponse`
+
 ## [2.2.2] - 2022-10-20
 
 ### Fixed
