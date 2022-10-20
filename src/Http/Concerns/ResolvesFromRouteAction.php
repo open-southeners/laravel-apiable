@@ -32,11 +32,15 @@ trait ResolvesFromRouteAction
             return;
         }
 
-        [$controller, $method] = explode('@', $routeAction);
+        $routeAction = explode('@', $routeAction);
 
-        $this->resolveAttributesFrom(new ReflectionClass($controller));
+        if ($controller = array_shift($routeAction)) {
+            $this->resolveAttributesFrom(new ReflectionClass($controller));
 
-        $this->resolveAttributesFrom(new ReflectionMethod($controller, $method));
+            if ($method = array_shift($routeAction)) {
+                $this->resolveAttributesFrom(new ReflectionMethod($controller, $method));
+            }
+        }
     }
 
     /**
