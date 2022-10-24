@@ -45,6 +45,8 @@ return [
         ],
 
         'viewable' => true,
+
+        'include_ids_on_attributes' => false,
     ],
 
 ];

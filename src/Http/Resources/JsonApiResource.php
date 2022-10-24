@@ -88,7 +88,17 @@ class JsonApiResource extends JsonResource
         return array_filter(
             array_merge($this->resource->attributesToArray(), $this->withAttributes()),
             function ($value, $key) {
-                return last(explode('_id', $key)) !== '' && $key !== $this->resource->getKeyName() && $value !== null;
+                $result = $key !== $this->resource->getKeyName() && $value !== null;
+
+                if (! $result) {
+                    return false;
+                }
+
+                if (! (Apiable::config('responses.include_ids_on_attributes') ?? false)) {
+                    return last(explode('_id', $key)) !== '';
+                }
+
+                return true;
             },
             ARRAY_FILTER_USE_BOTH
         );
