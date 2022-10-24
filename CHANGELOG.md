@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.0] - 2022-10-24
+
+### Added
+
+- Conditionally filter out attributes that ends with "_id" (adding config option `responses.include_ids_on_attributes`)
+- `JsonApiResponse::includingIdAttributes()` method for setting `responses.include_ids_on_attributes` option value within an individual response
+
 ## [2.2.3] - 2022-10-20
 
 ### Fixed
