@@ -221,6 +221,19 @@ class JsonApiResponse implements Responsable, Arrayable
     }
 
     /**
+     * Set response to include IDs on resource attributes.
+     *
+     * @param  bool  $value
+     * @return $this
+     */
+    public function includingIdAttributes($value = true)
+    {
+        config(['apiable.responses.include_ids_on_attributes' => $value]);
+
+        return $this;
+    }
+
+    /**
      * Call method of RequestQueryObject if not exists on this.
      *
      * @param  string  $name
