@@ -97,7 +97,7 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
 
         $attributePartsArr = explode('.', $attribute);
 
-        $relationshipAttribute = array_pop($attributePartsArr);
+        $relationshipAttribute = $query->getModel()->getTable().'.'.array_pop($attributePartsArr);
 
         $relationship = implode($attributePartsArr);
 
