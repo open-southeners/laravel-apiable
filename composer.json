@@ -8,12 +8,15 @@
         "apiable",
         "json-api",
         "laravel",
-        "laravel-package"
+        "laravel-package",
+        "request-query",
+        "request-search",
+        "request-params-filtering"
     ],
     "authors": [
         {
             "name": "Ruben Robles",
-            "email": "d8vjork@outlook.com"
+            "email": "me@d8vjork.com"
         }
     ],
     "require": {
