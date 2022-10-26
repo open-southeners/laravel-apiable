@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.1] - 2022-10-26
+
+### Fixed
+
+- Ambiguous columns when filtering on relationships attributes
+
 ## [2.3.0] - 2022-10-24
 
 ### Added
