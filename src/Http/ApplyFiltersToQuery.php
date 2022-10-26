@@ -97,7 +97,7 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
 
         $attributePartsArr = explode('.', $attribute);
 
-        $relationshipAttribute = $query->getModel()->getTable().'.'.array_pop($attributePartsArr);
+        $relationshipAttribute = array_pop($attributePartsArr);
 
         $relationship = implode($attributePartsArr);
 
@@ -108,7 +108,7 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
         }
 
         return $query->whereHas($relationship, function ($query) use ($callback, $relationshipAttribute) {
-            return $callback($query, $relationshipAttribute);
+            return $callback($query, $query->getModel()->getTable().'.'.$relationshipAttribute);
         });
     }
 
