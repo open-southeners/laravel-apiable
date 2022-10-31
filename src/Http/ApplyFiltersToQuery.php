@@ -61,21 +61,21 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
     protected function applyFilters(Builder $query, array $filters)
     {
         $enforceScopeNames = Apiable::config('requests.filters.enforce_scoped_names');
-
-        foreach ($filters as $fullAttribute => $values) {
-            $this->wrapIfRelatedQuery(function ($query, $attribute) use ($fullAttribute, $values, $enforceScopeNames) {
+        
+        foreach ($filters as $filterAttribute => $filterValues) {
+            $this->wrapIfRelatedQuery(function ($query, $attribute, $relationship) use ($filterValues, $enforceScopeNames) {
                 $queryModel = $query->getModel();
 
                 if ($this->isAttribute($queryModel, $attribute)) {
-                    return $this->applyArrayOfFiltersToQuery($query, $attribute, (array) $values, $fullAttribute);
+                    return $this->applyArrayOfFiltersToQuery($query, $attribute, (array) $filterValues, $relationship);
                 }
 
                 $scopeName = Str::camel($enforceScopeNames ? str_replace('_scoped', '', $attribute) : $attribute);
 
                 if ($this->isScope($queryModel, $scopeName)) {
-                    return $this->forwardCallTo($query, $scopeName, (array) $values);
+                    return $this->forwardCallTo($query, $scopeName, (array) $filterValues);
                 }
-            }, $query, $fullAttribute);
+            }, $query, $filterAttribute);
         }
 
         return $query;
@@ -84,32 +84,28 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
     /**
      * Wrap query if relationship found in filter's attribute.
      *
-     * @param  callable(\Illuminate\Database\Eloquent\Builder, string): mixed  $callback
+     * @param  callable(\Illuminate\Database\Eloquent\Builder, string, string): mixed  $callback
      * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @param  string  $attribute
+     * @param  string  $filterAttribute
      * @return mixed
      */
-    protected function wrapIfRelatedQuery(callable $callback, Builder $query, string $attribute)
+    protected function wrapIfRelatedQuery(callable $callback, Builder $query, string $filterAttribute)
     {
-        if (! str_contains($attribute, '.')) {
-            return $callback($query, $attribute);
+        if (! str_contains($filterAttribute, '.')) {
+            return $callback($query, null, $filterAttribute);
         }
 
-        $attributePartsArr = explode('.', $attribute);
+        $attributePartsArr = explode('.', $filterAttribute);
 
-        $relationshipAttribute = array_pop($attributePartsArr);
+        $attribute = array_pop($attributePartsArr);
 
         $relationship = implode($attributePartsArr);
 
         if (in_array($relationship, $this->includes) && version_compare(App::version(), '9.16.0', '>=')) {
-            return $query->withWhereHas($relationship, function ($query) use ($callback, $relationshipAttribute) {
-                return $callback($query, $relationshipAttribute);
-            });
+            return $query->withWhereHas($relationship, fn ($query) => $callback($query, $attribute, $relationship));
         }
 
-        return $query->whereHas($relationship, function ($query) use ($callback, $relationshipAttribute) {
-            return $callback($query, $query->getModel()->getTable().'.'.$relationshipAttribute);
-        });
+        return $query->whereHas($relationship, fn ($query) => $callback($query, $attribute, $relationship));
     }
 
     /**
@@ -120,7 +116,7 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
      * @param  array  $filterValues
      * @return void
      */
-    protected function applyArrayOfFiltersToQuery($query, string $attribute, array $filterValues, string $fullAttribute)
+    protected function applyArrayOfFiltersToQuery($query, string $attribute, array $filterValues, $relationship = null)
     {
         $hasModifiers = Arr::isAssoc($filterValues);
 
@@ -128,6 +124,8 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
             $filterValue = array_values($filterValues)[$i];
             $filterOperator = array_keys($filterValues)[$i];
             $filterBoolean = $i === 0 || $hasModifiers ? 'and' : 'or';
+
+            $fullAttribute = $relationship ? "${relationship}.${attribute}" : $attribute;
 
             if (! is_string($filterOperator)) {
                 $filterOperator = $this->allowed[$fullAttribute]['operator'];
@@ -138,7 +136,7 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
             }
 
             $query->where(
-                $attribute,
+                $query->getModel()->getTable().".$attribute",
                 match ($filterOperator) {
                     'gt' => '>',
                     'gte' => '>=',
