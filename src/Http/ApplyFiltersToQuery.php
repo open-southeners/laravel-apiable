@@ -92,7 +92,7 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
     protected function wrapIfRelatedQuery(callable $callback, Builder $query, string $filterAttribute)
     {
         if (! str_contains($filterAttribute, '.')) {
-            return $callback($query, null, $filterAttribute);
+            return $callback($query, $filterAttribute, null);
         }
 
         $attributePartsArr = explode('.', $filterAttribute);
