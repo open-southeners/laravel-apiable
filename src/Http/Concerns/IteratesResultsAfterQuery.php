@@ -34,6 +34,10 @@ trait IteratesResultsAfterQuery
             ])]);
         }
 
+        if ($result instanceof JsonApiCollection) {
+            $result->withQuery($this->getRequest()->query->all());
+        }
+
         return $result;
     }
 
