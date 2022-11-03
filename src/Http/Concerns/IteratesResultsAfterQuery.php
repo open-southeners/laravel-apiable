@@ -35,7 +35,13 @@ trait IteratesResultsAfterQuery
         }
 
         if ($result instanceof JsonApiCollection) {
-            $result->withQuery($this->getRequest()->query->all());
+            $result->withQuery(
+                array_filter(
+                    $this->getRequest()->query->all(),
+                    fn ($queryParam) => $queryParam !== 'page',
+                    ARRAY_FILTER_USE_KEY
+                )
+            );
         }
 
         return $result;
