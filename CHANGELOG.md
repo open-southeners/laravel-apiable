@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0] - 2022-11-04
+
+### Fixed
+
+- Remove page parameter from pagination links when using `withQuery`
+
+### Changed
+
+- Filter relationship without any value applies relationship existence filtering, now doesn't
+- Filtering now handles AND/OR conditions properly
+- Filtering using OR condition (`filter[status]=Active,Inactive`) will be fully invalidated if one member doesn't pass the validation
+- `RequestQueryObject::filters` method now implements own logic instead of reusing Symfony's request one to be able to get AND filters with same keys (attributes) on a different array item
+
+### Removed
+
+- `withWhereHas` under filtering, now all related data is loaded (until reimplemented with AND/OR conditionals...)
+
 ## [2.3.3] - 2022-11-01
 
 ### Fixed
