@@ -59,7 +59,7 @@ class JsonApiResponseTest extends TestCase
         $response->assertJsonCount(4, 'data');
     }
 
-    public function testFilteringOrValuesByAllowedAttributeValue()
+    public function testFilteringOrValuesByAllowedAttributeValueInvalidatesWholeFilter()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -70,7 +70,7 @@ class JsonApiResponseTest extends TestCase
 
         $response = $this->get('/?filter[status]=Active,Inactive');
 
-        $response->assertJsonCount(2, 'data');
+        $response->assertJsonCount(4, 'data');
     }
 
     public function testFilteringByAllowedScope()
@@ -167,7 +167,6 @@ class JsonApiResponseTest extends TestCase
         $response->assertJsonCount(1, 'data');
     }
 
-    // TODO: Need to do this as unit test to know if query is optimal, guess it is...
     public function testFilteringByTwoDifferentAttributesOfSameRelationship()
     {
         Route::get('/', function () {

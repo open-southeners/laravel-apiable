@@ -5,8 +5,6 @@ namespace OpenSoutheners\LaravelApiable\Http;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\ForwardsCalls;
@@ -61,39 +59,40 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
     protected function applyFilters(Builder $query, array $filters)
     {
         $enforceScopeNames = Apiable::config('requests.filters.enforce_scoped_names');
-        
+
         foreach ($filters as $filterAttribute => $filterValues) {
-            $this->wrapIfRelatedQuery(function ($query, $attribute, $relationship) use ($filterValues, $enforceScopeNames) {
-                $queryModel = $query->getModel();
+            if (! $filterValues || empty($filterValues)) {
+                continue;
+            }
 
-                if ($this->isAttribute($queryModel, $attribute)) {
-                    return $this->applyArrayOfFiltersToQuery($query, $attribute, (array) $filterValues, $relationship);
-                }
-
+            $this->wrapIfRelatedQuery(function ($query, $relationship, $attribute, $operator, $value, $condition) use ($enforceScopeNames) {
                 $scopeName = Str::camel($enforceScopeNames ? str_replace('_scoped', '', $attribute) : $attribute);
+                $isAttribute = $this->isAttribute($query->getModel(), $attribute);
+                $isScope = $this->isScope($query->getModel(), $scopeName);
 
-                if ($this->isScope($queryModel, $scopeName)) {
-                    return $this->forwardCallTo($query, $scopeName, (array) $filterValues);
-                }
-            }, $query, $filterAttribute);
+                match (true) {
+                    $isAttribute => $this->applyFilterAsWhere($query, $relationship, $attribute, $operator, $value, $condition),
+                    $isScope => $this->applyFilterAsScope($query, $relationship, $scopeName, $operator, $value, $condition),
+                    default => null,
+                };
+            }, $query, $filterAttribute, $filterValues);
         }
 
         return $query;
     }
 
     /**
-     * Wrap query if relationship found in filter's attribute.
+     * Wrap query if relationship found applying its operator and conditional to the filtered attribute.
      *
-     * @param  callable(\Illuminate\Database\Eloquent\Builder, string, string): mixed  $callback
+     * @param  callable(\Illuminate\Database\Eloquent\Builder, string|null, string, string, string, string): mixed  $callback
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @param  string  $filterAttribute
-     * @return mixed
+     * @param  array<string>|string  $filterValues
+     * @return void
      */
-    protected function wrapIfRelatedQuery(callable $callback, Builder $query, string $filterAttribute)
+    protected function wrapIfRelatedQuery(callable $callback, Builder $query, string $filterAttribute, $filterValues)
     {
-        if (! str_contains($filterAttribute, '.')) {
-            return $callback($query, $filterAttribute, null);
-        }
+        $systemPreferredOperator = $this->allowed[$filterAttribute]['operator'];
 
         $attributePartsArr = explode('.', $filterAttribute);
 
@@ -101,54 +100,85 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
 
         $relationship = implode($attributePartsArr);
 
-        if (in_array($relationship, $this->includes) && version_compare(App::version(), '9.16.0', '>=')) {
-            return $query->withWhereHas($relationship, fn ($query) => $callback($query, $attribute, $relationship));
-        }
+        for ($i = 0; $i < count($filterValues); $i++) {
+            $values = array_filter(explode(',', array_values($filterValues)[$i]));
+            $operator = array_keys($filterValues)[$i];
 
-        return $query->whereHas($relationship, fn ($query) => $callback($query, $attribute, $relationship));
+            if (! is_string($operator)) {
+                $operator = $systemPreferredOperator;
+            }
+
+            $operator = match ($operator) {
+                'gt' => '>',
+                'gte' => '>=',
+                'lt' => '<',
+                'lte' => '<=',
+                'like' => 'LIKE',
+                'equal' => '=',
+                default => Apiable::config('requests.filters.default_operator')
+            };
+
+            for ($n = 0; $n < count($values); $n++) {
+                $condition = $n === 0 ? 'and' : 'or';
+
+                if (! $relationship) {
+                    $callback($query, $relationship, $attribute, $operator, $values[$n], $condition);
+
+                    continue;
+                }
+
+                $query->has(
+                    relation: $relationship,
+                    callback: fn ($query) => $callback($query, $relationship, $attribute, $operator, $values[$n], $condition),
+                    boolean: $condition
+                );
+            }
+        }
     }
 
     /**
-     * Applies where/orWhere to all filtered values.
+     * Apply where or orWhere (non relationships only) to all filtered values.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Relations\Relation  $query
      * @param  string  $attribute
      * @param  array  $filterValues
      * @return void
      */
-    protected function applyArrayOfFiltersToQuery($query, string $attribute, array $filterValues, $relationship = null)
+    protected function applyFilterAsWhere($query, $relationship, string $attribute, string $operator, string $value, string $condition)
     {
-        $hasModifiers = Arr::isAssoc($filterValues);
+        $query->where(
+            $query->getModel()->getTable().".${attribute}",
+            $operator,
+            $operator === 'LIKE' ? "%${value}%" : $value,
+            $relationship ? 'and' : $condition
+        );
+    }
 
-        for ($i = 0; $i < count($filterValues); $i++) {
-            $filterValue = array_values($filterValues)[$i];
-            $filterOperator = array_keys($filterValues)[$i];
-            $filterBoolean = $i === 0 || $hasModifiers ? 'and' : 'or';
+    /**
+     * Apply scope wrapped into a where (non relationships only) forwarding the call directly to the builder.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Relations\Relation  $query
+     * @param  string|null  $relationship
+     * @param  string  $scope
+     * @param  string  $operator
+     * @param  string  $value
+     * @param  string  $condition
+     * @return void
+     */
+    protected function applyFilterAsScope($query, $relationship, string $scope, string $operator, string $value, string $condition)
+    {
+        $wrappedQueryFn = fn ($query) => $this->forwardCallTo($query, $scope, (array) $value);
 
-            $fullAttribute = $relationship ? "${relationship}.${attribute}" : $attribute;
+        if ($relationship) {
+            $wrappedQueryFn($query);
 
-            if (! is_string($filterOperator)) {
-                $filterOperator = $this->allowed[$fullAttribute]['operator'];
-            }
-
-            if ($filterOperator === 'like') {
-                $filterValue = "%${filterValue}%";
-            }
-
-            $query->where(
-                $query->getModel()->getTable().".$attribute",
-                match ($filterOperator) {
-                    'gt' => '>',
-                    'gte' => '>=',
-                    'lt' => '<',
-                    'lte' => '<=',
-                    'like' => 'LIKE',
-                    'equal' => '=',
-                },
-                $filterValue,
-                $filterBoolean
-            );
+            return;
         }
+
+        $query->where(
+            column: $wrappedQueryFn,
+            boolean: $condition
+        );
     }
 
     /**
