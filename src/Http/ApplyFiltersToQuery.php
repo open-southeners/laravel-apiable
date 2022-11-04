@@ -22,11 +22,6 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
     protected $allowed = [];
 
     /**
-     * @var array
-     */
-    protected $includes = [];
-
-    /**
      * Apply modifications to the query based on allowed query fragments.
      *
      * @param  \OpenSoutheners\LaravelApiable\Http\RequestQueryObject  $request
@@ -40,9 +35,6 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
         }
 
         $this->allowed = $request->getAllowedFilters();
-
-        // We need this to be able to add withWhereHas at this step
-        $this->includes = $request->includes();
 
         $this->applyFilters($request->query, $request->userAllowedFilters());
 
