@@ -29,6 +29,11 @@ trait AllowsFilters
 
         foreach ($queryStringArr as $param) {
             $filterQueryParam = HeaderUtils::parseQuery($param);
+
+            if (! is_array(head($filterQueryParam))) {
+                continue;
+            }
+
             $filterQueryParamAttribute = head(array_keys($filterQueryParam));
 
             if ($filterQueryParamAttribute !== 'filter') {
