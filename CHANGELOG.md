@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.1] - 2022-11-23
+
+### Fixed
+
+- Empty filter without attribute: `?filter=test` was throwing an error
+
 ## [3.0.0] - 2022-11-04
 
 ### Fixed
