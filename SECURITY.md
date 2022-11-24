@@ -7,9 +7,11 @@ We're also following the [Laravel's default support policy](https://laravel.com/
 | Version | Supported          |
 | ------- | ------------------ |
 | 1.x     | :white_check_mark: |
+| 2.x     | :white_check_mark: |
+| 3.x     | :white_check_mark: |
 <!-- | 2.x     | :white_check_mark: | -->
 <!-- | < 1.0   | :x:                | -->
 
 ## Reporting a Vulnerability
 
-Send us an email at developers@open-southeners.com
+Send us an email at security@opensoutheners.com
