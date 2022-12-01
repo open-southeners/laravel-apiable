@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.1.0] - 2022-12-01
+
+### Added
+
+- Search (Laravel Scout) filters with allowed attributes and/or value(s): `?q=hello&q[filter][attribute]=foo` or `?search=hello&search[filter][attribute]=foo`
+
 ## [3.0.1] - 2022-11-23
 
 ### Fixed
