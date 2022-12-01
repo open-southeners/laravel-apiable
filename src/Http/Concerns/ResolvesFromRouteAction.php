@@ -8,6 +8,7 @@ use OpenSoutheners\LaravelApiable\Attributes\FieldsQueryParam;
 use OpenSoutheners\LaravelApiable\Attributes\FilterQueryParam;
 use OpenSoutheners\LaravelApiable\Attributes\IncludeQueryParam;
 use OpenSoutheners\LaravelApiable\Attributes\QueryParam;
+use OpenSoutheners\LaravelApiable\Attributes\SearchFilterQueryParam;
 use OpenSoutheners\LaravelApiable\Attributes\SearchQueryParam;
 use OpenSoutheners\LaravelApiable\Attributes\SortQueryParam;
 use ReflectionAttribute;
@@ -60,6 +61,7 @@ trait ResolvesFromRouteAction
 
             match (true) {
                 $attributeInstance instanceof SearchQueryParam => $this->allowSearch($attributeInstance->allowSearch),
+                $attributeInstance instanceof SearchFilterQueryParam => $this->allowSearchFilter($attributeInstance->attribute, $attributeInstance->values),
                 $attributeInstance instanceof FilterQueryParam => $this->allowFilter($attributeInstance->attribute, $attributeInstance->type, $attributeInstance->values),
                 $attributeInstance instanceof SortQueryParam => $this->allowSort($attributeInstance->attribute, $attributeInstance->direction),
                 $attributeInstance instanceof IncludeQueryParam => $this->allowInclude($attributeInstance->relationships),

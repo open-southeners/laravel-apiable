@@ -3,6 +3,7 @@
 namespace OpenSoutheners\LaravelApiable\Http;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 class RequestQueryObject
 {
@@ -23,6 +24,11 @@ class RequestQueryObject
      * @var \Illuminate\Database\Eloquent\Builder
      */
     public $query;
+
+    /**
+     * @var \Illuminate\Support\Collection<array>
+     */
+    protected $queryParameters;
 
     /**
      * Construct the request query object.
@@ -46,6 +52,26 @@ class RequestQueryObject
         $this->query = $query;
 
         return $this;
+    }
+
+    /**
+     * Get request query parameters as array.
+     *
+     * @return \Illuminate\Support\Collection<array>
+     */
+    public function queryParameters()
+    {
+        if (! $this->queryParameters) {
+            $this->queryParameters = Collection::make(
+                array_map(
+                    [HeaderUtils::class, 'parseQuery'],
+                    explode('&', $this->request->server('QUERY_STRING'))
+                )
+            )->groupBy(fn ($item, $key) => head(array_keys($item)), true)
+            ->map(fn (Collection $collection) => $collection->flatten(1)->all());
+        }
+
+        return $this->queryParameters;
     }
 
     /**
@@ -109,6 +135,7 @@ class RequestQueryObject
                 AllowedInclude::class => $this->allowInclude($allowed),
                 AllowedFields::class => $this->allowFields($allowed),
                 AllowedAppends::class => $this->allowAppends($allowed),
+                AllowedSearchFilter::class => $this->allowSearchFilter($allowed),
             };
         }
 
