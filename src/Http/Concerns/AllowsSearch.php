@@ -103,6 +103,12 @@ trait AllowsSearch
      */
     public function userAllowedSearchFilters()
     {
+        $searchFilters = $this->searchFilters();
+
+        if (empty($searchFilters)) {
+            return [];
+        }
+
         return $this->validator($this->searchFilters())
             ->givingRules($this->allowedSearchFilters)
             ->whenPatternMatches(fn ($key) => throw new Exception(sprintf('"%s" is not filterable on search or contains invalid values', $key)))

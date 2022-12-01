@@ -4,6 +4,7 @@ namespace OpenSoutheners\LaravelApiable\Http;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 
 class RequestQueryObject
 {
