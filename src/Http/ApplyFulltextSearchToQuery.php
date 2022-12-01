@@ -11,44 +11,53 @@ class ApplyFulltextSearchToQuery implements HandlesRequestQueries
     /**
      * Apply modifications to the query based on allowed query fragments.
      *
-     * @param  \OpenSoutheners\LaravelApiable\Http\RequestQueryObject  $requestQueryObject
+     * @param  \OpenSoutheners\LaravelApiable\Http\RequestQueryObject  $request
      * @param  \Closure  $next
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function from(RequestQueryObject $requestQueryObject, Closure $next)
+    public function from(RequestQueryObject $request, Closure $next)
     {
-        $queryModel = $requestQueryObject->query->getModel();
-        $userSearchQuery = $requestQueryObject->searchQuery();
+        $queryModel = $request->query->getModel();
+        $userSearchQuery = $request->searchQuery();
 
         if (
-            ! $requestQueryObject->isSearchAllowed()
+            ! $request->isSearchAllowed()
             || ! class_use($queryModel, 'Laravel\Scout\Searchable')
             || empty($userSearchQuery)
         ) {
-            return $next($requestQueryObject);
+            return $next($request);
         }
 
         $scoutBuilder = $queryModel::search($userSearchQuery);
 
-        // TODO: Search filters & sorts
-        // if ($requestQueryObject->hasSearchFilters()) {
-        //     $scoutBuilder->where('');
-        // }
+        $this->applyFilters($scoutBuilder, $request->userAllowedSearchFilters());
 
-        $requestQueryObject->query->whereKey($scoutBuilder->keys()->toArray());
+        $request->query->whereKey($scoutBuilder->keys()->toArray());
 
-        return $next($requestQueryObject);
+        return $next($request);
     }
 
-    protected function applyFilters(RequestQueryObject $request)
+    /**
+     * Apply filters to search query (Scout).
+     *
+     * @param  \Laravel\Scout\Builder  $query
+     * @param  array<string, array>  $searchFilters
+     * @return void
+     */
+    protected function applyFilters($query, array $searchFilters)
     {
-        $allowedFilters = $request->getAllowedSearchFilters();
+        if (empty($searchFilters)) {
+            return;
+        }
 
-        $userFilters = $request->filters();
-    }
+        foreach ($searchFilters as $attribute => $values) {
+            if (count($values) > 1) {
+                $query->whereIn($attribute, $values);
 
-    protected function applySorts()
-    {
-        // code...
+                continue;
+            }
+
+            $query->where($attribute, head($values));
+        }
     }
 }
