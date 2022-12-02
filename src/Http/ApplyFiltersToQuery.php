@@ -197,7 +197,7 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
         $isScope = $model->hasNamedScope($value);
         $modelQueryBuilder = $model::query();
 
-        if ($isScope && class_namespace($modelQueryBuilder) !== 'Illuminate\Database\Eloquent') {
+        if (! $isScope && class_namespace($modelQueryBuilder) !== 'Illuminate\Database\Eloquent') {
             return in_array(
                 $value,
                 array_diff(
