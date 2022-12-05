@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.1.2] - 2022-12-05
+
+### Fixed
+
+- Fixed `page[size]` in request doesn't get the number of results when lower than model's `$perPage` (only on higher)
+
 ## [3.1.1] - 2022-12-02
 
 ### Fixed
