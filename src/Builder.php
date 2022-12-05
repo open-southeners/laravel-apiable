@@ -26,7 +26,7 @@ class Builder
             $pageSize = $pageSize ?: $this->model->getPerPage();
             $requestedPageSize = (int) request('page.size', Apiable::config('responses.pagination.default_size'));
 
-            if (! $pageSize || $pageSize < $requestedPageSize) {
+            if ($requestedPageSize && (! $pageSize || $requestedPageSize !== $pageSize)) {
                 $pageSize = $requestedPageSize;
             }
 
