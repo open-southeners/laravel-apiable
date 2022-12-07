@@ -110,21 +110,23 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
                 default => Apiable::config('requests.filters.default_operator')
             };
 
-            for ($n = 0; $n < count($values); $n++) {
-                $condition = $n === 0 ? 'and' : 'or';
+            $query->where(function (Builder $query) use ($callback, $relationship, $attribute, $operator, $values) {
+                for ($n = 0; $n < count($values); $n++) {
+                    $condition = $n === 0 ? 'and' : 'or';
 
-                if (! $relationship) {
-                    $callback($query, $relationship, $attribute, $operator, $values[$n], $condition);
+                    if (! $relationship) {
+                        $callback($query, $relationship, $attribute, $operator, $values[$n], $condition);
 
-                    continue;
+                        continue;
+                    }
+
+                    $query->has(
+                        relation: $relationship,
+                        callback: fn ($query) => $callback($query, $relationship, $attribute, $operator, $values[$n], $condition),
+                        boolean: $condition
+                    );
                 }
-
-                $query->has(
-                    relation: $relationship,
-                    callback: fn ($query) => $callback($query, $relationship, $attribute, $operator, $values[$n], $condition),
-                    boolean: $condition
-                );
-            }
+            });
         }
     }
 
