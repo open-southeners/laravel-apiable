@@ -28,12 +28,10 @@ trait CollectsWithIncludes
             }
         }
 
-        $includesArr = $this->checkUniqueness(
-            $collectionIncludes
-        )->values()->all();
+        $included = $this->checkUniqueness($collectionIncludes)->values()->all();
 
-        if (! empty($includesArr)) {
-            $this->with = array_merge($this->with, ['included' => $includesArr]);
+        if (! empty($included)) {
+            $this->with = array_merge_recursive($this->with, compact('included'));
         }
     }
 }
