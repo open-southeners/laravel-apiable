@@ -168,7 +168,7 @@ class Apiable
      * Get model class from
      *
      * @param  string  $type
-     * @return Model|false
+     * @return \Illuminate\Database\Eloquent\Model|false
      */
     public static function getModelFromResourceType(string $type)
     {
