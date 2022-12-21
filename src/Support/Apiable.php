@@ -183,6 +183,6 @@ class Apiable
      */
     public static function scopedFilterSuffix(string $value)
     {
-        return "${value}_scoped";
+        return "{$value}_scoped";
     }
 }

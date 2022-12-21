@@ -66,7 +66,7 @@ class RequestQueryObject
             $this->queryParameters = Collection::make(
                 array_map(
                     [HeaderUtils::class, 'parseQuery'],
-                    explode('&', $this->request->server('QUERY_STRING'))
+                    explode('&', $this->request->server('QUERY_STRING', ''))
                 )
             )->groupBy(fn ($item, $key) => head(array_keys($item)), true)
             ->map(fn (Collection $collection) => $collection->flatten(1)->all());
