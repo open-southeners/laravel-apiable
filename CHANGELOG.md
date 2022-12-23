@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.2.2] - 2022-12-23
+
+### Fixed
+
+- Filters values like: `filter[attribute]=0` now doesn't get removed
+
 ## [3.2.1] - 2022-12-21
 
 ### Fixed
