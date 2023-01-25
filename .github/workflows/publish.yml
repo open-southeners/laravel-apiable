@@ -21,5 +21,9 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           body: ${{ steps.get-release-info.outputs.release-notes }}
+          # TODO: Check PR https://github.com/softprops/action-gh-release/pull/304
+          # make_latest: ${{ $GITHUB_REF_NAME == 'main' && true || false }}
+          # TODO: Workaround for the above (semi-automatic workflow when non main releases):
+          draft: ${{ $GITHUB_REF_NAME != 'main' && true || false }}
           # prerelease: true
           # files: '*.vsix'
