@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.4] - 2023-01-25
+
+### Fixed
+
+- Fix issue reporting wrong status code when setup handler renderable receives a query exception: `apiable()->jsonApiRenderable()`
+
 ## [2.3.3] - 2022-11-01
 
 ### Fixed
