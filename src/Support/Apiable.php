@@ -5,6 +5,7 @@ namespace OpenSoutheners\LaravelApiable\Support;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Resources\MissingValue;
 use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
@@ -113,7 +114,7 @@ class Apiable
         }
 
         if ($statusCode === Response::HTTP_INTERNAL_SERVER_ERROR) {
-            $response['errors'][0]['code'] = $e->getCode() ?: $statusCode;
+            $response['errors'][0]['code'] = $e instanceof QueryException ? $statusCode : ($e->getCode() ?: $statusCode);
             $response['errors'][0]['title'] = $e->getMessage();
             $response['errors'][0]['trace'] = $e->getTrace();
         }
