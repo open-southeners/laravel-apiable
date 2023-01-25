@@ -1,5 +1,9 @@
 # Laravel Apiable
 
+> **Warning**
+> 
+> Version 1.x of this package is deprecated, better upgrade to 2.x using `composer require open-southeners/laravel-apiable "^2.x"`
+
 Integrate JSON:API resources on your Laravel API project.
 
 ## Status
@@ -9,7 +13,7 @@ Integrate JSON:API resources on your Laravel API project.
 ## Getting started
 
 ```
-composer require open-southeners/laravel-apiable
+composer require open-southeners/laravel-apiable "^1.x"
 ```
 
 ## Documentation
