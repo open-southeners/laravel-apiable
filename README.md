@@ -9,7 +9,7 @@ Integrate JSON:API resources on your Laravel API project.
 ## Getting started
 
 ```
-composer require open-southeners/laravel-apiable
+composer require open-southeners/laravel-apiable "^2.0"
 ```
 
 ## Documentation
