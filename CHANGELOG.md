@@ -29,6 +29,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `enforce_scoped_names` from `config/apiable.php` file as now they can be enforced or not (depends on the frontend)
 
+## [3.2.5] - 2023-01-26
+
+### Added
+
+- `forceAppendWhen` method to `JsonApiResponse`
+
 ## [3.2.4] - 2023-01-26
 
 ### Fixed
