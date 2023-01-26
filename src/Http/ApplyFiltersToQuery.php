@@ -144,9 +144,9 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
     protected function applyFilterAsWhere($query, $relationship, string $attribute, string $operator, string $value, string $condition)
     {
         $query->where(
-            $query->getModel()->getTable().".${attribute}",
+            $query->getModel()->getTable().".{$attribute}",
             $operator,
-            $operator === 'LIKE' ? "%${value}%" : $value,
+            $operator === 'LIKE' ? "%{$value}%" : $value,
             $relationship ? 'and' : $condition
         );
     }
