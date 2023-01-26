@@ -202,10 +202,41 @@ class JsonApiResponse implements Responsable, Arrayable
      *
      * @param  string|array|class-string<\Illuminate\Database\Eloquent\Model>  $type
      * @param  array  $attributes
-     * @return JsonApiResponse
+     * @return \OpenSoutheners\LaravelApiable\Http\JsonApiResponse
      */
     public function forceAppend($type, array $attributes = [])
     {
+        if (is_array($type)) {
+            $attributes = $type;
+
+            $type = $this->model;
+        }
+
+        $resourceType = class_exists($type) ? Apiable::getResourceType($type) : $type;
+
+        $this->forceAppends = array_merge_recursive($this->forceAppends, [$resourceType => $attributes]);
+
+        return $this;
+    }
+
+    /**
+     * Force append attributes to be included without being allowed only when condition matches.
+     *
+     * @param  \Closure|bool  $condition
+     * @param  string|array|class-string<\Illuminate\Database\Eloquent\Model>  $type
+     * @param  array  $attributes
+     * @return \OpenSoutheners\LaravelApiable\Http\JsonApiResponse
+     */
+    public function forceAppendWhen($condition, $type, array $attributes = [])
+    {
+        if (is_callable($condition)) {
+            $condition = $condition();
+        }
+
+        if (! $condition) {
+            return $this;
+        }
+
         if (is_array($type)) {
             $attributes = $type;
 
