@@ -237,17 +237,7 @@ class JsonApiResponse implements Responsable, Arrayable
             return $this;
         }
 
-        if (is_array($type)) {
-            $attributes = $type;
-
-            $type = $this->model;
-        }
-
-        $resourceType = class_exists($type) ? Apiable::getResourceType($type) : $type;
-
-        $this->forceAppends = array_merge_recursive($this->forceAppends, [$resourceType => $attributes]);
-
-        return $this;
+        return $this->forceAppend($type, $attributes);
     }
 
     /**
