@@ -24,7 +24,7 @@ trait AllowsFilters
      */
     public function filters()
     {
-        $queryStringArr = explode('&', $this->request->server('QUERY_STRING'));
+        $queryStringArr = explode('&', $this->request->server('QUERY_STRING', ''));
         $filters = [];
 
         foreach ($queryStringArr as $param) {
