@@ -24,6 +24,7 @@ jobs:
           # TODO: Check PR https://github.com/softprops/action-gh-release/pull/304
           # make_latest: ${{ $GITHUB_REF_NAME == 'main' && true || false }}
           # TODO: Workaround for the above (semi-automatic workflow when non main releases):
-          draft: ${{ $GITHUB_REF_NAME != 'main' && true || false }}
+          # FIXME: See https://github.com/open-southeners/laravel-apiable/actions/runs/4016588356
+          # draft: ${{ $GITHUB_REF_NAME != 'main' && true || false }}
           # prerelease: true
           # files: '*.vsix'
