@@ -196,6 +196,7 @@ class AllowedFilter implements Arrayable
                 static::GREATER_THAN => 'gt',
                 static::LOWER_OR_EQUAL_THAN => 'lte',
                 static::GREATER_OR_EQUAL_THAN => 'gte',
+                default => 'like',
             };
         }
 

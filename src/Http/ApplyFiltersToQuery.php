@@ -93,8 +93,10 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
         $relationship = implode($attributePartsArr);
 
         for ($i = 0; $i < count($filterValues); $i++) {
+            $filterValue = array_values($filterValues)[$i];
+
             $values = array_filter(
-                explode(',', array_values($filterValues)[$i]),
+                explode(',', is_array($filterValue) ? reset($filterValue) : $filterValue),
                 fn ($value) => ! is_null($value) && trim($value) !== ''
             );
             $operator = array_keys($filterValues)[$i];
