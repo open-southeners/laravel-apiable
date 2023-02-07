@@ -7,27 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
+## [3.2.4] - 2023-02-07
 
-- Allowed filter operators:
-  - `FilterOperator::NOT_SIMILAR` (`filter[attr][nsim]=`)
-  - `FilterOperator::NOT_EQUAL` (`filter[attr][neq]=`)
-  - `FilterOperator::IN` (`filter[attr][in]=`)
-  - `FilterOperator::NOT_IN` (`filter[attr][nin]=`)
-- Ability to pass multiple named filters arguments for query scopes: `filter[ofScopeName][argument1]=hello&filter[ofScopeName][argument2]=world`
+### Fixed
 
-### Changed
-
-- Query scopes might be enforced on filters by using `?filter[scope:name]=&filter[name]=` so they don't conflict with attributes
-- `AllowedFilter::exact()` to `AllowedFilter::equal()` to align constant change
-- Allowed filter operators constant names (aligned to the MySQL spec):
-  - `AllowedFilter::EXACT` to `FilterOperator::EQUAL`
-- Filter operator names at user level (URL parameters) now are 2 to 4 letter words:
-  - `filter[like]` to `filter[sim]`
-
-### Removed
-
-- `enforce_scoped_names` from `config/apiable.php` file as now they can be enforced or not (depends on the frontend)
+- Filtering when wrong operator is present was returning exception, now ignores the operator (e.g. `filter[attribute][0]=1&filter[attribute][1]=2`)
 
 ## [3.2.6] - 2023-01-30
 
