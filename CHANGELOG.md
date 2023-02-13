@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.2.8] - 2023-02-13
+
+### Fixed
+
+- Error when wrong typed parameter sent to `IteratesResultsAfterQuery::appendToApiResource`
+
 ## [3.2.7] - 2023-02-07
 
 ### Fixed
