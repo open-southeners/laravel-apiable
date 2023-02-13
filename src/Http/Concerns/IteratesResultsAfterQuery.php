@@ -86,12 +86,16 @@ trait IteratesResultsAfterQuery
     /**
      * Append array of attributes to the resulted JSON:API resource.
      *
-     * @param  \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource  $resource
-     * @param array appends
+     * @param  \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource|mixed  $resource
+     * @param  array  $appends
      * @return void
      */
-    protected function appendToApiResource(JsonApiResource $resource, array $appends)
+    protected function appendToApiResource(mixed $resource, array $appends)
     {
+        if (! ($resource instanceof JsonApiResource)) {
+            return;
+        }
+
         /** @var array<\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource> $resourceIncluded */
         $resourceIncluded = $resource->with['included'] ?? [];
         $resourceType = Apiable::getResourceType($resource->resource);
