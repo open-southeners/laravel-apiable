@@ -59,6 +59,7 @@ jobs:
 
       - name: Deploy coverage to codacy
         uses: codacy/codacy-coverage-reporter-action@v1
+        if: matrix.php == '8.2' && matrix.laravel == '10.*'
         with:
           # project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           api-token: ${{ secrets.CODACY_API_TOKEN }}
