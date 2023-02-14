@@ -9,27 +9,20 @@ trait ValidatesParams
 {
     /**
      * Checks if configured to enforce query paramaters validation.
-     *
-     * @return bool
      */
-    public function enforcesValidation()
+    public function enforcesValidation(): bool
     {
         return (bool) Apiable::config('requests.validate_params');
     }
 
     /**
      * Get instance of query params validator.
-     *
-     * @param  array  $params
-     * @return \OpenSoutheners\LaravelApiable\Http\QueryParamsValidator
      */
-    protected function validator(array $params)
+    protected function validator(array $params): QueryParamsValidator
     {
         return new QueryParamsValidator(
             $params,
             $this->enforcesValidation()
-                ? QueryParamsValidator::ENFORCE_VALIDATION_STRATEGY
-                : QueryParamsValidator::FILTER_VALIDS_ONLY_STRATEGY
         );
     }
 }

@@ -3,6 +3,7 @@
 namespace OpenSoutheners\LaravelApiable\Http\Resources\Json;
 
 use Countable;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\PaginatedResourceResponse;
 use Illuminate\Pagination\AbstractCursorPaginator;
 use Illuminate\Pagination\AbstractPaginator;
@@ -11,8 +12,9 @@ use OpenSoutheners\LaravelApiable\Http\Resources\CollectsResources;
 use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource;
 
 /**
- * @template T of \OpenSoutheners\LaravelApiable\Contracts\JsonApiable
- * @extends JsonApiResource<\Illuminate\Support\Collection<T>>
+ * @template T
+ *
+ * @extends JsonApiResource<\Illuminate\Support\Collection<T>|\Illuminate\Pagination\AbstractPaginator|\Illuminate\Pagination\AbstractCursorPaginator>
  */
 class ResourceCollection extends JsonApiResource implements Countable, IteratorAggregate
 {
@@ -34,10 +36,8 @@ class ResourceCollection extends JsonApiResource implements Countable, IteratorA
 
     /**
      * Indicates if all existing request query parameters should be added to pagination links.
-     *
-     * @var bool
      */
-    protected $preserveQueryParameters = false;
+    protected bool $preserveQueryParameters = false;
 
     /**
      * The query parameters that should be added to the pagination links.
@@ -48,21 +48,16 @@ class ResourceCollection extends JsonApiResource implements Countable, IteratorA
 
     /**
      * Create a new resource instance.
-     *
-     * @param  mixed  $resource
-     * @return void
      */
-    public function __construct($resource)
+    public function __construct(mixed $resource)
     {
         $this->resource = $this->collectResource($resource);
     }
 
     /**
      * Indicate that all current query parameters should be appended to pagination links.
-     *
-     * @return $this
      */
-    public function preserveQuery()
+    public function preserveQuery(): self
     {
         $this->preserveQueryParameters = true;
 
@@ -71,11 +66,8 @@ class ResourceCollection extends JsonApiResource implements Countable, IteratorA
 
     /**
      * Specify the query string parameters that should be present on pagination links.
-     *
-     * @param  array  $query
-     * @return $this
      */
-    public function withQuery(array $query)
+    public function withQuery(array $query): self
     {
         $this->preserveQueryParameters = false;
 
@@ -86,8 +78,6 @@ class ResourceCollection extends JsonApiResource implements Countable, IteratorA
 
     /**
      * Return the count of items in the resource collection.
-     *
-     * @return int
      */
     public function count(): int
     {
@@ -98,9 +88,8 @@ class ResourceCollection extends JsonApiResource implements Countable, IteratorA
      * Transform the resource into a JSON array.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
      */
-    public function toArray($request)
+    public function toArray($request): mixed
     {
         return $this->collection->map->toArray($request);
     }
@@ -109,9 +98,8 @@ class ResourceCollection extends JsonApiResource implements Countable, IteratorA
      * Create an HTTP response that represents the object.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
      */
-    public function toResponse($request)
+    public function toResponse($request): JsonResponse
     {
         if ($this->resource instanceof AbstractPaginator || $this->resource instanceof AbstractCursorPaginator) {
             return $this->preparePaginatedResponse($request);
@@ -124,9 +112,8 @@ class ResourceCollection extends JsonApiResource implements Countable, IteratorA
      * Create a paginate-aware HTTP response.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
      */
-    protected function preparePaginatedResponse($request)
+    protected function preparePaginatedResponse($request): JsonResponse
     {
         if ($this->preserveQueryParameters) {
             $this->resource->appends($request->query());

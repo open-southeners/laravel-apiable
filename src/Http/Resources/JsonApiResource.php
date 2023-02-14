@@ -7,7 +7,7 @@ use Illuminate\Http\Resources\MissingValue;
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
 
 /**
- * @template TResource of \OpenSoutheners\LaravelApiable\Contracts\JsonApiable
+ * @template TResource
  */
 class JsonApiResource extends JsonResource
 {

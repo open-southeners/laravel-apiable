@@ -13,16 +13,14 @@ use Symfony\Component\HttpFoundation\HeaderUtils;
 trait AllowsFilters
 {
     /**
-     * @var array<string, string>
+     * @var array<string, array>
      */
-    protected $allowedFilters = [];
+    protected array $allowedFilters = [];
 
     /**
      * Get user filters from request.
-     *
-     * @return array
      */
-    public function filters()
+    public function filters(): array
     {
         $queryStringArr = explode('&', $this->request->server('QUERY_STRING', ''));
         $filters = [];
@@ -85,11 +83,9 @@ trait AllowsFilters
     /**
      * Allow filter by scope and pattern of value(s).
      *
-     * @param  string  $attribute
      * @param  array<string>|string  $value
-     * @return $this
      */
-    public function allowScopedFilter($attribute, $value = '*')
+    public function allowScopedFilter(string $attribute, array|string $value = '*'): self
     {
         $this->allowedFilters = array_merge_recursive(
             $this->allowedFilters,
@@ -101,10 +97,8 @@ trait AllowsFilters
 
     /**
      * Get user requested filters filtered by allowed ones.
-     *
-     * @return array
      */
-    public function userAllowedFilters()
+    public function userAllowedFilters(): array
     {
         $defaultFilterOperator = Apiable::config('requests.filters.default_operator');
         $throwOnValidationError = fn ($key) => throw new Exception(sprintf('"%s" is not filterable or contains invalid values', $key));
@@ -112,8 +106,8 @@ trait AllowsFilters
         return $this->validator($this->filters())
             ->givingRules($this->allowedFilters)
             ->whenPatternMatches($throwOnValidationError)
-            ->when(function ($key, $modifiers, $values, $rules) use ($defaultFilterOperator) {
-                $allowedOperators = (array) $rules['operator'] ?? $defaultFilterOperator;
+            ->when(function ($key, $modifiers, $values, $rules) use ($defaultFilterOperator): bool {
+                $allowedOperators = (array) ($rules['operator'] ?? $defaultFilterOperator);
 
                 return ! empty(array_intersect($modifiers, $allowedOperators));
             }, $throwOnValidationError)
@@ -123,9 +117,9 @@ trait AllowsFilters
     /**
      * Get list of allowed filters.
      *
-     * @return array<string, string>
+     * @return array<string, array>
      */
-    public function getAllowedFilters()
+    public function getAllowedFilters(): array
     {
         return $this->allowedFilters;
     }

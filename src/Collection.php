@@ -12,7 +12,7 @@ class Collection
 {
     public function toJsonApi()
     {
-        return function () {
+        return function (): JsonApiCollection {
             return new JsonApiCollection(
                 $this->filter(function ($item) {
                     return is_object($item) && $item instanceof JsonApiable;

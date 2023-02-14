@@ -8,10 +8,8 @@ trait HasJsonApi
 {
     /**
      * Transform the model instance attributes to JSON:API.
-     *
-     * @return \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource
      */
-    public function toJsonApi()
+    public function toJsonApi(): JsonApiResource
     {
         return new JsonApiResource($this);
     }

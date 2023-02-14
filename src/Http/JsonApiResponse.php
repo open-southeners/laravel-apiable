@@ -2,6 +2,7 @@
 
 namespace OpenSoutheners\LaravelApiable\Http;
 
+use Closure;
 use Exception;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Responsable;
@@ -11,7 +12,6 @@ use Illuminate\Support\Traits\ForwardsCalls;
 use OpenSoutheners\LaravelApiable\Contracts\ViewableBuilder;
 use OpenSoutheners\LaravelApiable\Contracts\ViewQueryable;
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
-use function OpenSoutheners\LaravelHelpers\Classes\class_implement;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -23,40 +23,27 @@ class JsonApiResponse implements Responsable, Arrayable
     use Concerns\ResolvesFromRouteAction;
     use ForwardsCalls;
 
-    /**
-     * @var \Illuminate\Pipeline\Pipeline
-     */
-    protected $pipeline;
+    protected Pipeline $pipeline;
+
+    protected RequestQueryObject|null $request;
 
     /**
-     * @var \OpenSoutheners\LaravelApiable\Http\RequestQueryObject|null
+     * @var class-string<\Illuminate\Database\Eloquent\Model>|class-string<\OpenSoutheners\LaravelApiable\Contracts\ViewQueryable>
      */
-    protected $request;
+    protected string $model;
 
-    /**
-     * @var class-string<\Illuminate\Database\Eloquent\Model>
-     */
-    protected $model;
+    protected bool|null $includeAllowedToResponse = null;
 
-    /**
-     * @var bool|null
-     */
-    protected $includeAllowedToResponse = null;
-
-    /**
-     * @var bool
-     */
-    protected $singleResourceResponse = false;
+    protected bool $singleResourceResponse = false;
 
     /**
      * @var array<string>
      */
-    protected $forceAppends = [];
+    protected array $forceAppends = [];
 
     /**
      * Instantiate this class.
      *
-     * @param  \Illuminate\Http\Request|null  $request
      * @return void
      */
     public function __construct(?Request $request = null)
@@ -72,9 +59,8 @@ class JsonApiResponse implements Responsable, Arrayable
      * Create new instance of repository from query.
      *
      * @param  class-string<\Illuminate\Database\Eloquent\Model>|\Illuminate\Database\Eloquent\Builder  $modelOrQuery
-     * @return static
      */
-    public static function from($modelOrQuery)
+    public static function from($modelOrQuery): static
     {
         return (new static())->using($modelOrQuery);
     }
@@ -83,16 +69,18 @@ class JsonApiResponse implements Responsable, Arrayable
      * Use the specified model for this JSON:API response.
      *
      * @param  class-string<\Illuminate\Database\Eloquent\Model>|\Illuminate\Database\Eloquent\Builder  $modelOrQuery
-     * @return \OpenSoutheners\LaravelApiable\Http\JsonApiResponse
      */
-    public function using($modelOrQuery)
+    public function using($modelOrQuery): static
     {
         $this->model = is_string($modelOrQuery) ? $modelOrQuery : get_class($modelOrQuery->getModel());
 
-        /** @var \Illuminate\Database\Eloquent\Builder $query */
+        /** @var \Illuminate\Database\Eloquent\Builder|\OpenSoutheners\LaravelApiable\Contracts\ViewableBuilder $query */
         $query = is_string($modelOrQuery) ? $modelOrQuery::query() : clone $modelOrQuery;
 
-        if (class_implement($this->model, ViewQueryable::class) || class_implement($query, ViewableBuilder::class)) {
+        if (
+            is_a($this->model, ViewQueryable::class, true)
+            || is_a($query, ViewableBuilder::class)
+        ) {
             $query->viewable();
         }
 
@@ -105,10 +93,12 @@ class JsonApiResponse implements Responsable, Arrayable
      * Build pipeline and return resulting request query object instance.
      *
      * @return \OpenSoutheners\LaravelApiable\Http\RequestQueryObject
+     *
+     * @throws \Exception
      */
     protected function buildPipeline()
     {
-        if (! $this->request->query) {
+        if (! $this->request?->query) {
             throw new Exception('RequestQueryObject needs a base query to work, none provided');
         }
 
@@ -125,10 +115,8 @@ class JsonApiResponse implements Responsable, Arrayable
 
     /**
      * Get single resource from response.
-     *
-     * @return $this
      */
-    public function gettingOne()
+    public function gettingOne(): static
     {
         $this->singleResourceResponse = true;
 
@@ -137,11 +125,8 @@ class JsonApiResponse implements Responsable, Arrayable
 
     /**
      * Add allowed filters and sorts to the response meta.
-     *
-     * @param  bool|null  $value
-     * @return $this
      */
-    public function includeAllowedToResponse($value = true)
+    public function includeAllowedToResponse(bool|null $value = true): static
     {
         $this->includeAllowedToResponse = $value;
 
@@ -168,13 +153,12 @@ class JsonApiResponse implements Responsable, Arrayable
      * Create an HTTP response that represents the object.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function toResponse($request)
+    public function toResponse($request): mixed
     {
         $response = $this->getResults()->toResponse($request);
 
-        if ($request->hasMacro('inertia') && $request->inertia()) {
+        if ($request->hasMacro('inertia') && method_exists($request, 'inertia') && $request->inertia()) {
             return $response->getData();
         }
 
@@ -183,28 +167,24 @@ class JsonApiResponse implements Responsable, Arrayable
 
     /**
      * Get the instance as an array.
-     *
-     * @return array
      */
-    public function toArray()
+    public function toArray(): array
     {
         $response = $this->toResponse(app(Request::class));
 
-        if ($response instanceof Response) {
-            return $response->getData();
+        if ($response instanceof Response && method_exists($response, 'getData')) {
+            return (array) $response->getData();
         }
 
-        return $response;
+        return (array) $response;
     }
 
     /**
      * Force append attributes to be included without being allowed.
      *
      * @param  string|array|class-string<\Illuminate\Database\Eloquent\Model>  $type
-     * @param  array  $attributes
-     * @return \OpenSoutheners\LaravelApiable\Http\JsonApiResponse
      */
-    public function forceAppend($type, array $attributes = [])
+    public function forceAppend(string|array $type, array $attributes = []): static
     {
         if (is_array($type)) {
             $attributes = $type;
@@ -222,12 +202,9 @@ class JsonApiResponse implements Responsable, Arrayable
     /**
      * Force append attributes to be included without being allowed only when condition matches.
      *
-     * @param  \Closure|bool  $condition
      * @param  string|array|class-string<\Illuminate\Database\Eloquent\Model>  $type
-     * @param  array  $attributes
-     * @return \OpenSoutheners\LaravelApiable\Http\JsonApiResponse
      */
-    public function forceAppendWhen($condition, $type, array $attributes = [])
+    public function forceAppendWhen(Closure|bool $condition, string|array $type, array $attributes = []): static
     {
         if (is_callable($condition)) {
             $condition = $condition();
@@ -242,11 +219,8 @@ class JsonApiResponse implements Responsable, Arrayable
 
     /**
      * Set response to include IDs on resource attributes.
-     *
-     * @param  bool  $value
-     * @return $this
      */
-    public function includingIdAttributes($value = true)
+    public function includingIdAttributes(bool $value = true): static
     {
         config(['apiable.responses.include_ids_on_attributes' => $value]);
 
@@ -255,12 +229,8 @@ class JsonApiResponse implements Responsable, Arrayable
 
     /**
      * Call method of RequestQueryObject if not exists on this.
-     *
-     * @param  string  $name
-     * @param  array  $arguments
-     * @return $this
      */
-    public function __call(string $name, array $arguments)
+    public function __call(string $name, array $arguments): mixed
     {
         return $this->forwardDecoratedCallTo($this->request, $name, $arguments);
     }

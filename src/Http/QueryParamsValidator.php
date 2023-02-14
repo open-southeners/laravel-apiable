@@ -8,34 +8,23 @@ use Illuminate\Support\Str;
 
 class QueryParamsValidator
 {
-    public const ENFORCE_VALIDATION_STRATEGY = 1;
-
-    public const FILTER_VALIDS_ONLY_STRATEGY = 2;
-
     /**
-     * @var array{0: callable, 1: \Throwable|callable}
+     * @var array{0: callable(string, array, array, array, array): bool, 1: \Throwable|callable}|array
      */
     protected $validationCallbacks = [];
 
     /**
-     * Create new instance.
-     *
-     * @param  array  $params
-     * @param  int  $strategy
-     * @param  array|bool  $rules
+     * Create new validator instance.
      */
-    public function __construct(protected array $params, protected int $strategy, protected $rules = [])
+    public function __construct(protected array $params, protected bool $enforceValidation, protected array|bool $rules = [])
     {
         //
     }
 
     /**
      * Validate params against the following rules.
-     *
-     * @param  array|bool  $rules
-     * @return $this
      */
-    public function givingRules($rules)
+    public function givingRules(array|bool $rules): self
     {
         $this->rules = $rules;
 
@@ -46,10 +35,8 @@ class QueryParamsValidator
      * Validate when patterns are matched (using rules instead).
      *
      * @param  callable|\Throwable  $exception
-     * @param  array  $patterns
-     * @return $this
      */
-    public function whenPatternMatches($exception, array $patterns = [])
+    public function whenPatternMatches($exception, array $patterns = []): self
     {
         return $this->when(function ($key, $modifiers, $values, $rules, &$valids) use ($patterns) {
             $paramPattern = $patterns[$key]['values'] ?? $rules['values'];
@@ -72,11 +59,9 @@ class QueryParamsValidator
     /**
      * Validate when condition function passes, throws exception otherwise.
      *
-     * @param  \Closure  $condition
      * @param  callable|\Throwable  $exception
-     * @return $this
      */
-    public function when(Closure $condition, $exception)
+    public function when(Closure $condition, $exception): self
     {
         $this->validationCallbacks[] = [$condition, $exception];
 
@@ -85,10 +70,8 @@ class QueryParamsValidator
 
     /**
      * Performs validation running all conditions on each query parameter.
-     *
-     * @return array
      */
-    public function validate()
+    public function validate(): array
     {
         $filteredResults = [];
 
@@ -109,7 +92,7 @@ class QueryParamsValidator
                     ? false
                     : $condition($key, $queryParamModifiers, $queryParamValues, $rulesForKey, $valids);
 
-                if (! $conditionResult && $this->strategy === static::ENFORCE_VALIDATION_STRATEGY) {
+                if (! $conditionResult && $this->enforceValidation) {
                     is_callable($exception) ? $exception($key, $queryParamValues) : throw $exception;
                 }
 

@@ -19,14 +19,13 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
     /**
      * @var array<array>
      */
-    protected $allowed = [];
+    protected array $allowed = [];
 
     /**
      * Apply modifications to the query based on allowed query fragments.
      *
      * @param  \OpenSoutheners\LaravelApiable\Http\RequestQueryObject  $request
-     * @param  \Closure  $next
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return callable(RequestQueryObject)
      */
     public function from(RequestQueryObject $request, Closure $next)
     {
@@ -43,17 +42,13 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
 
     /**
      * Apply collection of filters to the query.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @param  array  $filters
-     * @return \Illuminate\Database\Eloquent\Builder
      */
-    protected function applyFilters(Builder $query, array $filters)
+    protected function applyFilters(Builder $query, array $filters): Builder
     {
         $enforceScopeNames = Apiable::config('requests.filters.enforce_scoped_names');
 
         foreach ($filters as $filterAttribute => $filterValues) {
-            if (! $filterValues || empty($filterValues)) {
+            if (empty($filterValues)) {
                 continue;
             }
 
@@ -77,12 +72,9 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
      * Wrap query if relationship found applying its operator and conditional to the filtered attribute.
      *
      * @param  callable(\Illuminate\Database\Eloquent\Builder, string|null, string, string, string, string): mixed  $callback
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @param  string  $filterAttribute
      * @param  array<string>|string  $filterValues
-     * @return void
      */
-    protected function wrapIfRelatedQuery(callable $callback, Builder $query, string $filterAttribute, $filterValues)
+    protected function wrapIfRelatedQuery(callable $callback, Builder $query, string $filterAttribute, array|string $filterValues): void
     {
         $systemPreferredOperator = $this->allowed[$filterAttribute]['operator'];
 
@@ -97,7 +89,7 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
 
             $values = array_filter(
                 explode(',', is_array($filterValue) ? reset($filterValue) : $filterValue),
-                fn ($value) => ! is_null($value) && trim($value) !== ''
+                fn ($value) => ! empty($value) && trim($value) !== ''
             );
             $operator = array_keys($filterValues)[$i];
 
@@ -139,11 +131,8 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
      * Apply where or orWhere (non relationships only) to all filtered values.
      *
      * @param  \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Relations\Relation  $query
-     * @param  string  $attribute
-     * @param  array  $filterValues
-     * @return void
      */
-    protected function applyFilterAsWhere($query, $relationship, string $attribute, string $operator, string $value, string $condition)
+    protected function applyFilterAsWhere($query, $relationship, string $attribute, string $operator, string $value, string $condition): void
     {
         $query->where(
             $query->getModel()->getTable().".{$attribute}",
@@ -157,14 +146,8 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
      * Apply scope wrapped into a where (non relationships only) forwarding the call directly to the builder.
      *
      * @param  \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Relations\Relation  $query
-     * @param  string|null  $relationship
-     * @param  string  $scope
-     * @param  string  $operator
-     * @param  string  $value
-     * @param  string  $condition
-     * @return void
      */
-    protected function applyFilterAsScope($query, $relationship, string $scope, string $operator, string $value, string $condition)
+    protected function applyFilterAsScope($query, string|null $relationship, string $scope, string $operator, string $value, string $condition): void
     {
         $wrappedQueryFn = fn ($query) => $this->forwardCallTo($query, $scope, (array) $value);
 
@@ -182,34 +165,29 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
 
     /**
      * Check if the specified filter is a model attribute.
-     *
-     * @param  \Illuminate\Database\Eloquent\Model  $model
-     * @param  mixed  $value
-     * @return bool
      */
-    protected function isAttribute(Model $model, $value)
+    protected function isAttribute(Model $model, mixed $value): bool
     {
         return in_array($value, Schema::getColumnListing($model->getTable()));
     }
 
     /**
      * Check if the specified filter is a model scope.
-     *
-     * @param  \Illuminate\Database\Eloquent\Model  $model
-     * @param  mixed  $value
-     * @return bool
      */
-    protected function isScope(Model $model, $value)
+    protected function isScope(Model $model, mixed $value): bool
     {
         $isScope = $model->hasNamedScope($value);
         $modelQueryBuilder = $model::query();
 
         if (! $isScope && class_namespace($modelQueryBuilder) !== 'Illuminate\Database\Eloquent') {
+            /** @var string */
+            $modelQueryBuilderParent = get_parent_class($modelQueryBuilder);
+
             return in_array(
                 $value,
                 array_diff(
                     get_class_methods($modelQueryBuilder),
-                    get_class_methods(get_parent_class($modelQueryBuilder))
+                    get_class_methods($modelQueryBuilderParent)
                 )
             );
         }

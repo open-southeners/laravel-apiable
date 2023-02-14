@@ -6,16 +6,17 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\MissingValue;
 use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use OpenSoutheners\LaravelApiable\Contracts\JsonApiable;
 use OpenSoutheners\LaravelApiable\Http\JsonApiResponse;
 use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection;
 use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource;
-use function OpenSoutheners\LaravelHelpers\Classes\class_use;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
 
@@ -28,29 +29,23 @@ class Apiable
 
     /**
      * Get package prefixed config by key.
-     *
-     * @param  string  $key
-     * @return mixed
      */
-    public static function config(string $key)
+    public static function config(string $key): mixed
     {
         return config("apiable.$key");
     }
 
     /**
      * Format model or collection of models to JSON:API, false otherwise if not valid resource.
-     *
-     * @param  mixed  $resource
-     * @return \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource|\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection|false
      */
-    public static function toJsonApi($resource)
+    public static function toJsonApi(mixed $resource): JsonApiResource|JsonApiCollection|false
     {
         return match (true) {
             ! is_object($resource) => false,
-            $resource instanceof Collection, class_use($resource, \OpenSoutheners\LaravelApiable\Concerns\JsonApiable::class) => $resource->toJsonApi(),
+            $resource instanceof Collection, $resource instanceof JsonApiable => $resource->toJsonApi(),
             $resource instanceof Builder => $resource->jsonApiPaginate(),
             $resource instanceof LengthAwarePaginator => new JsonApiCollection($resource),
-            $resource instanceof Model || $resource instanceof MissingValue => new JsonApiResource($resource),
+            $resource instanceof Model, $resource instanceof MissingValue => new JsonApiResource($resource),
             default => false,
         };
     }
@@ -58,10 +53,9 @@ class Apiable
     /**
      * Determine default resource type from giving model.
      *
-     * @param class-string<\Illuminate\Database\Eloquent\Model>|\Illuminate\Database\Eloquent\Model
-     * @return string
+     * @param  \Illuminate\Database\Eloquent\Model|class-string<\Illuminate\Database\Eloquent\Model>  $model
      */
-    public static function resourceTypeForModel($model)
+    public static function resourceTypeForModel(Model|string $model): string
     {
         return Str::snake(class_basename(is_string($model) ? $model : get_class($model)));
     }
@@ -70,9 +64,8 @@ class Apiable
      * Get resource type from a model.
      *
      * @param  \Illuminate\Database\Eloquent\Model|class-string<\Illuminate\Database\Eloquent\Model>  $model
-     * @return string
      */
-    public static function getResourceType($model)
+    public static function getResourceType(Model|string $model): string
     {
         return static::$modelResourceTypeMap[is_string($model) ? $model : get_class($model)]
             ?? static::resourceTypeForModel($model);
@@ -81,11 +74,9 @@ class Apiable
     /**
      * Transforms error rendering to a JSON:API complaint error response.
      *
-     * @param  \Throwable  $e
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
      */
-    public static function jsonApiRenderable(Throwable $e, $request)
+    public static function jsonApiRenderable(Throwable $e, $request): JsonResponse
     {
         $response = ['errors' => []];
 
@@ -126,10 +117,8 @@ class Apiable
      * Prepare response allowing user requests from query.
      *
      * @param  \Illuminate\Database\Eloquent\Builder|\OpenSoutheners\LaravelApiable\Contracts\JsonApiable|class-string<\OpenSoutheners\LaravelApiable\Contracts\JsonApiable>  $query
-     * @param  array  $alloweds
-     * @return \OpenSoutheners\LaravelApiable\Http\JsonApiResponse
      */
-    public static function response($query, array $alloweds = [])
+    public static function response($query, array $alloweds = []): JsonApiResponse
     {
         $response = JsonApiResponse::from($query);
 
@@ -168,7 +157,6 @@ class Apiable
     /**
      * Get model class from
      *
-     * @param  string  $type
      * @return \Illuminate\Database\Eloquent\Model|false
      */
     public static function getModelFromResourceType(string $type)
@@ -179,7 +167,6 @@ class Apiable
     /**
      * Add suffix to filter attribute/scope name.
      *
-     * @param  string  $value
      * @return string
      */
     public static function scopedFilterSuffix(string $value)

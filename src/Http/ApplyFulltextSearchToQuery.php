@@ -12,7 +12,6 @@ class ApplyFulltextSearchToQuery implements HandlesRequestQueries
      * Apply modifications to the query based on allowed query fragments.
      *
      * @param  \OpenSoutheners\LaravelApiable\Http\RequestQueryObject  $request
-     * @param  \Closure  $next
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function from(RequestQueryObject $request, Closure $next)
@@ -23,6 +22,7 @@ class ApplyFulltextSearchToQuery implements HandlesRequestQueries
         if (
             ! $request->isSearchAllowed()
             || ! class_use($queryModel, 'Laravel\Scout\Searchable')
+            || ! method_exists($queryModel, 'search')
             || empty($userSearchQuery)
         ) {
             return $next($request);

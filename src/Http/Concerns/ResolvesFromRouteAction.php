@@ -67,6 +67,7 @@ trait ResolvesFromRouteAction
                 $attributeInstance instanceof IncludeQueryParam => $this->allowInclude($attributeInstance->relationships),
                 $attributeInstance instanceof FieldsQueryParam => $this->allowFields($attributeInstance->type, $attributeInstance->fields),
                 $attributeInstance instanceof AppendsQueryParam => $this->allowAppends($attributeInstance->type, $attributeInstance->attributes),
+                default => null,
             };
         }
     }

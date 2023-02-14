@@ -15,7 +15,7 @@ trait CollectsResources
     /**
      * Map the given collection resource into its individual resources.
      *
-     * @param  \Illuminate\Http\Resources\MissingValue|\Illuminate\Support\Collection<\OpenSoutheners\LaravelApiable\Contracts\JsonApiable>  $resource
+     * @param  \Illuminate\Http\Resources\MissingValue|\Illuminate\Pagination\AbstractPaginator|\Illuminate\Support\Collection<\OpenSoutheners\LaravelApiable\Contracts\JsonApiable>  $resource
      * @return mixed
      */
     protected function collectResource($resource)
@@ -84,8 +84,6 @@ trait CollectsResources
 
     /**
      * Get an iterator for the resource collection.
-     *
-     * @return \Traversable
      */
     public function getIterator(): Traversable
     {

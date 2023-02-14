@@ -16,10 +16,7 @@ class RequestQueryObject
     use Concerns\AllowsSearch;
     use Concerns\ValidatesParams;
 
-    /**
-     * @var \Illuminate\Http\Request
-     */
-    protected $request;
+    protected Request $request;
 
     /**
      * @var \Illuminate\Database\Eloquent\Builder
@@ -27,17 +24,14 @@ class RequestQueryObject
     public $query;
 
     /**
-     * @var \Illuminate\Support\Collection<array>
+     * @var \Illuminate\Support\Collection<array>|null
      */
-    protected $queryParameters;
+    protected Collection|null $queryParameters = null;
 
     /**
      * Construct the request query object.
-     *
-     * @param  \Illuminate\Http\Request|null  $request
-     * @return void
      */
-    public function __construct($request = null)
+    public function __construct(Request|null $request = null)
     {
         $this->request = $request ?? app(Request::class);
     }
@@ -46,9 +40,8 @@ class RequestQueryObject
      * Set query for this request query object.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return $this
      */
-    public function setQuery($query)
+    public function setQuery($query): self
     {
         $this->query = $query;
 
@@ -60,7 +53,7 @@ class RequestQueryObject
      *
      * @return \Illuminate\Support\Collection<array>
      */
-    public function queryParameters()
+    public function queryParameters(): Collection
     {
         if (! $this->queryParameters) {
             $this->queryParameters = Collection::make(
@@ -77,23 +70,14 @@ class RequestQueryObject
 
     /**
      * Get the underlying request object.
-     *
-     * @return Request|null
      */
-    public function getRequest()
+    public function getRequest(): Request
     {
         return $this->request;
     }
 
     /**
      * Allows the following user operations.
-     *
-     * @param  array  $sorts
-     * @param  array  $filters
-     * @param  array  $includes
-     * @param  array  $fields
-     * @param  array  $appends
-     * @return $this
      */
     public function allows(
         array $sorts = [],
@@ -101,7 +85,7 @@ class RequestQueryObject
         array $includes = [],
         array $fields = [],
         array $appends = []
-    ) {
+    ): self {
         $allowedArr = compact('sorts', 'filters', 'includes', 'fields', 'appends');
 
         foreach ($allowedArr as $allowedKey => $alloweds) {
@@ -123,11 +107,8 @@ class RequestQueryObject
 
     /**
      * Process query object allowing the following user operations.
-     *
-     * @param  array  $alloweds
-     * @return $this
      */
-    public function allowing(array $alloweds)
+    public function allowing(array $alloweds): self
     {
         foreach ($alloweds as $allowed) {
             match (get_class($allowed)) {
@@ -137,6 +118,7 @@ class RequestQueryObject
                 AllowedFields::class => $this->allowFields($allowed),
                 AllowedAppends::class => $this->allowAppends($allowed),
                 AllowedSearchFilter::class => $this->allowSearchFilter($allowed),
+                default => null,
             };
         }
 

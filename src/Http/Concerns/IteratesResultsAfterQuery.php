@@ -87,7 +87,6 @@ trait IteratesResultsAfterQuery
      * Append array of attributes to the resulted JSON:API resource.
      *
      * @param  \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource|mixed  $resource
-     * @param  array  $appends
      * @return void
      */
     protected function appendToApiResource(mixed $resource, array $appends)
@@ -101,7 +100,7 @@ trait IteratesResultsAfterQuery
         $resourceType = Apiable::getResourceType($resource->resource);
 
         if ($appendsArr = $appends[$resourceType] ?? null) {
-            $resource->makeVisible($appendsArr)->append($appendsArr);
+            $resource->resource->makeVisible($appendsArr)->append($appendsArr);
         }
 
         foreach ($resourceIncluded as $included) {

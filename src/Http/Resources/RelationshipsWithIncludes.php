@@ -15,17 +15,13 @@ trait RelationshipsWithIncludes
 {
     /**
      * Included relations on the resource.
-     *
-     * @var array
      */
-    protected $relationships = [];
+    protected array $relationships = [];
 
     /**
      * Attach relationships to the resource.
-     *
-     * @return void
      */
-    protected function attachModelRelations()
+    protected function attachModelRelations(): void
     {
         $relations = $this->resource->getRelations();
 
@@ -59,9 +55,8 @@ trait RelationshipsWithIncludes
      * Process a model relation attaching to its model additional attributes.
      *
      * @param  \OpenSoutheners\LaravelApiable\Contracts\JsonApiable|\Illuminate\Database\Eloquent\Model  $model
-     * @return array
      */
-    protected function processModelRelation($model)
+    protected function processModelRelation($model): array
     {
         /** @var \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource $modelResource */
         $modelResource = new self($model);
@@ -78,11 +73,8 @@ trait RelationshipsWithIncludes
 
     /**
      * Set included data to resource's with.
-     *
-     * @param $resource
-     * @return void
      */
-    protected function addIncluded(JsonApiResource $resource)
+    protected function addIncluded(JsonApiResource $resource): void
     {
         $includesCol = Collection::make([
             $resource,
@@ -99,23 +91,18 @@ trait RelationshipsWithIncludes
 
     /**
      * Get resource included relationships.
-     *
-     * @return array
      */
-    public function getIncluded()
+    public function getIncluded(): array
     {
         return $this->with['included'] ?? [];
     }
 
     /**
      * Check and return unique resources on a collection.
-     *
-     * @param \Illuminate\Support\Collection
-     * @return \Illuminate\Support\Collection
      */
-    protected function checkUniqueness(Collection $collection)
+    protected function checkUniqueness(Collection $collection): Collection
     {
-        return $collection->unique(static function ($resource) {
+        return $collection->unique(static function ($resource): string {
             return implode('', $resource->getResourceIdentifier());
         });
     }

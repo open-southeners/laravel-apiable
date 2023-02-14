@@ -7,38 +7,32 @@ use Illuminate\Contracts\Support\Arrayable;
 class AllowedInclude implements Arrayable
 {
     /**
-     * @var string|array
-     */
-    protected $relationship;
-
-    /**
      * Make an instance of this class.
      *
-     * @param  string|array  $relationship
+     * @param  string|string[]  $relationship
      * @return void
      */
-    public function __construct($relationship)
+    public function __construct(protected string|array $relationship)
     {
-        $this->relationship = $relationship;
+        //
     }
 
     /**
      * Allow include resource relationship.
      *
-     * @param  string|array  $relationship
-     * @return static
+     * @param  string|string[]  $relationship
      */
-    public static function make($relationship)
+    public static function make(string|array $relationship): static
     {
-        return new self($relationship);
+        return new static($relationship);
     }
 
     /**
      * Get the instance as an array.
      *
-     * @return array
+     * @return string[]
      */
-    public function toArray()
+    public function toArray(): array
     {
         return (array) $this->relationship;
     }

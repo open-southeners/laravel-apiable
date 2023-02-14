@@ -13,14 +13,13 @@ class AllowedFields implements Arrayable
     protected $type;
 
     /**
-     * @var array<string>
+     * @var array<string|array<string>>
      */
     protected $attributes;
 
     /**
      * Make an instance of this class.
      *
-     * @param  string  $type
      * @param  string|array<string>  $attributes
      * @return void
      */
@@ -33,11 +32,9 @@ class AllowedFields implements Arrayable
     /**
      * Allow include fields (attributes) to resource type.
      *
-     * @param  string  $type
      * @param  string|array<string>  $attributes
-     * @return static
      */
-    public static function make(string $type, $attributes)
+    public static function make(string $type, $attributes): static
     {
         return new static($type, $attributes);
     }
@@ -47,7 +44,7 @@ class AllowedFields implements Arrayable
      *
      * @return array<string, array<string>>
      */
-    public function toArray()
+    public function toArray(): array
     {
         return [
             $this->type => is_array(head($this->attributes))

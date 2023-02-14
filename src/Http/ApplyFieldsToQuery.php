@@ -13,7 +13,6 @@ class ApplyFieldsToQuery implements HandlesRequestQueries
      * Apply modifications to the query based on allowed query fragments.
      *
      * @param  \OpenSoutheners\LaravelApiable\Http\RequestQueryObject  $request
-     * @param  \Closure  $next
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function from(RequestQueryObject $request, Closure $next)
@@ -30,13 +29,11 @@ class ApplyFieldsToQuery implements HandlesRequestQueries
     /**
      * Apply array of fields to the query.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @param  array  $fields
      * @return \Illuminate\Database\Eloquent\Builder
      */
     protected function applyFields(Builder $query, array $fields)
     {
-        /** @var \OpenSoutheners\LaravelApiable\Contracts\JsonApiable */
+        /** @var \OpenSoutheners\LaravelApiable\Contracts\JsonApiable|\Illuminate\Database\Eloquent\Model */
         $mainQueryModel = $query->getModel();
         $mainQueryResourceType = Apiable::getResourceType($mainQueryModel);
         $queryEagerLoaded = $query->getEagerLoads();

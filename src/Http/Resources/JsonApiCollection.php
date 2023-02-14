@@ -5,7 +5,7 @@ namespace OpenSoutheners\LaravelApiable\Http\Resources;
 use OpenSoutheners\LaravelApiable\Http\Resources\Json\ResourceCollection;
 
 /**
- * @template TCollectedResource of \OpenSoutheners\LaravelApiable\Contracts\JsonApiable
+ * @template TCollectedResource
  * @extends ResourceCollection<TCollectedResource>
  */
 class JsonApiCollection extends ResourceCollection

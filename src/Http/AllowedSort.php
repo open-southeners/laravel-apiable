@@ -13,58 +13,41 @@ class AllowedSort implements Arrayable
 
     public const DESCENDANT = 3;
 
-    /**
-     * @var string
-     */
-    protected $attribute;
+    protected string $attribute;
 
-    /**
-     * @var string
-     */
-    protected $direction;
+    protected int $direction;
 
     /**
      * Make an instance of this class.
      *
-     * @param  string  $attribute
-     * @param  int|null  $direction
      * @return void
      */
-    public function __construct($attribute, $direction = null)
+    public function __construct(string $attribute, int|null $direction = null)
     {
         $this->attribute = $attribute;
-        $this->direction = $direction ?? Apiable::config('requests.sorts.default_direction') ?? static::BOTH;
+        $this->direction = (int) ($direction ?? Apiable::config('requests.sorts.default_direction') ?? static::BOTH);
     }
 
     /**
      * Allow default sort by attribute.
-     *
-     * @param  string  $attribute
-     * @return static
      */
-    public static function make($attribute)
+    public static function make(string $attribute): static
     {
         return new static($attribute);
     }
 
     /**
      * Allow sort by attribute as ascendant.
-     *
-     * @param  string  $attribute
-     * @return static
      */
-    public static function ascendant($attribute)
+    public static function ascendant(string $attribute): static
     {
         return new static($attribute, static::ASCENDANT);
     }
 
     /**
      * Allow sort by attribute as descendant.
-     *
-     * @param  string  $attribute
-     * @return static
      */
-    public static function descendant($attribute)
+    public static function descendant(string $attribute): static
     {
         return new static($attribute, static::DESCENDANT);
     }
@@ -74,7 +57,7 @@ class AllowedSort implements Arrayable
      *
      * @return array<string, string>
      */
-    public function toArray()
+    public function toArray(): array
     {
         return [
             $this->attribute => match ($this->direction) {
