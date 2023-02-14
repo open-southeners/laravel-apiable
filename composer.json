@@ -21,16 +21,16 @@
     ],
     "require": {
         "php": "^8.0|^8.1|^8.2",
-        "illuminate/support": "^9.0",
+        "illuminate/support": "^9.0|^10.0",
         "open-southeners/laravel-helpers": "^0.9.0"
     },
     "require-dev": {
         "laravel/pint": "^1.1",
         "laravel/scout": "^9.0",
         "nunomaduro/larastan": "^2.1",
-        "orchestra/testbench": "^7.0",
+        "orchestra/testbench": "^7.0|^8.0",
         "phpstan/phpstan": "^1.0",
-        "phpunit/phpunit": "^9.0"
+        "phpunit/phpunit": "^9.0|^10.0"
     },
     "suggest": {
         "hammerstone/fast-paginate": "Improves jsonApiPaginate method performance (SQL database query pagination)",
