@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.3.0] - 2023-02-14
+
+### Added
+
+- Laravel 10 support
+- PHP native types
+
+### Removed
+
+- `QueryParametersValidator` constants `ENFORCE_VALIDATION_STRATEGY` & `FILTER_VALIDS_ONLY_STRATEGY`, now strategy parameter is changed to a boolean instead
+
+### Fixed
+
+- Types with static analysis
+
 ## [3.2.8] - 2023-02-13
 
 ### Fixed
