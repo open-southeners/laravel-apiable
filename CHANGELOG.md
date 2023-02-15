@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.3.1] - 2023-02-15
+
+### Added
+
+- `JsonApiResponse::conditionallyLoadResults` to manage adding viewable query or not to the response 
+
 ## [3.3.0] - 2023-02-14
 
 ### Added
