@@ -228,6 +228,16 @@ class JsonApiResponse implements Responsable, Arrayable
     }
 
     /**
+     * Conditionally query results to display based on viewable query (if available).
+     */
+    public function conditionallyLoadResults(bool $value = true): self
+    {
+        config(['apiable.responses.viewable' => $value]);
+
+        return $this;
+    }
+
+    /**
      * Call method of RequestQueryObject if not exists on this.
      */
     public function __call(string $name, array $arguments): mixed
