@@ -60,7 +60,7 @@ class JsonApiResponse implements Responsable, Arrayable
      *
      * @param  class-string<\Illuminate\Database\Eloquent\Model>|\Illuminate\Database\Eloquent\Builder  $modelOrQuery
      */
-    public static function from($modelOrQuery): static
+    public static function from($modelOrQuery): self
     {
         return (new static())->using($modelOrQuery);
     }
@@ -70,7 +70,7 @@ class JsonApiResponse implements Responsable, Arrayable
      *
      * @param  class-string<\Illuminate\Database\Eloquent\Model>|\Illuminate\Database\Eloquent\Builder  $modelOrQuery
      */
-    public function using($modelOrQuery): static
+    public function using($modelOrQuery): self
     {
         $this->model = is_string($modelOrQuery) ? $modelOrQuery : get_class($modelOrQuery->getModel());
 
@@ -116,7 +116,7 @@ class JsonApiResponse implements Responsable, Arrayable
     /**
      * Get single resource from response.
      */
-    public function gettingOne(): static
+    public function gettingOne(): self
     {
         $this->singleResourceResponse = true;
 
@@ -126,7 +126,7 @@ class JsonApiResponse implements Responsable, Arrayable
     /**
      * Add allowed filters and sorts to the response meta.
      */
-    public function includeAllowedToResponse(bool|null $value = true): static
+    public function includeAllowedToResponse(bool|null $value = true): self
     {
         $this->includeAllowedToResponse = $value;
 
@@ -184,7 +184,7 @@ class JsonApiResponse implements Responsable, Arrayable
      *
      * @param  string|array|class-string<\Illuminate\Database\Eloquent\Model>  $type
      */
-    public function forceAppend(string|array $type, array $attributes = []): static
+    public function forceAppend(string|array $type, array $attributes = []): self
     {
         if (is_array($type)) {
             $attributes = $type;
@@ -204,7 +204,7 @@ class JsonApiResponse implements Responsable, Arrayable
      *
      * @param  string|array|class-string<\Illuminate\Database\Eloquent\Model>  $type
      */
-    public function forceAppendWhen(Closure|bool $condition, string|array $type, array $attributes = []): static
+    public function forceAppendWhen(Closure|bool $condition, string|array $type, array $attributes = []): self
     {
         if (is_callable($condition)) {
             $condition = $condition();
@@ -220,7 +220,7 @@ class JsonApiResponse implements Responsable, Arrayable
     /**
      * Set response to include IDs on resource attributes.
      */
-    public function includingIdAttributes(bool $value = true): static
+    public function includingIdAttributes(bool $value = true): self
     {
         config(['apiable.responses.include_ids_on_attributes' => $value]);
 
