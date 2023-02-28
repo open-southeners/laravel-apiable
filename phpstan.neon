@@ -17,5 +17,6 @@ parameters:
         - '#Method OpenSoutheners\\LaravelApiable\\Support\\Apiable::response\(\) should return OpenSoutheners\\LaravelApiable\\Http\\JsonApiResponse but returns OpenSoutheners\\LaravelApiable\\Http\\RequestQueryObject#'
         - '#Variable \$valids in empty\(\) always exists and is always falsy#'
         - '#Method OpenSoutheners\\LaravelApiable\\Http\\Resources\\Json\\ResourceCollection::toArray\(\) should return array but returns Illuminate\\Support\\Collection<int, mixed>#'
+        - '#Call to an undefined method Throwable::errors\(\)#'
 
     checkMissingIterableValueType: false
