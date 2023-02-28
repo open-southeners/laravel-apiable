@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.4.0] - 2023-02-28
+
+### Changed
+
+- `Apiable::jsonApiRenderable` now accepts 2 arguments: Throwable exception & second a bool nullable withTrace, error handling redesign to properly match JSON:API & Laravel.
+
 ## [3.3.1] - 2023-02-15
 
 ### Added
