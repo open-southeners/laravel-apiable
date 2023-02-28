@@ -14,6 +14,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use OpenSoutheners\LaravelApiable\Contracts\JsonApiable;
+use OpenSoutheners\LaravelApiable\Handler;
 use OpenSoutheners\LaravelApiable\Http\JsonApiResponse;
 use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection;
 use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource;
@@ -73,44 +74,10 @@ class Apiable
 
     /**
      * Transforms error rendering to a JSON:API complaint error response.
-     *
-     * @param  \Illuminate\Http\Request  $request
      */
-    public static function jsonApiRenderable(Throwable $e, $request): JsonResponse
+    public static function jsonApiRenderable(Throwable $e, bool|null $withTrace = null): Handler
     {
-        $response = ['errors' => []];
-
-        $statusCode = Response::HTTP_INTERNAL_SERVER_ERROR;
-
-        if ($e instanceof HttpExceptionInterface || method_exists($e, 'getStatusCode')) {
-            /** @var \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface $e */
-            $statusCode = $e->getStatusCode();
-        }
-
-        if ($e instanceof ValidationException) {
-            /** @var \Illuminate\Validation\ValidationException $e */
-            $statusCode = 422;
-
-            foreach ($e->errors() as $errorSource => $errors) {
-                foreach ($errors as $error) {
-                    $response['errors'][] = [
-                        'code' => $statusCode,
-                        'title' => $error,
-                        'source' => [
-                            'pointer' => $errorSource,
-                        ],
-                    ];
-                }
-            }
-        }
-
-        if ($statusCode === Response::HTTP_INTERNAL_SERVER_ERROR) {
-            $response['errors'][0]['code'] = $e instanceof QueryException ? $statusCode : ($e->getCode() ?: $statusCode);
-            $response['errors'][0]['title'] = $e->getMessage();
-            $response['errors'][0]['trace'] = $e->getTrace();
-        }
-
-        return response()->json($response, $statusCode);
+        return new Handler($e, $withTrace);
     }
 
     /**
