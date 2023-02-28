@@ -2,6 +2,7 @@
 
 namespace OpenSoutheners\LaravelApiable\Tests;
 
+use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 use OpenSoutheners\LaravelApiable\Http\AllowedAppends;
@@ -70,28 +71,52 @@ class ApiableTest extends TestCase
 
     public function testJsonApiRenderableReturnsExceptionAsFormatted500ErrorJson()
     {
-        $exceptionAsJson = Apiable::jsonApiRenderable(new \Exception('My error'), request());
+        $handler = Apiable::jsonApiRenderable(new \Exception('My error'), true);
+
+        $this->assertTrue($handler instanceof Responsable);
+
+        $exceptionAsJson = $handler->toResponse(request());
 
         $this->assertTrue($exceptionAsJson instanceof JsonResponse);
 
         $exceptionAsJsonString = $exceptionAsJson->__toString();
 
-        $this->assertStringContainsString('"code":500', $exceptionAsJsonString);
+        $this->assertStringContainsString('"status":"500"', $exceptionAsJsonString);
         $this->assertStringContainsString('"title":"My error"', $exceptionAsJsonString);
+    }
+
+    public function testJsonApiRenderableReturnsExceptionAsFormatted500ErrorJsonWithHiddenDetailsWhenDebugFalse()
+    {
+        $handler = Apiable::jsonApiRenderable(new \Exception('My error'), false);
+
+        $this->assertTrue($handler instanceof Responsable);
+
+        $exceptionAsJson = $handler->toResponse(request());
+
+        $this->assertTrue($exceptionAsJson instanceof JsonResponse);
+
+        $exceptionAsJsonString = $exceptionAsJson->__toString();
+
+        $this->assertStringContainsString('"status":"500"', $exceptionAsJsonString);
+        $this->assertStringContainsString('"title":"Internal server error."', $exceptionAsJsonString);
     }
 
     public function testJsonApiRenderableReturnsValidationExceptionAsFormatted422ErrorJson()
     {
-        $exceptionAsJson = Apiable::jsonApiRenderable(ValidationException::withMessages([
+        $handler = Apiable::jsonApiRenderable(ValidationException::withMessages([
             'email' => ['The email is incorrectly formatted.'],
             'password' => ['The password should have 6 characters or more.'],
-        ]), request());
+        ]));
+
+        $this->assertTrue($handler instanceof Responsable);
+
+        $exceptionAsJson = $handler->toResponse(request());
 
         $this->assertTrue($exceptionAsJson instanceof JsonResponse);
 
         $exceptionAsJsonString = $exceptionAsJson->__toString();
 
-        $this->assertStringContainsString('"code":422', $exceptionAsJsonString);
+        $this->assertStringContainsString('"status":"422"', $exceptionAsJsonString);
         $this->assertStringContainsString('"title":"The email is incorrectly formatted."', $exceptionAsJsonString);
         $this->assertStringContainsString('"source":{"pointer":"email"}', $exceptionAsJsonString);
 

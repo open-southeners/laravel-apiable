@@ -2,7 +2,6 @@
 
 namespace OpenSoutheners\LaravelApiable;
 
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
@@ -82,9 +81,11 @@ class Handler implements Responsable
      */
     protected function handleValidation($request): void
     {
-        foreach ($e->errors() as $errorSource => $errors) {
+        $status = $this->exception->getCode() ?: Response::HTTP_UNPROCESSABLE_ENTITY;
+
+        foreach ($this->exception->errors() as $errorSource => $errors) {
             foreach ($errors as $error) {
-                $this->jsonApiException->addError(title: $error, source: $errorSource, status: $statusCode);
+                $this->jsonApiException->addError(title: $error, source: $errorSource, status: $status);
             }
         }
     }
