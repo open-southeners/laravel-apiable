@@ -89,7 +89,7 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
 
             $values = array_filter(
                 explode(',', is_array($filterValue) ? reset($filterValue) : $filterValue),
-                fn ($value) => ! empty($value) && trim($value) !== ''
+                fn ($value) => (string) $value === '0' || (! empty($value) && trim($value) !== '')
             );
             $operator = array_keys($filterValues)[$i];
 
