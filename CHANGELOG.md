@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.4.2] - 2023-03-03
+
+### Fixed
+
+- Filters with negative values like `filter[attr]=0` won't be filtered out
+
 ## [3.4.1] - 2023-02-28
 
 ### Fixed
