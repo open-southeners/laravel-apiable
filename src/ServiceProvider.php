@@ -3,6 +3,7 @@
 namespace OpenSoutheners\LaravelApiable;
 
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
+use OpenSoutheners\LaravelApiable\Console\ApiableDocgenCommand;
 use OpenSoutheners\LaravelApiable\Support\Apiable;
 
 class ServiceProvider extends BaseServiceProvider
@@ -37,6 +38,8 @@ class ServiceProvider extends BaseServiceProvider
         });
 
         $this->registerMacros();
+
+        $this->commands([ApiableDocgenCommand::class]);
     }
 
     /**

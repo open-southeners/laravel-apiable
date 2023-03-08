@@ -28,20 +28,19 @@ trait AllowsFilters
      */
     public function filters(): array
     {
-        $queryStringArr = explode('&', $this->request->server('QUERY_STRING', ''));
         $filters = [];
 
-        foreach ($queryStringArr as $param) {
+        $this->queryParameters()->each(function ($param) use (&$filters) {
             $filterQueryParam = HeaderUtils::parseQuery($param);
 
             if (! is_array(head($filterQueryParam))) {
-                continue;
+                return;
             }
 
             $filterQueryParamAttribute = head(array_keys($filterQueryParam));
 
             if ($filterQueryParamAttribute !== 'filter') {
-                continue;
+                return;
             }
 
             $filterQueryParam = head($filterQueryParam);
@@ -51,11 +50,11 @@ trait AllowsFilters
             if (! isset($filters[$filterQueryParamAttribute])) {
                 $filters[$filterQueryParamAttribute] = [$filterQueryParamValue];
 
-                continue;
+                return;
             }
 
             $filters[$filterQueryParamAttribute][] = $filterQueryParamValue;
-        }
+        });
 
         return $filters;
     }
