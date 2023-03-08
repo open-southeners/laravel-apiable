@@ -5,9 +5,9 @@ namespace OpenSoutheners\LaravelApiable\Attributes;
 use Attribute;
 
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
-final class SearchQueryParam extends QueryParam
+class DocumentedEndpointSection
 {
-    public function __construct(public bool $allowSearch = true, public string $description = '')
+    public function __construct(public string|null $title = null, public string $description = '')
     {
         //
     }
