@@ -8,6 +8,7 @@ use OpenSoutheners\LaravelApiable\Attributes\ApplyDefaultFilter;
 use OpenSoutheners\LaravelApiable\Attributes\ApplyDefaultSort;
 use OpenSoutheners\LaravelApiable\Attributes\FieldsQueryParam;
 use OpenSoutheners\LaravelApiable\Attributes\FilterQueryParam;
+use OpenSoutheners\LaravelApiable\Attributes\ForceAppendAttribute;
 use OpenSoutheners\LaravelApiable\Attributes\IncludeQueryParam;
 use OpenSoutheners\LaravelApiable\Attributes\QueryParam;
 use OpenSoutheners\LaravelApiable\Attributes\SearchFilterQueryParam;
@@ -63,6 +64,7 @@ trait ResolvesFromRouteAction
             $attributeInstance = $allowedQueryParam->newInstance();
 
             match (true) {
+                $attributeInstance instanceof ForceAppendAttribute => $this->forceAppend($attributeInstance->type, $attributeInstance->attributes),
                 $attributeInstance instanceof SearchQueryParam => $this->allowSearch($attributeInstance->allowSearch),
                 $attributeInstance instanceof SearchFilterQueryParam => $this->allowSearchFilter($attributeInstance->attribute, $attributeInstance->values),
                 $attributeInstance instanceof FilterQueryParam => $this->allowFilter($attributeInstance->attribute, $attributeInstance->type, $attributeInstance->values),
