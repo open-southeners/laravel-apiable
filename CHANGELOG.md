@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.5.0] - 2023-03-21
+
+### Added
+
+- Backend now returns properly the `Content-Type=application/vnd.api+json` response header
+
 ## [3.4.2] - 2023-03-03
 
 ### Fixed
