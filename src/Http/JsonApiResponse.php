@@ -158,6 +158,8 @@ class JsonApiResponse implements Responsable, Arrayable
     {
         $response = $this->getResults()->toResponse($request);
 
+        $response->header('Content-Type', \OpenSoutheners\LaravelApiable\Http\Request::JSON_API_HEADER);
+
         if ($request->hasMacro('inertia') && method_exists($request, 'inertia') && $request->inertia()) {
             return $response->getData();
         }
