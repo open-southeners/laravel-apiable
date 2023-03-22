@@ -4,6 +4,7 @@ namespace OpenSoutheners\LaravelApiable\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\MissingValue;
+use OpenSoutheners\LaravelApiable\Http\Request;
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
 
 /**
@@ -115,17 +116,14 @@ class JsonApiResource extends JsonResource
     }
 
     /**
-     * Create an HTTP response that represents the object.
+     * Customize the response for a request.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
+     * @param  \Illuminate\Http\JsonResponse  $response
+     * @return void
      */
-    public function toResponse($request)
+    public function withResponse($request, $response)
     {
-        $response = parent::toResponse($request);
-
-        $response->header('Content-Type', \OpenSoutheners\LaravelApiable\Http\Request::JSON_API_HEADER);
-
-        return $response;
+        $response->header('Content-Type', Request::JSON_API_HEADER);
     }
 }
