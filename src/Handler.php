@@ -21,6 +21,9 @@ class Handler implements Responsable
         $this->jsonApiException = new JsonApiException();
     }
 
+    /**
+     * Check wether include error trace.
+     */
     protected function includesTrace(): bool
     {
         return (bool) ($this->withTrace ?? env('APP_DEBUG'));
@@ -40,14 +43,15 @@ class Handler implements Responsable
 
         return new JsonResponse(
             $this->jsonApiException->toArray(),
-            max(array_column($this->jsonApiException->getErrors(), 'status'))
+            max(array_column($this->jsonApiException->getErrors(), 'status')),
+            $this->exception instanceof HttpExceptionInterface ? $this->exception->getHeaders() : []
         );
     }
 
     /**
      * Handle any other type of exception.
-     * 
-     * @param \Illuminate\Http\Request $request
+     *
+     * @param  \Illuminate\Http\Request  $request
      */
     protected function handleException($request): void
     {
