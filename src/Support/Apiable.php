@@ -5,20 +5,16 @@ namespace OpenSoutheners\LaravelApiable\Support;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\QueryException;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\MissingValue;
 use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
 use OpenSoutheners\LaravelApiable\Contracts\JsonApiable;
 use OpenSoutheners\LaravelApiable\Handler;
 use OpenSoutheners\LaravelApiable\Http\JsonApiResponse;
 use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection;
 use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource;
-use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
 
 class Apiable
@@ -39,15 +35,15 @@ class Apiable
     /**
      * Format model or collection of models to JSON:API, false otherwise if not valid resource.
      */
-    public static function toJsonApi(mixed $resource): JsonApiResource|JsonApiCollection|false
+    public static function toJsonApi(mixed $resource): JsonApiResource|JsonApiCollection
     {
         return match (true) {
-            ! is_object($resource) => false,
+            ! is_object($resource) => new JsonApiCollection(Collection::make([])),
             $resource instanceof Collection, $resource instanceof JsonApiable => $resource->toJsonApi(),
             $resource instanceof Builder => $resource->jsonApiPaginate(),
             $resource instanceof LengthAwarePaginator => new JsonApiCollection($resource),
             $resource instanceof Model, $resource instanceof MissingValue => new JsonApiResource($resource),
-            default => false,
+            default => new JsonApiCollection(Collection::make([])),
         };
     }
 

@@ -4,6 +4,7 @@ namespace OpenSoutheners\LaravelApiable\Tests;
 
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 use OpenSoutheners\LaravelApiable\Http\AllowedAppends;
 use OpenSoutheners\LaravelApiable\Http\JsonApiResponse;
@@ -15,10 +16,10 @@ use OpenSoutheners\LaravelApiable\Tests\Fixtures\Post;
 
 class ApiableTest extends TestCase
 {
-    public function testToJsonApiReturnsFalseWhenValidInput()
+    public function testToJsonApiReturnsEmptyJsonApiCollectionWhenInvalidInput()
     {
-        $this->assertFalse(Apiable::toJsonApi(new \stdClass));
-        $this->assertFalse(Apiable::toJsonApi('test'));
+        $this->assertEquals(new JsonApiCollection(Collection::make([])), Apiable::toJsonApi(new \stdClass));
+        $this->assertEquals(new JsonApiCollection(Collection::make([])), Apiable::toJsonApi('test'));
     }
 
     public function testToJsonApiReturnsFormattedJsonWhenValidInput()
