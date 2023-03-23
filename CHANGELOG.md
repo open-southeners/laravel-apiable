@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.6.0] - 2023-03-23
+
+### Fixed
+
+- Inconsistent behaviour with `Apiable::toJsonApi()` returning false sometimes, now returns an API resource/collection all the time (**might be a breakchange therefore this was minor release**)
+
 ## [3.5.2] - 2023-03-23
 
 ### Fixed
