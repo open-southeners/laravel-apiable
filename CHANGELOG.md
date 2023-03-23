@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.5.2] - 2023-03-23
+
+### Fixed
+
+- `JsonApiResponse::conditionallyLoadResults()` method doesn't work as expected
+
 ## [3.5.1] - 2023-03-22
 
 ### Fixed
