@@ -77,13 +77,6 @@ class JsonApiResponse implements Responsable, Arrayable
         /** @var \Illuminate\Database\Eloquent\Builder|\OpenSoutheners\LaravelApiable\Contracts\ViewableBuilder $query */
         $query = is_string($modelOrQuery) ? $modelOrQuery::query() : clone $modelOrQuery;
 
-        if (
-            is_a($this->model, ViewQueryable::class, true)
-            || is_a($query, ViewableBuilder::class)
-        ) {
-            $query->viewable();
-        }
-
         $this->request->setQuery($query);
 
         return $this;
@@ -140,11 +133,21 @@ class JsonApiResponse implements Responsable, Arrayable
      */
     protected function getResults()
     {
+        $query = $this->buildPipeline()->query;
+
+        if (
+            Apiable::config('responses.viewable')
+            && (is_a($this->model, ViewQueryable::class, true)
+                || is_a($query, ViewableBuilder::class))
+        ) {
+            $query->viewable();
+        }
+
         return $this->resultPostProcessing(
             Apiable::toJsonApi(
                 $this->singleResourceResponse
-                    ? $this->buildPipeline()->query->first()
-                    : $this->buildPipeline()->query
+                    ? $query->first()
+                    : $query
             )
         );
     }
