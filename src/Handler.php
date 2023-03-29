@@ -2,6 +2,7 @@
 
 namespace OpenSoutheners\LaravelApiable;
 
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
@@ -65,6 +66,14 @@ class Handler implements Responsable
                 || method_exists($this->exception, 'getStatusCode')
         ) {
             $statusCode = $this->exception->getStatusCode();
+        }
+
+        /**
+         * When authentication exception need to return proper error code as Laravel framework
+         * is completely inconsistent with its exceptions...
+         */
+        if ($this->exception instanceof AuthenticationException) {
+            $statusCode = Response::HTTP_UNAUTHORIZED;
         }
 
         if (! $this->includesTrace()) {
