@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.7.0] - 2023-08-07
+
+### Added
+
+- `include_pivot_attributes` config option to optionally add pivot attributes to the relationships data (default to false to match previous functionality). Pivot data will be added as `pivot_name_pivot_attribute` (remember if you're using `as` it will use this one: https://laravel.com/docs/10.x/eloquent-relationships#customizing-the-pivot-attribute-name).
+
 ## [3.6.1] - 2023-03-29
 
 ### Fixed
