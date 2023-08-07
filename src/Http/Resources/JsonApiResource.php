@@ -86,22 +86,9 @@ class JsonApiResource extends JsonResource
      */
     protected function getAttributes()
     {
-        return array_filter(
-            array_merge($this->resource->attributesToArray(), $this->withAttributes()),
-            function ($value, $key) {
-                $result = $key !== $this->resource->getKeyName() && $value !== null;
-
-                if (! $result) {
-                    return false;
-                }
-
-                if (! (Apiable::config('responses.include_ids_on_attributes') ?? false)) {
-                    return last(explode('_id', $key)) !== '';
-                }
-
-                return true;
-            },
-            ARRAY_FILTER_USE_BOTH
+        return static::filterAttributes(
+            $this->resource,
+            array_merge($this->resource->attributesToArray(), $this->withAttributes())
         );
     }
 
@@ -125,5 +112,29 @@ class JsonApiResource extends JsonResource
     public function withResponse($request, $response)
     {
         $response->header('Content-Type', Request::JSON_API_HEADER);
+    }
+
+    /**
+     * Filter attributes of a resource.
+     */
+    public static function filterAttributes($model, array $attributes): array
+    {
+        return array_filter(
+            $attributes,
+            function ($value, $key) use ($model) {
+                $result = $key !== $model->getKeyName() && $value !== null;
+
+                if (! $result) {
+                    return false;
+                }
+
+                if (! (Apiable::config('responses.include_ids_on_attributes') ?? false)) {
+                    return last(explode('_id', $key)) !== '';
+                }
+
+                return true;
+            },
+            ARRAY_FILTER_USE_BOTH
+        );
     }
 }

@@ -37,6 +37,8 @@ trait RelationshipsWithIncludes
             }
 
             if ($relationObj instanceof DatabaseCollection) {
+                $this->relationships[$relation]['data'] = [];
+
                 /** @var \Illuminate\Database\Eloquent\Model $relationModel */
                 foreach ($relationObj->all() as $relationModel) {
                     $this->processModelRelation($relation, $relationModel);
@@ -44,6 +46,8 @@ trait RelationshipsWithIncludes
             }
 
             if ($relationObj instanceof Model) {
+                $this->relationships[$relation]['data'] = null;
+
                 $this->processModelRelation($relation, $relationObj);
             }
         }
@@ -64,21 +68,29 @@ trait RelationshipsWithIncludes
             return;
         }
 
-        $this->addIncluded($modelResource);
+        $resourceRelationshipData = [];
 
-        $this->relationships[$relation]['data'] = $modelIdentifier;
+        $resourceRelationshipData = $modelIdentifier;
 
         $pivotRelations = array_filter($model->getRelations(), fn ($relation) => $relation instanceof Pivot);
 
         foreach ($pivotRelations as $pivotRelation => $pivotRelationObj) {
-            $this->relationships[$relation]['data']['meta'] = array_merge(
-                $this->relationships[$relation]['data']['meta'] ?? [],
+            $resourceRelationshipData['meta'] = array_merge(
+                $resourceRelationshipData['meta'] ?? [],
                 Arr::mapWithKeys(
-                    $pivotRelationObj->getAttributes(),
+                    static::filterAttributes($pivotRelationObj, $pivotRelationObj->getAttributes()),
                     fn ($value, $key) => ["${pivotRelation}_${key}" => $value]
                 )
             );
         }
+
+        if (is_array($this->relationships[$relation]['data'])) {
+            $this->relationships[$relation]['data'][] = array_filter($resourceRelationshipData);
+        } else {
+            $this->relationships[$relation]['data'] = array_filter($resourceRelationshipData);
+        }
+
+        $this->addIncluded($modelResource);
     }
 
     /**
