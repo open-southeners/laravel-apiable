@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.8.0] - 2023-08-07
+
+### Changed
+
+- Pivot attributes now aren't configurable through `config/apiable.php`, they will always be applied as long as there are any under the relationship. They can be found under `relationships.data.*.meta` and keyed following the same as before: `pivot_name_pivot_attribute` (`pivot_name` being customisable through: https://laravel.com/docs/10.x/eloquent-relationships#customizing-the-pivot-attribute-name)
+
 ## [3.7.1] - 2023-08-07
 
 ### Fixed
