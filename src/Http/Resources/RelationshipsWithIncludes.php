@@ -21,11 +21,6 @@ trait RelationshipsWithIncludes
     protected array $relationships = [];
 
     /**
-     * The resource relationships' pivot attributes.
-     */
-    protected array $pivotAttributes = [];
-
-    /**
      * Attach relationships to the resource.
      */
     protected function attachModelRelations(): void
@@ -33,7 +28,7 @@ trait RelationshipsWithIncludes
         $relations = $this->resource->getRelations();
 
         foreach ($relations as $relation => $relationObj) {
-            if (! $relationObj || ($relationObj instanceof Pivot && ! Apiable::config('responses.include_pivot_attributes', false))) {
+            if (! $relationObj || $relationObj instanceof Pivot) {
                 continue;
             }
 
@@ -41,31 +36,15 @@ trait RelationshipsWithIncludes
                 $relation = Str::snake($relation);
             }
 
-            if ($relationObj instanceof Pivot) {
-                $this->pivotAttributes = array_merge(
-                    $this->pivotAttributes,
-                    Arr::mapWithKeys(
-                        $relationObj->getAttributes(),
-                        fn ($value, $key) => ["${relation}_${key}" => $value]
-                    )
-                );
-
-                continue;
-            }
-
             if ($relationObj instanceof DatabaseCollection) {
                 /** @var \Illuminate\Database\Eloquent\Model $relationModel */
                 foreach ($relationObj->all() as $relationModel) {
-                    $this->relationships[$relation]['data'][] = $this->processModelRelation(
-                        $relationModel
-                    );
+                    $this->processModelRelation($relation, $relationModel);
                 }
             }
 
             if ($relationObj instanceof Model) {
-                $this->relationships[$relation]['data'] = $this->processModelRelation(
-                    $relationObj
-                );
+                $this->processModelRelation($relation, $relationObj);
             }
         }
     }
@@ -75,19 +54,31 @@ trait RelationshipsWithIncludes
      *
      * @param  \OpenSoutheners\LaravelApiable\Contracts\JsonApiable|\Illuminate\Database\Eloquent\Model  $model
      */
-    protected function processModelRelation($model): array
+    protected function processModelRelation(string $relation, $model): void
     {
         /** @var \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource $modelResource */
         $modelResource = new self($model);
         $modelIdentifier = $modelResource->getResourceIdentifier();
 
-        if (! empty($modelIdentifier[$model->getKeyName()] ?? null)) {
-            $this->addIncluded($modelResource);
-
-            return $modelIdentifier;
+        if (empty($modelIdentifier[$model->getKeyName()] ?? null)) {
+            return;
         }
 
-        return [];
+        $this->addIncluded($modelResource);
+
+        $this->relationships[$relation]['data'] = $modelIdentifier;
+
+        $pivotRelations = array_filter($model->getRelations(), fn ($relation) => $relation instanceof Pivot);
+
+        foreach ($pivotRelations as $pivotRelation => $pivotRelationObj) {
+            $this->relationships[$relation]['data']['meta'] = array_merge(
+                $this->relationships[$relation]['data']['meta'] ?? [],
+                Arr::mapWithKeys(
+                    $pivotRelationObj->getAttributes(),
+                    fn ($value, $key) => ["${pivotRelation}_${key}" => $value]
+                )
+            );
+        }
     }
 
     /**

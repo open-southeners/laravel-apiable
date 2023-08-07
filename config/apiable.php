@@ -47,8 +47,6 @@ return [
         'viewable' => true,
 
         'include_ids_on_attributes' => false,
-
-        'include_pivot_attributes' => false,
     ],
 
 ];
