@@ -5,7 +5,6 @@ namespace OpenSoutheners\LaravelApiable\Http\Resources;
 use Illuminate\Database\Eloquent\Collection as DatabaseCollection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Pivot;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
@@ -75,13 +74,11 @@ trait RelationshipsWithIncludes
         $pivotRelations = array_filter($model->getRelations(), fn ($relation) => $relation instanceof Pivot);
 
         foreach ($pivotRelations as $pivotRelation => $pivotRelationObj) {
-            $resourceRelationshipData['meta'] = array_merge(
-                $resourceRelationshipData['meta'] ?? [],
-                Arr::mapWithKeys(
-                    static::filterAttributes($pivotRelationObj, $pivotRelationObj->getAttributes()),
-                    fn ($value, $key) => ["${pivotRelation}_${key}" => $value]
-                )
-            );
+            $resourceRelationshipDataMeta = static::filterAttributes($pivotRelationObj, $pivotRelationObj->getAttributes());
+
+            array_walk($resourceRelationshipDataMeta, fn ($value, $key) => ["${pivotRelation}_${key}" => $value]);
+
+            $resourceRelationshipData['meta'] = $resourceRelationshipDataMeta;
         }
 
         if (is_array($this->relationships[$relation]['data'])) {
