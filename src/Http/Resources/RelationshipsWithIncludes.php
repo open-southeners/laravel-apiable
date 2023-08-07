@@ -4,6 +4,7 @@ namespace OpenSoutheners\LaravelApiable\Http\Resources;
 
 use Illuminate\Database\Eloquent\Collection as DatabaseCollection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
@@ -19,6 +20,11 @@ trait RelationshipsWithIncludes
     protected array $relationships = [];
 
     /**
+     * The resource relationships' pivot attributes.
+     */
+    protected array $pivotAttributes = [];
+
+    /**
      * Attach relationships to the resource.
      */
     protected function attachModelRelations(): void
@@ -26,12 +32,24 @@ trait RelationshipsWithIncludes
         $relations = $this->resource->getRelations();
 
         foreach ($relations as $relation => $relationObj) {
-            if ($relation === 'pivot' || ! $relationObj) {
+            if (! $relationObj || ($relationObj instanceof Pivot && ! Apiable::config('responses.include_pivot_attributes', false))) {
                 continue;
             }
 
             if (Apiable::config('responses.normalize_relations') ?? false) {
                 $relation = Str::snake($relation);
+            }
+
+            if ($relationObj instanceof Pivot) {
+                $this->pivotAttributes = array_merge(
+                    $this->pivotAttributes,
+                    Arr::mapWithKeys(
+                        $relationObj->getAttributes(),
+                        fn ($value, $key) => ["${relation}_${key}" => $value]
+                    )
+                );
+
+                continue;
             }
 
             if ($relationObj instanceof DatabaseCollection) {

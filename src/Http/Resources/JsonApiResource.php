@@ -87,7 +87,7 @@ class JsonApiResource extends JsonResource
     protected function getAttributes()
     {
         return array_filter(
-            array_merge($this->resource->attributesToArray(), $this->withAttributes()),
+            array_merge($this->resource->attributesToArray(), $this->withAttributes(), $this->pivotAttributes),
             function ($value, $key) {
                 $result = $key !== $this->resource->getKeyName() && $value !== null;
 
