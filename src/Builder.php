@@ -15,7 +15,7 @@ class Builder
         /**
          * Paginate the given query using JSON:API.
          *
-         * @param  int|string  $perPage
+         * @param  int|string  $pageSize
          * @param  array  $columns
          * @param  int  $page
          * @return \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection
