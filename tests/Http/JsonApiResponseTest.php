@@ -23,8 +23,6 @@ class JsonApiResponseTest extends TestCase
 
     /**
      * Setup the test environment.
-     *
-     * @return void
      */
     public function setUp(): void
     {
