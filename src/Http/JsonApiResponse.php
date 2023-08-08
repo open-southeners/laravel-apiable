@@ -11,6 +11,8 @@ use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Traits\ForwardsCalls;
 use OpenSoutheners\LaravelApiable\Contracts\ViewableBuilder;
 use OpenSoutheners\LaravelApiable\Contracts\ViewQueryable;
+use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection;
+use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource;
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -25,14 +27,14 @@ class JsonApiResponse implements Responsable, Arrayable
 
     protected Pipeline $pipeline;
 
-    protected RequestQueryObject|null $request;
+    protected ?RequestQueryObject $request;
 
     /**
      * @var class-string<\Illuminate\Database\Eloquent\Model>|class-string<\OpenSoutheners\LaravelApiable\Contracts\ViewQueryable>
      */
     protected string $model;
 
-    protected bool|null $includeAllowedToResponse = null;
+    protected ?bool $includeAllowedToResponse = null;
 
     protected bool $singleResourceResponse = false;
 
@@ -41,12 +43,14 @@ class JsonApiResponse implements Responsable, Arrayable
      */
     protected array $forceAppends = [];
 
+    protected ?Closure $pagination = null;
+
     /**
      * Instantiate this class.
      *
      * @return void
      */
-    public function __construct(?Request $request = null)
+    public function __construct(Request $request = null)
     {
         $this->request = new RequestQueryObject($request);
 
@@ -119,7 +123,7 @@ class JsonApiResponse implements Responsable, Arrayable
     /**
      * Add allowed filters and sorts to the response meta.
      */
-    public function includeAllowedToResponse(bool|null $value = true): self
+    public function includeAllowedToResponse(?bool $value = true): self
     {
         $this->includeAllowedToResponse = $value;
 
@@ -144,11 +148,35 @@ class JsonApiResponse implements Responsable, Arrayable
         }
 
         return $this->resultPostProcessing(
-            Apiable::toJsonApi(
+            $this->serializeResponse(
                 $this->singleResourceResponse
                     ? $query->first()
                     : $query
             )
+        );
+    }
+
+    /**
+     * Return response using the following pagination method.
+     */
+    public function paginateUsing(Closure $closure): self
+    {
+        $this->pagination = $closure;
+
+        return $this;
+    }
+
+    /**
+     * Serialize response with pagination using a custom function that user provides or the default one.
+     *
+     * @param  \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder  $response
+     */
+    protected function serializeResponse(mixed $response): JsonApiCollection|JsonApiResource
+    {
+        return Apiable::toJsonApi(
+            $this->pagination
+                ? call_user_func_array($this->pagination, [$response])
+                : $response
         );
     }
 

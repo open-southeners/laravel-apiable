@@ -2,11 +2,10 @@
 
 namespace OpenSoutheners\LaravelApiable\Support;
 
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Resources\MissingValue;
-use Illuminate\Http\Response;
+use Illuminate\Pagination\AbstractPaginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -41,7 +40,7 @@ class Apiable
             ! is_object($resource) => new JsonApiCollection(Collection::make([])),
             $resource instanceof Collection, $resource instanceof JsonApiable => $resource->toJsonApi(),
             $resource instanceof Builder => $resource->jsonApiPaginate(),
-            $resource instanceof LengthAwarePaginator => new JsonApiCollection($resource),
+            $resource instanceof AbstractPaginator => new JsonApiCollection($resource),
             $resource instanceof Model, $resource instanceof MissingValue => new JsonApiResource($resource),
             default => new JsonApiCollection(Collection::make([])),
         };
@@ -71,7 +70,7 @@ class Apiable
     /**
      * Transforms error rendering to a JSON:API complaint error response.
      */
-    public static function jsonApiRenderable(Throwable $e, bool|null $withTrace = null): Handler
+    public static function jsonApiRenderable(Throwable $e, bool $withTrace = null): Handler
     {
         return new Handler($e, $withTrace);
     }
