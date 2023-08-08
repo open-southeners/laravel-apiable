@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.9.0] - 2023-08-08
+
+### Added
+
+- `JsonApiResponse::paginateUsing(fn ($query) => $query->simplePaginate())` method to customise pagination used in JSON API responses.
+
 ## [3.8.0] - 2023-08-07
 
 ### Changed
