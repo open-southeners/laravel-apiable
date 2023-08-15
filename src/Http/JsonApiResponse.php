@@ -8,6 +8,7 @@ use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\Request;
 use Illuminate\Pipeline\Pipeline;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Traits\ForwardsCalls;
 use OpenSoutheners\LaravelApiable\Contracts\ViewableBuilder;
 use OpenSoutheners\LaravelApiable\Contracts\ViewQueryable;
@@ -144,7 +145,7 @@ class JsonApiResponse implements Responsable, Arrayable
             && (is_a($this->model, ViewQueryable::class, true)
                 || is_a($query, ViewableBuilder::class))
         ) {
-            $query->viewable();
+            $query->viewable(Auth::user());
         }
 
         return $this->resultPostProcessing(
