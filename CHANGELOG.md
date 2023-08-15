@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.9.1] - 2023-08-15
+
+### Fixed
+
+- `JsonApiResponse` using viewable builder (query scopes to filter by view permission) didn't send any user as first parameter
+
 ## [3.9.0] - 2023-08-08
 
 ### Added
