@@ -76,7 +76,7 @@ trait RelationshipsWithIncludes
         foreach ($pivotRelations as $pivotRelation => $pivotRelationObj) {
             $resourceRelationshipDataMeta = static::filterAttributes($pivotRelationObj, $pivotRelationObj->getAttributes());
 
-            array_walk($resourceRelationshipDataMeta, fn ($value, $key) => ["${pivotRelation}_${key}" => $value]);
+            array_walk($resourceRelationshipDataMeta, fn ($value, $key) => ["{$pivotRelation}_{$key}" => $value]);
 
             $resourceRelationshipData['meta'] = $resourceRelationshipDataMeta;
         }
