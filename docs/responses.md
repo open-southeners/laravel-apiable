@@ -1,12 +1,10 @@
 ---
-layout: default
-title: Responses
-category: Introduction
+description: >-
+  For your API controllers responses you've multiple ways to transform your
+  models or collection of models to JSON:API, here we list all of them.
 ---
 
 # Responses
-
-For your API controllers responses you've multiple ways to transform your models or collection of models to JSON:API, here we list all of them.
 
 ## Custom resource type
 
@@ -38,9 +36,9 @@ class Post extends Model implements JsonApiable
 }
 ```
 
-::: tip
+{% hint style="info" %}
 Just remember to check the allowed types in [the oficial JSON:API spec](https://jsonapi.org/format/#document-member-names).
-:::
+{% endhint %}
 
 ## Custom API resource class
 
@@ -102,34 +100,29 @@ class PostResource extends JsonApiResource
 
 ## Using JsonApiResponse to create API responses
 
-::: tip
-For the requests side with features like allowing specific filters, sorts, etc., you should [check our Request section](requests.md).
-:::
-
 ### List of resources
 
-::: tip
-This will get a paginated response. In case you've install [hammerstone/fast-paginate](https://github.com/hammerstonedev/fast-paginate) it will use fastPaginate to make it faster.
-:::
+{% hint style="info" %}
+This will get a paginated response. In case you've install [hammerstone/fast-paginate](https://github.com/hammerstonedev/fast-paginate) it will use fastPaginate method to make it faster.
+{% endhint %}
 
 To get a list (wrapped in a `JsonApiCollection`) of your resources query you should do the following:
 
 ```php
-JsonApiResponse::from(Film::where('title', 'LIKE', 'The%'))->list();
+JsonApiResponse::from(Film::where('title', 'LIKE', 'The%'));
+```
+
+In case you want to customise the pagination used you can actually use the `paginateUsing` method:
+
+```php
+JsonApiResponse::paginateUsing(fn ($query) => $query->simplePaginate());
 ```
 
 ### One resource by key
 
-And to get a single resource you can do the following:
+You can still use apiable responses to get one result:
 
 ```php
-JsonApiResponse::from(Film::class)->getOne(1);
+JsonApiResponse::from(Film::class)->gettingOne();
 ```
 
-But **you are not only limited to send a key**, you could also send a model instance, as long as it has the key (`id` by default in Laravel) available:
-
-```php
-$film = Film::first();
-
-JsonApiResponse::from(Film::class)->getOne($film);
-```

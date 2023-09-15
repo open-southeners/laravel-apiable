@@ -1,19 +1,23 @@
 ---
-layout: default
-title: Requests
-category: Introduction
+description: >-
+  Allow requests through your application to send specific parameters like
+  filters, includes, appends, fields, sorts and search.
 ---
 
 # Requests
 
 As a new addition to this package, you can now allow your users to use:
 
-- Filters by attributes or local query scopes.
-- Include model relationships.
-- Append model accessors ([learn more about them](https://laravel.com/docs/master/eloquent-serialization#appending-values-to-json)).
-- Select fields from the database ([sparse fieldset](https://jsonapi.org/format/#fetching-sparse-fieldsets)).
-- Sort by attributes.
-- Perform a fulltext search (using [Laravel Scout](https://laravel.com/docs/master/scout)).
+* Filters by attributes or local query scopes.
+* Include model relationships.
+* Append model accessors ([learn more about them](https://laravel.com/docs/master/eloquent-serialization#appending-values-to-json)).
+* Select fields from the database ([sparse fieldset](https://jsonapi.org/format/#fetching-sparse-fieldsets)).
+* Sort by attributes.
+* Perform a full-text search (using [Laravel Scout](https://laravel.com/docs/master/scout)).
+
+{% hint style="info" %}
+Remember that there are 2 ways to achieve the exact same behaviour on this package, you can use [PHP Attributes](https://www.php.net/manual/en/language.attributes.overview.php) or normal methods. Advantage of these is that **attributes can be at the method or class level.**
+{% endhint %}
 
 All of the following being conditionally allowed by you on your controllers, like the following example:
 
@@ -33,14 +37,16 @@ public function index()
             AllowedSort::make('created_at'),
             AllowedSort::make('user_id'),
             AllowedInclude::make('author'),
-        ])->list();
+        ]);
 }
 ```
 
 ## Allow includes
 
-You can allow users to include relationships to the JSON:API response like so:
+You can allow users to include relationships to the JSON:API response.
 
+{% tabs %}
+{% tab title="Using methods" %}
 ```php
 JsonApiResponse::from(Film::class)->allowing([
   AllowedInclude::make('author'),
@@ -57,35 +63,43 @@ JsonApiResponse::from(Film::class)->allowing([
 ]);
 ```
 
-Or even use a "less-generic" method like `allowIncludes`:
+Or using a more specific method like `allowIncludes`:
 
 ```php
 JsonApiResponse::from(Film::class)->allowInclude('author');
 
 // or
 
-JsonApiResponse::from(Film::class)->allowInclude(AllowedInclude::make('author'));
+JsonApiResponse::from(Film::class)
+    ->allowInclude(AllowedInclude::make('author'));
 ```
+{% endtab %}
+
+{% tab title="Using attributes" %}
+```php
+#[IncludeQueryParam('author')]
+#[IncludeQueryParam('author.reviews')]
+public function index(JsonApiResponse $response)
+{
+    return $response->using(Post::class);
+}
+```
+{% endtab %}
+{% endtabs %}
 
 ## Allow sorts
 
-::: tip
-Remember that you can use `OpenSoutheners\LaravelApiable\Http\SortDirection` enum, **only if you're using PHP 8.1+**.
-:::
+You can allow your users to sort by descendant or ascendant order (or both, **which is the default behaviour**).
 
-You can allow your users to sort by descendant or ascendant order (or both, **which is the default behaviour**):
-
-<CodeGroup>
-  <CodeGroupItem title="BOTH">
-
+{% tabs %}
+{% tab title="Using methods" %}
 ```php
 JsonApiResponse::from(Film::class)->allowing([
   AllowedSort::make('created_at'),
 ]);
 ```
 
-  </CodeGroupItem>
-  <CodeGroupItem title="ASCENDANT">
+As top uses the direction defined in the config as default you can specify a direction instead as the following for ascendant:
 
 ```php
 JsonApiResponse::from(Film::class)->allowing([
@@ -94,7 +108,9 @@ JsonApiResponse::from(Film::class)->allowing([
 
 // or
 
-JsonApiResponse::from(Film::class)->allowSort(AllowedSort::ascendant('created_at'));
+JsonApiResponse::from(Film::class)->allowSort(
+  AllowedSort::ascendant('created_at')
+);
 
 // or
 
@@ -105,8 +121,7 @@ JsonApiResponse::from(Film::class)->allowSort('created_at', 'asc');
 JsonApiResponse::from(Film::class)->allowSort('created_at', SortDirection::ASCENDANT->value);
 ```
 
-  </CodeGroupItem>
-  <CodeGroupItem title="DESCENDANT">
+Or using descendant direction:
 
 ```php
 JsonApiResponse::from(Film::class)->allowing([
@@ -115,7 +130,9 @@ JsonApiResponse::from(Film::class)->allowing([
 
 // or
 
-JsonApiResponse::from(Film::class)->allowSort(AllowedSort::descendant('created_at'));
+JsonApiResponse::from(Film::class)->allowSort(
+  AllowedSort::descendant('created_at')
+);
 
 // or
 
@@ -125,64 +142,62 @@ JsonApiResponse::from(Film::class)->allowSort('created_at', 'desc');
 
 JsonApiResponse::from(Film::class)->allowSort('created_at', SortDirection::DESCENDANT->value);
 ```
+{% endtab %}
 
-  </CodeGroupItem>
-</CodeGroup>
+{% tab title="Using attributes" %}
+<pre class="language-php"><code class="lang-php">#[SortQueryParam('created_at')]
+#[SortQueryParam('review_points', AllowedSort::ASCENDANT)]
+public function index(JsonApiResponse $response)
+{
+<strong>    JsonApiResponse::from(Film::class);
+</strong>}
+</code></pre>
+{% endtab %}
+{% endtabs %}
 
 ## Allow filters
 
-::: tip
-Remember that an `exact` filter is using `LIKE` comparison at the end (on the database), while an exact is using `MATCH` (or `=`). Use them depending of your case. **By default it uses `LIKE` comparison.**
-:::
+{% hint style="info" %}
+Remember that a `similar` filter is using `LIKE` comparison at the end (on the database), while an exact is using `MATCH` (or `=`). Use them depending of your case. **By default it uses `LIKE` comparison.**
+{% endhint %}
 
-::: tip
-Also filters automatically detects wether you have a scope or an attribute.
-:::
+You can allow your users to filter by a model attribute or its relation's attributes.
 
-You can allow your users to filter by a model attribute or its relation's attributes:
-
-<CodeGroup>
-  <CodeGroupItem title="DEFAULT">
+{% tabs %}
+{% tab title="Using methods" %}
+By default will use similar (LIKE) but you may change this in the `config/apiable.php` file:
 
 ```php
 JsonApiResponse::from(Film::class)->allowing([
   AllowedFilter::make('title'),
-  AllowedFilter::make('author.name'),
 ]);
 ```
 
-  </CodeGroupItem>
-  <CodeGroupItem title="SIMILAR">
+You can also specify any method you like:
 
 ```php
 JsonApiResponse::from(Film::class)->allowing([
   AllowedFilter::similar('title'),
-  AllowedFilter::similar('author.name'),
-]);
-```
-
-  </CodeGroupItem>
-  <CodeGroupItem title="EXACT">
-
-```php
-JsonApiResponse::from(Film::class)->allowing([
-  AllowedFilter::exact('title'),
   AllowedFilter::exact('author.name'),
+  AllowedFilter::greaterThan('review_points'),
+  AllowedFilter::greaterOrEqualThan('review_points'),
+  AllowedFilter::lowerThan('review_points'),
+  AllowedFilter::lowerOrEqualThan('review_points'),
 ]);
 ```
 
-  </CodeGroupItem>
-  
-  <CodeGroupItem title="SCOPE">
+Scoped filters might be used if you want to filter using Eloquent's query scopes:
 
 ```php
 JsonApiResponse::from(Film::class)->allowing([
   AllowedFilter::scoped('active'),
 ]);
-```
 
-  </CodeGroupItem>
-</CodeGroup>
+// or
+
+JsonApiResponse::from(Film::class)
+  ->allowFilter('active', AllowedFilter::SCOPE);
+```
 
 And even restrict what they can use for filter on each filter like so:
 
@@ -192,15 +207,35 @@ JsonApiResponse::from(Film::class)->allowing([
   AllowedFilter::exact('author.name', ['Rubén Robles', 'Taylor Otwell']),
 ]);
 ```
+{% endtab %}
+
+{% tab title="Using attributes" %}
+```php
+#[FilterQueryParam('title', AllowedFilter::SIMILAR)]
+#[FilterQueryParam('author.name', AllowedFilter::EXACT, ['Rubén Robles', 'Taylor Otwell'])]
+#[FilterQueryParam('review_points', AllowedFilter::GREATER_THAN)]
+#[FilterQueryParam('review_points', AllowedFilter::GREATER_OR_EQUAL_THAN)]
+#[FilterQueryParam('review_points', AllowedFilter::LOWER_THAN)]
+#[FilterQueryParam('review_points', AllowedFilter::LOWER_OR_EQUAL_THAN)]
+#[FilterQueryParam('active', AllowedFilter::SCOPE)]
+public function index(JsonApiResponse $response)
+{
+    JsonApiResponse::from(Film::class);
+}
+```
+{% endtab %}
+{% endtabs %}
 
 ## Allow fields (sparse fieldset)
 
-::: tip
-This part just fully complaints with JSON:API, while the `allowAppends` doesn't as it's something adapted to Laravel.
-:::
+{% hint style="info" %}
+This part just fully complaints with JSON:API, while the `allowAppends` doesn't as it's something specially adapted to Laravel.
+{% endhint %}
 
-You can allow fields by resource type like so:
+Allow fields will limit the columns selected by the database query being ran by Laravel.
 
+{% tabs %}
+{% tab title="Using methods" %}
 ```php
 JsonApiResponse::from(Film::class)->allowing([
   AllowedFields::make('film', ['title', 'shortDescription', 'description', 'created_by']),
@@ -214,10 +249,39 @@ JsonApiResponse::from(Film::class)
   ->allowFields('user', ['name', 'email']);
 ```
 
+You can also use models in replace of that first argument (the resource type):
+
+```php
+JsonApiResponse::from(Film::class)
+  ->allowFields(User::class, ['is_active']);
+```
+
+Or directly an array as first argument to append to the main response resource (in this case film):
+
+```php
+JsonApiResponse::from(Film::class)
+  ->allowFields(['is_published']);
+```
+{% endtab %}
+
+{% tab title="Using attributes" %}
+```php
+#[FieldsQueryParam('film', ['title', 'shortDescription', 'description', 'created_by'])]
+#[FieldsQueryParam(User::class, ['name', 'email'])]
+public function index(JsonApiResponse $response)
+{
+    JsonApiResponse::from(Film::class);
+}
+```
+{% endtab %}
+{% endtabs %}
+
 ## Allow appends
 
-Same as allowing fields by resource type but this will append [Model accessors]() after the query is done:
+Same as allowing fields by resource type but this will append [Model accessors](broken-reference) after the query is done.
 
+{% tabs %}
+{% tab title="Using methods" %}
 ```php
 JsonApiResponse::from(Film::class)->allowing([
   AllowedAppends::make('user', ['is_active']),
@@ -225,37 +289,75 @@ JsonApiResponse::from(Film::class)->allowing([
 
 // or
 
-JsonApiResponse::from(Film::class)->allowAppends('user', ['is_active']);
+JsonApiResponse::from(Film::class)
+  ->allowAppends('user', ['is_active']);
 ```
 
-## Allow search <Badge type="tip" text="1.0.0" vertical="middle" />
+You can also use models in replace of that first argument (the resource type):
 
-::: danger
+```php
+JsonApiResponse::from(Film::class)
+  ->allowAppends(User::class, ['is_active']);
+```
+
+Or directly an array as first argument to append to the main response resource (in this case film):
+
+```php
+JsonApiResponse::from(Film::class)
+  ->allowAppends(['is_published']);
+```
+{% endtab %}
+
+{% tab title="Using attributes" %}
+```php
+#[AppendsQueryParam('film', ['is_published'])]
+#[AppendsQueryParam(User::class, ['is_active'])]
+public function index(JsonApiResponse $response)
+{
+    JsonApiResponse::from(Film::class);
+}
+```
+{% endtab %}
+{% endtabs %}
+
+## Allow search
+
+{% hint style="info" %}
 This feature is only available for proper setup of [Laravel Scout](https://laravel.com/docs/master/scout#installation) in your model.
-:::
+{% endhint %}
 
-You can also allow fulltext search (by sending `yourapi.com/?q=search_query` or `yourapi.com/?search=search_query`) to users like this:
+You can also perform full-text search with this package with the help of Laravel Scout. So the frontend should send something like `yourapi.com/?q=search_query` or `yourapi.com/?search=search_query`) to perform a search if allowed by the backend.
 
+{% tabs %}
+{% tab title="Using methods" %}
 ```php
 JsonApiResponse::from(Film::class)->allowSearch();
 ```
+{% endtab %}
+
+{% tab title="Using attributes" %}
+```php
+#[SearchQueryParam()]
+public function index(JsonApiResponse $response)
+{
+    JsonApiResponse::from(Film::class);
+}
+```
+{% endtab %}
+{% endtabs %}
 
 ## Include allowed filters & sorts on the response
 
 If you have a table or a component in the frontend that needs to know about what can be filtered or sorted by, you may want to add this to your JSON:API response:
 
-<CodeGroup>
-  <CodeGroupItem title="BACKEND">
-
 ```php
 JsonApiResponse::from(Film::class)->allowing([
   AllowedFilter::similar('title'),
   AllowedSort::ascendant('created_at'),
-])->includeAllowedToResponse()->list();
+])->includeAllowedToResponse();
 ```
 
-  </CodeGroupItem>
-  <CodeGroupItem title="RESPONSE">
+Then the response payload will look like this:
 
 ```json
 {
@@ -336,6 +438,3 @@ JsonApiResponse::from(Film::class)->allowing([
   }
 }
 ```
-
-  </CodeGroupItem>
-</CodeGroup>

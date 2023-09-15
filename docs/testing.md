@@ -1,12 +1,10 @@
 ---
-layout: default
-title: Testing
-category: Digging deeper
+description: >-
+  This package also have some testing utilities built on top of PHPUnit and
+  Laravel's framework assertions.
 ---
 
 # Testing
-
-This package also have some testing utilities built on top of PHPUnit and Laravel's framework assertions.
 
 ## Assertions
 
@@ -17,8 +15,6 @@ $response = $this->getJson('/posts');
 
 $response->assertJsonApi();
 ```
-
-[[toc]]
 
 ### at
 
@@ -64,7 +60,7 @@ $response->assertJsonApi(function (AssertableJsonApi $assert) {
 });
 ```
 
-### hasNotAttribute <Badge type="tip" text="1.1.0" vertical="middle" />
+### hasNotAttribute
 
 Assert the resource does not has the specified attribute key and value.
 
@@ -95,7 +91,7 @@ $response->assertJsonApi(function (AssertableJsonApi $assert) {
 });
 ```
 
-### hasNotAttributes <Badge type="tip" text="1.1.0" vertical="middle" />
+### hasNotAttributes
 
 Assert the resource does not has the specified attributes keys and values.
 
