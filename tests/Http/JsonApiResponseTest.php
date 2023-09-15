@@ -247,6 +247,82 @@ class JsonApiResponseTest extends TestCase
         });
     }
 
+    public function testSortingBelongsToManyRelationshipFieldAsAscendant()
+    {
+        Route::get('/', function () {
+            return JsonApiResponse::from(Post::class)
+                ->allowing([
+                    AllowedSort::ascendant('tags.name'),
+                ]);
+        });
+
+        $response = $this->getJson('/?sort=tags.name');
+
+        $response->assertJsonApi(function (AssertableJsonApi $assert) {
+            $assert->isCollection();
+            
+            $assert->at(0)->hasAttribute('title', 'Hola mundo');
+            $assert->at(1)->hasAttribute('title', 'My first test');
+        });
+    }
+
+    public function testSortingBelongsToManyRelationshipFieldAsDescendant()
+    {
+        Route::get('/', function () {
+            return JsonApiResponse::from(Post::class)
+                ->allowing([
+                    AllowedSort::descendant('tags.name'),
+                ]);
+        });
+
+        $response = $this->getJson('/?sort=-tags.name');
+
+        $response->assertJsonApi(function (AssertableJsonApi $assert) {
+            $assert->isCollection();
+            
+            $assert->at(0)->hasAttribute('title', 'Hello world');
+            $assert->at(1)->hasAttribute('title', 'Y esto en español');
+        });
+    }
+
+    public function testSortingBelongsToRelationshipFieldAsAscendant()
+    {
+        Route::get('/', function () {
+            return JsonApiResponse::from(Post::class)
+                ->allowing([
+                    AllowedSort::ascendant('author.name'),
+                ]);
+        });
+
+        $response = $this->getJson('/?sort=author.name');
+
+        $response->assertJsonApi(function (AssertableJsonApi $assert) {
+            $assert->isCollection();
+            
+            $assert->at(0)->hasAttribute('title', 'My first test');
+            $assert->at(1)->hasAttribute('title', 'Y esto en español');
+        });
+    }
+
+    public function testSortingBelongsToRelationshipFieldAsDescendant()
+    {
+        Route::get('/', function () {
+            return JsonApiResponse::from(Post::class)
+                ->allowing([
+                    AllowedSort::descendant('author.name'),
+                ]);
+        });
+
+        $response = $this->getJson('/?sort=-author.name');
+
+        $response->assertJsonApi(function (AssertableJsonApi $assert) {
+            $assert->isCollection();
+            
+            $assert->at(0)->hasAttribute('title', 'Hello world');
+            $assert->at(1)->hasAttribute('title', 'Y esto en español');
+        });
+    }
+
     public function testAddingFieldsAsModelAppendedAttributes()
     {
         Route::get('/', function () {

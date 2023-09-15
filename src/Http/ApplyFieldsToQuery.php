@@ -17,6 +17,8 @@ class ApplyFieldsToQuery implements HandlesRequestQueries
      */
     public function from(RequestQueryObject $request, Closure $next)
     {
+        $request->query->select($request->query->getModel()->qualifyColumn('*'));
+
         if (empty($request->fields()) || empty($request->getAllowedFields())) {
             return $next($request);
         }
@@ -33,7 +35,7 @@ class ApplyFieldsToQuery implements HandlesRequestQueries
      */
     protected function applyFields(Builder $query, array $fields)
     {
-        /** @var \OpenSoutheners\LaravelApiable\Contracts\JsonApiable|\Illuminate\Database\Eloquent\Model */
+        /** @var \OpenSoutheners\LaravelApiable\Contracts\JsonApiable|\Illuminate\Database\Eloquent\Model $mainQueryModel */
         $mainQueryModel = $query->getModel();
         $mainQueryResourceType = Apiable::getResourceType($mainQueryModel);
         $queryEagerLoaded = $query->getEagerLoads();
@@ -45,10 +47,10 @@ class ApplyFieldsToQuery implements HandlesRequestQueries
             $matchedFn = match (true) {
                 $mainQueryResourceType === $type => function () use ($query, $mainQueryModel, $columns) {
                     if (! in_array($mainQueryModel->getKeyName(), $columns)) {
-                        $columns[] = $mainQueryModel->getKeyName();
+                        $columns[] = $mainQueryModel->getQualifiedKeyName();
                     }
 
-                    $query->select($columns);
+                    $query->select($mainQueryModel->qualifyColumns($columns));
                 },
                 in_array($typeModel, $queryEagerLoaded) => fn () => $query->with($type, function (Builder $query) use ($queryEagerLoaded, $type, $columns) {
                     $relatedModel = $query->getModel();
@@ -57,7 +59,7 @@ class ApplyFieldsToQuery implements HandlesRequestQueries
                         $columns[] = $relatedModel->getKeyName();
                     }
 
-                    $queryEagerLoaded[$type]($query->select($columns));
+                    $queryEagerLoaded[$type]($query->select($relatedModel->qualifyColumns($columns)));
                 }),
                 default => fn () => null,
             };
