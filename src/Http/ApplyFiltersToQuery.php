@@ -29,13 +29,11 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
      */
     public function from(RequestQueryObject $request, Closure $next)
     {
-        if (empty($request->filters())) {
-            return $next($request);
-        }
-
         $this->allowed = $request->getAllowedFilters();
 
-        $this->applyFilters($request->query, $request->userAllowedFilters());
+        $userFilters = $request->userAllowedFilters() ?: $request->getDefaultFilters();
+
+        $this->applyFilters($request->query, $userFilters);
 
         return $next($request);
     }

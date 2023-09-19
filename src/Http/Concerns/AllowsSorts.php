@@ -4,6 +4,7 @@ namespace OpenSoutheners\LaravelApiable\Http\Concerns;
 
 use Exception;
 use OpenSoutheners\LaravelApiable\Http\AllowedSort;
+use OpenSoutheners\LaravelApiable\Http\DefaultSort;
 
 /**
  * @mixin \OpenSoutheners\LaravelApiable\Http\RequestQueryObject
@@ -13,7 +14,12 @@ trait AllowsSorts
     /**
      * @var array<string, string>
      */
-    protected $allowedSorts = [];
+    protected array $allowedSorts = [];
+
+    /**
+     * @var array<string, string>
+     */
+    protected array $defaultSorts = [];
 
     /**
      * Get user sorts from request.
@@ -60,6 +66,24 @@ trait AllowsSorts
     }
 
     public function userAllowedSorts()
+    /**
+     * Default sort by the following attribute and direction when no user sorts are being applied.
+     *
+     * @param  \OpenSoutheners\LaravelApiable\Http\DefaultSort|array<string>|string  $attribute
+     * @param  int|null  $direction
+     */
+    public function applyDefaultSort($attribute, $direction = null): self
+    {
+        $this->defaultSorts = array_merge(
+            $this->defaultSorts,
+            $attribute instanceof DefaultSort
+                ? $attribute->toArray()
+                : (new DefaultSort($attribute, $direction))->toArray(),
+
+        );
+
+        return $this;
+    }
     {
         return $this->validator($this->sorts())
             ->givingRules($this->allowedSorts)
@@ -81,5 +105,15 @@ trait AllowsSorts
     public function getAllowedSorts()
     {
         return $this->allowedSorts;
+    }
+
+    /**
+     * Get list of default sorts with their directions.
+     *
+     * @return array<string, string>
+     */
+    public function getDefaultSorts(): array
+    {
+        return $this->defaultSorts;
     }
 }

@@ -18,14 +18,9 @@ class ApplySortsToQuery implements HandlesRequestQueries
      */
     public function from(RequestQueryObject $request, Closure $next)
     {
-        if (empty($request->sorts())) {
-            return $next($request);
-        }
+        $userSorts = $request->userAllowedSorts() ?: $request->getDefaultSorts();
 
-        $this->applySorts(
-            $request->query,
-            $request->userAllowedSorts()
-        );
+        $this->applySorts($request->query, $userSorts);
 
         return $next($request);
     }

@@ -4,6 +4,8 @@ namespace OpenSoutheners\LaravelApiable\Http\Concerns;
 
 use Illuminate\Support\Facades\Route;
 use OpenSoutheners\LaravelApiable\Attributes\AppendsQueryParam;
+use OpenSoutheners\LaravelApiable\Attributes\ApplyDefaultFilter;
+use OpenSoutheners\LaravelApiable\Attributes\ApplyDefaultSort;
 use OpenSoutheners\LaravelApiable\Attributes\FieldsQueryParam;
 use OpenSoutheners\LaravelApiable\Attributes\FilterQueryParam;
 use OpenSoutheners\LaravelApiable\Attributes\IncludeQueryParam;
@@ -53,7 +55,9 @@ trait ResolvesFromRouteAction
     protected function resolveAttributesFrom($reflected)
     {
         $allowedQueryParams = array_filter($reflected->getAttributes(), function (ReflectionAttribute $attribute) {
-            return is_subclass_of($attribute->getName(), QueryParam::class);
+            return is_subclass_of($attribute->getName(), QueryParam::class)
+                || $attribute->getName() === ForceAppendAttribute::class
+                || in_array($attribute->getName(), [ApplyDefaultFilter::class, ApplyDefaultSort::class]);
         });
 
         foreach ($allowedQueryParams as $allowedQueryParam) {
@@ -67,6 +71,8 @@ trait ResolvesFromRouteAction
                 $attributeInstance instanceof IncludeQueryParam => $this->allowInclude($attributeInstance->relationships),
                 $attributeInstance instanceof FieldsQueryParam => $this->allowFields($attributeInstance->type, $attributeInstance->fields),
                 $attributeInstance instanceof AppendsQueryParam => $this->allowAppends($attributeInstance->type, $attributeInstance->attributes),
+                $attributeInstance instanceof ApplyDefaultSort => $this->applyDefaultSort($attributeInstance->attribute, $attributeInstance->direction),
+                $attributeInstance instanceof ApplyDefaultFilter => $this->applyDefaultFilter($attributeInstance->attribute, $attributeInstance->operator, $attributeInstance->values),
                 default => null,
             };
         }

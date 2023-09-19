@@ -4,6 +4,7 @@ namespace OpenSoutheners\LaravelApiable\Http\Concerns;
 
 use Exception;
 use OpenSoutheners\LaravelApiable\Http\AllowedFilter;
+use OpenSoutheners\LaravelApiable\Http\DefaultFilter;
 use OpenSoutheners\LaravelApiable\Support\Apiable;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 
@@ -16,6 +17,11 @@ trait AllowsFilters
      * @var array<string, array>
      */
     protected array $allowedFilters = [];
+
+    /**
+     * @var array<string, array>
+     */
+    protected array $defaultFilters = [];
 
     /**
      * Get user filters from request.
@@ -81,6 +87,31 @@ trait AllowsFilters
     }
 
     /**
+     * Default filter by the following attribute and direction when no user filters are being applied.
+     *
+     * @param  \OpenSoutheners\LaravelApiable\Http\DefaultFilter|string  $attribute
+     * @param  array<string>|string|int  $operator
+     * @param  array<string>|string  $values
+     */
+    public function applyDefaultFilter($attribute, $operator = ['*'], $values = ['*']): self
+    {
+        if ($values === ['*'] && (is_array($operator) || is_string($operator))) {
+            $values = $operator;
+
+            $operator = null;
+        }
+
+        $this->defaultFilters = array_merge_recursive(
+            $this->defaultFilters,
+            $attribute instanceof DefaultFilter
+                ? $attribute->toArray()
+                : (new DefaultFilter($attribute, $operator, $values))->toArray()
+        );
+
+        return $this;
+    }
+
+    /**
      * Allow filter by scope and pattern of value(s).
      *
      * @param  array<string>|string  $value
@@ -122,5 +153,15 @@ trait AllowsFilters
     public function getAllowedFilters(): array
     {
         return $this->allowedFilters;
+    }
+
+    /**
+     * Get list of default filters.
+     *
+     * @return array<string, array>
+     */
+    public function getDefaultFilters(): array
+    {
+        return $this->defaultFilters;
     }
 }
