@@ -46,6 +46,8 @@ class JsonApiResponse implements Arrayable, Responsable
 
     protected ?Closure $pagination = null;
 
+    protected bool $forcesFormatting = false;
+
     /**
      * Instantiate this class.
      *
@@ -181,7 +183,7 @@ class JsonApiResponse implements Arrayable, Responsable
         $request = $this->request->getRequest();
         $requesterAccepts = $request->header('Accept');
 
-        if ($this->withinInertia($request) || $requesterAccepts === null) {
+        if ($this->withinInertia($request) || $requesterAccepts === null || $this->forcesFormatting) {
             $requesterAccepts = Apiable::config('responses.default_format');
         }
 
@@ -292,6 +294,20 @@ class JsonApiResponse implements Arrayable, Responsable
     public function conditionallyLoadResults(bool $value = true): self
     {
         config(['apiable.responses.viewable' => $value]);
+
+        return $this;
+    }
+
+    /**
+     * Force response serialisation with the specified format otherwise use default.
+     */
+    public function forceFormatting(string|null $format = null): self
+    {
+        if ($format) {
+            config(['apiable.responses.default_format' => $format]);
+        }
+
+        $this->forcesFormatting = true;
 
         return $this;
     }
