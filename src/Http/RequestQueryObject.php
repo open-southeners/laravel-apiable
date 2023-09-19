@@ -57,7 +57,7 @@ class RequestQueryObject
     public function queryParameters(): Collection
     {
         if (! $this->queryParameters) {
-            $this->queryParameters = Collection::make(
+            $queryParameters = array_filter(
                 array_map(
                     [HeaderUtils::class, 'parseQuery'],
                     explode('&', $this->request->server('QUERY_STRING', ''))

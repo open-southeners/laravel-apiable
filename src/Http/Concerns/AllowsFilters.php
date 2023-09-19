@@ -28,35 +28,7 @@ trait AllowsFilters
      */
     public function filters(): array
     {
-        $filters = [];
-
-        $this->queryParameters()->each(function ($param) use (&$filters) {
-            $filterQueryParam = HeaderUtils::parseQuery($param);
-
-            if (! is_array(head($filterQueryParam))) {
-                return;
-            }
-
-            $filterQueryParamAttribute = head(array_keys($filterQueryParam));
-
-            if ($filterQueryParamAttribute !== 'filter') {
-                return;
-            }
-
-            $filterQueryParam = head($filterQueryParam);
-            $filterQueryParamAttribute = head(array_keys($filterQueryParam));
-            $filterQueryParamValue = head(array_values($filterQueryParam));
-
-            if (! isset($filters[$filterQueryParamAttribute])) {
-                $filters[$filterQueryParamAttribute] = [$filterQueryParamValue];
-
-                return;
-            }
-
-            $filters[$filterQueryParamAttribute][] = $filterQueryParamValue;
-        });
-
-        return $filters;
+        return $this->queryParameters()->get('filter', []);
     }
 
     /**
