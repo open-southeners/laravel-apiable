@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.11.2] - 2023-09-19
+
+### Changed
+
+- Config file now with `response.formatting` with `type` and `force` sub-items as options
+
+### Fixed
+
+- Force formatting for Inertia based apps (now can use `Apiable::forceResponseFormatting()`)
+
 ## [3.11.1] - 2023-09-19
 
 ### Fixed
