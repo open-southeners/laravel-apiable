@@ -140,7 +140,6 @@ class JsonApiResponse implements Arrayable, Responsable
      */
     protected function getResults()
     {
-
         $query = $this->buildPipeline()->query;
 
         if (
@@ -192,7 +191,7 @@ class JsonApiResponse implements Arrayable, Responsable
         return match ($requesterAccepts) {
             'application/json' => $response instanceof Builder ? $response->simplePaginate() : $response,
             'application/vnd.api+json' => Apiable::toJsonApi($response),
-            default => throw new HttpException(406),
+            default => throw new HttpException(406, 'Not acceptable response formatting'),
         };
     }
 
