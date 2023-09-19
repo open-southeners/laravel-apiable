@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.11.0] - 2023-09-19
+
+### Added
+
+- Default sorts using `JsonApiResponse::applyDefaultSort` method or `OpenSoutheners\LaravelApiable\Attributes\ApplyDefaultSort` attribute
+- Default filters using `JsonApiResponse::applyDefaultFilter` method or `OpenSoutheners\LaravelApiable\Attributes\ApplyDefaultFilter` attribute
+- Default formatting bypass using `JsonApiResponse::forceFormatting` method 
+
+### Changed
+
+- `Request::wantsJsonApi()` only looks at `Accept` header, not looking for `Content-Type` one anymore
+- Now all requests can send a different `Accept` header if they want a diffent response formatting. For e.g. sending `Accept: application/json` will get raw JSON response. Default being configured in the `config/apiable.php` **make sure to publish or update it**
+
 ## [3.10.0] - 2023-09-15
 
 ### Added
