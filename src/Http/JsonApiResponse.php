@@ -6,21 +6,20 @@ use Closure;
 use Exception;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Responsable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Traits\ForwardsCalls;
 use OpenSoutheners\LaravelApiable\Contracts\ViewableBuilder;
 use OpenSoutheners\LaravelApiable\Contracts\ViewQueryable;
-use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection;
-use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource;
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @mixin \OpenSoutheners\LaravelApiable\Http\RequestQueryObject
  */
-class JsonApiResponse implements Responsable, Arrayable
+class JsonApiResponse implements Arrayable, Responsable
 {
     use Concerns\IteratesResultsAfterQuery;
     use Concerns\ResolvesFromRouteAction;
@@ -172,13 +171,17 @@ class JsonApiResponse implements Responsable, Arrayable
      *
      * @param  \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder  $response
      */
-    protected function serializeResponse(mixed $response): JsonApiCollection|JsonApiResource
+    protected function serializeResponse(mixed $response): mixed
     {
-        return Apiable::toJsonApi(
-            $this->pagination
-                ? call_user_func_array($this->pagination, [$response])
-                : $response
-        );
+        $response = $this->pagination
+            ? call_user_func_array($this->pagination, [$response])
+            : $response;
+
+        if (! $this->request->getRequest()->wantsJsonApi()) {
+            return $response instanceof Builder ? $response->simplePaginate() : $response;
+        }
+
+        return Apiable::toJsonApi($response);
     }
 
     /**
@@ -188,7 +191,11 @@ class JsonApiResponse implements Responsable, Arrayable
      */
     public function toResponse($request): mixed
     {
-        $response = $this->getResults()->toResponse($request);
+        $results = $this->getResults();
+        
+        $response = $results instanceof Responsable
+            ? $results->toResponse($request)
+            : response()->json($results);
 
         if ($request->hasMacro('inertia') && method_exists($request, 'inertia') && $request->inertia()) {
             return $response->getData();
