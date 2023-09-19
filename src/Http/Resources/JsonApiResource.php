@@ -111,7 +111,7 @@ class JsonApiResource extends JsonResource
      */
     public function withResponse($request, $response)
     {
-        $response->header('Content-Type', Request::JSON_API_HEADER);
+        $response->header('Content-Type', 'application/vnd.api+json');
     }
 
     /**

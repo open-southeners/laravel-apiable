@@ -15,12 +15,8 @@ class RequestTest extends TestCase
             return $request->wantsJsonApi() ? 'foo' : 'bar';
         });
 
-        $this->get('/', ['Accept' => HttpRequest::JSON_API_HEADER])->assertSee('foo');
-
-        $this->get('/', ['Content-Type' => HttpRequest::JSON_API_HEADER])->assertSee('foo');
+        $this->get('/', ['Accept' => 'application/vnd.api+json'])->assertSee('foo');
 
         $this->get('/', ['Accept' => 'application/json'])->assertSee('bar');
-
-        $this->get('/', ['Content-Type' => 'application/json'])->assertSee('bar');
     }
 }

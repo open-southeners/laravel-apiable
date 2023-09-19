@@ -36,6 +36,8 @@ return [
      * @see https://docs.opensoutheners.com/laravel-apiable/guide/responses.html
      */
     'responses' => [
+        'default_format' => 'application/vnd.api+json',
+
         'normalize_relations' => false,
 
         'include_allowed' => false,

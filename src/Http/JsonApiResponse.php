@@ -15,6 +15,7 @@ use OpenSoutheners\LaravelApiable\Contracts\ViewableBuilder;
 use OpenSoutheners\LaravelApiable\Contracts\ViewQueryable;
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * @mixin \OpenSoutheners\LaravelApiable\Http\RequestQueryObject
@@ -177,11 +178,30 @@ class JsonApiResponse implements Arrayable, Responsable
             ? call_user_func_array($this->pagination, [$response])
             : $response;
 
-        if (! $this->request->getRequest()->wantsJsonApi()) {
-            return $response instanceof Builder ? $response->simplePaginate() : $response;
+        $request = $this->request->getRequest();
+        $requesterAccepts = $request->header('Accept');
+
+        if ($this->withinInertia($request) || $requesterAccepts === null) {
+            $requesterAccepts = Apiable::config('responses.default_format');
         }
 
-        return Apiable::toJsonApi($response);
+        return match ($requesterAccepts) {
+            'application/json' => $response instanceof Builder ? $response->simplePaginate() : $response,
+            'application/vnd.api+json' => Apiable::toJsonApi($response),
+            default => throw new HttpException(406),
+        };
+    }
+
+    /**
+     * Get wether request is made within InertiaJS context.
+     * 
+     * @param  \Illuminate\Http\Request  $request
+     */
+    protected function withinInertia($request): bool
+    {
+        return $request->hasMacro('inertia')
+            && method_exists($request, 'inertia')
+            && $request->inertia();
     }
 
     /**
@@ -197,7 +217,7 @@ class JsonApiResponse implements Arrayable, Responsable
             ? $results->toResponse($request)
             : response()->json($results);
 
-        if ($request->hasMacro('inertia') && method_exists($request, 'inertia') && $request->inertia()) {
+        if ($this->withinInertia($request)) {
             return $response->getData();
         }
 
