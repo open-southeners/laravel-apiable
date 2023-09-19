@@ -6,99 +6,49 @@ description: >-
 
 # Responses
 
+To start using the JSON:API serialisation (responses) you can just use the Apiable facade to do so:
+
+```php
+Apiable::toJsonApi(Film::all());
+```
+
+{% hint style="info" %}
+Take in mind that this `toJsonApi` method doesn't do anything more than serialisation, if you want filters, sorts and more flexible queries for users on your API head to [Requests section](requests.md).
+{% endhint %}
+
 ## Custom resource type
 
-To customise the resource type, the one that you see as the `type: "post"` (in case of a Post model), **this is very important for your frontend** to identify the resource. If you want to customise this:
+To customise the resource type, the one that you see as the `type: "post"` (in case of a Post model), **this is very important for your frontend** to identify the resource. If you want to customise this you will need the `config/apiable.php` file on your Laravel app:
 
-1. Add `OpenSoutheners\LaravelApiable\Contracts\JsonApiable` contract to the model class.
-2. Then add `jsonApiableOptions` method to the model returning the type as a string.
+```
+php artisan vendor:publish --provider="OpenSoutheners\\LaravelApiable\\ServiceProvider"
+```
+
+Then add items to the `resource_type_map` option:
 
 ```php
 <?php
 
-namespace OpenSoutheners\LaravelApiable\Tests\Fixtures;
+return [
 
-use Illuminate\Database\Eloquent\Model;
-use OpenSoutheners\LaravelApiable\Contracts\JsonApiable;
+    'resource_type_map' => [
+        \App\Models\Film::class => 'film',
+        \App\Models\User::class => 'client',
+    ],
 
-class Post extends Model implements JsonApiable
-{
-    /**
-     * Set options for model to be serialize with JSON:API.
-     *
-     * @return \OpenSoutheners\LaravelApiable\JsonApiableOptions
-     */
-    public function jsonApiableOptions()
-    {
-        return JsonApiableOptions::withDefaults(self::class)
-            ->resourceType('publication');
-    }
-}
 ```
 
 {% hint style="info" %}
 Just remember to check the allowed types in [the oficial JSON:API spec](https://jsonapi.org/format/#document-member-names).
 {% endhint %}
 
-## Custom API resource class
+## Using JsonApiResponse
 
-Adding the `transformer` to your model's `jsonApiableOptions` method which needs to point to an API resource that extends `JsonApiResource`:
+JsonApiResponse is a class helper that will abstract everything for you:
 
-```php
-<?php
-
-namespace OpenSoutheners\LaravelApiable\Tests\Fixtures;
-
-use Illuminate\Database\Eloquent\Model;
-use OpenSoutheners\LaravelApiable\Contracts\JsonApiable;
-use App\Http\Resources\PostResource;
-
-class Post extends Model implements JsonApiable
-{
-    /**
-     * Set options for model to be serialize with JSON:API.
-     *
-     * @return \OpenSoutheners\LaravelApiable\JsonApiableOptions
-     */
-    public function jsonApiableOptions()
-    {
-        return JsonApiableOptions::withDefaults(self::class)
-            ->transformer(PostResource::class);
-    }
-}
-```
-
-Also your JSON:API resource class should look like this:
-
-```php
-<?php
-
-namespace App\Http\Resources;
-
-use App\Models\User;
-use Illuminate\Support\Facades\Auth;
-use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource;
-
-class PostResource extends JsonApiResource
-{
-    /**
-     * Attach additional attributes data.
-     *
-     * @return array
-     */
-    protected function withAttributes()
-    {
-        return [
-            'is_first_visit' => $this->last_accessed_at === null,
-            $this->mergeWhen(Auth::user() instanceof User && $this->author->id === Auth::id(), [
-                'is_author' => true,
-            ]),
-        ];
-    }
-}
-```
-
-## Using JsonApiResponse to create API responses
+1. Handle users request query parameters sent (filters, sorts, includes, appends, etc).
+2. Transform all request parameters to a Eloquent query then apply conditional viewable and pagination if needed.
+3. Serialisation depending on application needs (JSON:API, raw JSON, etc).
 
 ### List of resources
 
@@ -112,17 +62,119 @@ To get a list (wrapped in a `JsonApiCollection`) of your resources query you sho
 JsonApiResponse::from(Film::where('title', 'LIKE', 'The%'));
 ```
 
+#### Conditionally viewable resources
+
+By default this is enabled but it can be disabled from the config file.
+
+When listing resources normally through API you want to exclude some of the ones that your users doesn't have access to, and we got covered here, simply adding a query scope in your model:
+
+```php
+<?php
+
+namespace App\Models;
+
+use OpenSoutheners\LaravelApiable\Contracts\JsonApiable;
+use OpenSoutheners\LaravelApiable\Contracts\QueryViewable;
+
+class Film extends Model implements JsonApiable, QueryViewable
+{
+    /**
+     * Scope applied to the query for show/hide items.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  \Illuminate\Contracts\Auth\Authenticatable|null  $user
+     * @return void
+     */
+    public function scopeViewable(Builder $query, ?Authenticatable $user = null)
+    {
+        $query->whereHas('author', fn (Builder $query) => $query->whereKey($user->getKey()));
+    }
+}
+```
+
+In case your models are using custom query builders you can use this feature as well on them:
+
+```php
+<?php
+
+namespace App\Builders;
+
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Database\Eloquent\Builder;
+use OpenSoutheners\LaravelApiable\Contracts\ViewableBuilder;
+
+/**
+ * @template TModelClass of \Illuminate\Database\Eloquent\Model
+ * @extends Builder<TModelClass>
+ */
+class FilmBuilder extends Builder implements ViewableBuilder
+{
+    /**
+     * Scope applied to the query for show/hide items.
+     *
+     * @param  \Illuminate\Contracts\Auth\Authenticatable|null  $user
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function viewable(?Authenticatable $user = null)
+    {
+        $this->whereHas('author', fn (Builder $query) => $query->whereKey($user->getKey()));
+        
+        return $this;
+    }
+}
+```
+
+#### Customise pagination method
+
 In case you want to customise the pagination used you can actually use the `paginateUsing` method:
 
 ```php
-JsonApiResponse::paginateUsing(fn ($query) => $query->simplePaginate());
+JsonApiResponse::from(Film::class)
+    ->paginateUsing(fn ($query) => $query->simplePaginate());
 ```
 
-### One resource by key
+### One resource from the list or query
 
 You can still use apiable responses to get one result:
 
 ```php
-JsonApiResponse::from(Film::class)->gettingOne();
+JsonApiResponse::from(Film::whereKey($id))->gettingOne();
 ```
 
+This will get a JsonApiResource response with just that one resource queried.
+
+## Responses formatting
+
+{% hint style="info" %}
+Custom formatting is coming soon on v4.
+{% endhint %}
+
+Serialisation is something this package was limited into back when it was dedicated just to JSON:API, nowadays and in the future it is capable of more than that so you can still use the powerful requests query parameters with the responses your frontend or clients requires.
+
+So in case they want normal JSON they should send the following header:
+
+```
+Accept: application/json
+```
+
+Or in case you want JSON:API:
+
+```
+Accept: application/vnd.api+json
+```
+
+In case you want to force any formatting in your application you can use the following:
+
+```php
+JsonApiResponse::from(Film::class)->forceFormatting();
+```
+
+The previous will force formatting to the default format which is in the config file generated by this package (on `config/apiable.php`), in case you want to enforce other format you only need to specify its RFC language string:
+
+```php
+JsonApiResponse::from(Film::class)->forceFormatting('application/json');
+```
+
+{% hint style="warning" %}
+In case an unsupported type is sent via the `Accept` header or this `forceFormatting` method the application will return a 406 not acceptable HTTP exception.
+{% endhint %}

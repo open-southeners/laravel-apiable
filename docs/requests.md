@@ -99,48 +99,35 @@ JsonApiResponse::from(Film::class)->allowing([
 ]);
 ```
 
-As top uses the direction defined in the config as default you can specify a direction instead as the following for ascendant:
+As top uses the direction defined in the config as default you can specify a direction instead, the following are all doing the same but in different directions:
 
 ```php
 JsonApiResponse::from(Film::class)->allowing([
   AllowedSort::ascendant('created_at'),
 ]);
 
-// or
-
-JsonApiResponse::from(Film::class)->allowSort(
-  AllowedSort::ascendant('created_at')
-);
-
-// or
-
-JsonApiResponse::from(Film::class)->allowSort('created_at', 'asc');
-
-// or if you have PHP8.1+
-
-JsonApiResponse::from(Film::class)->allowSort('created_at', SortDirection::ASCENDANT->value);
-```
-
-Or using descendant direction:
-
-```php
-JsonApiResponse::from(Film::class)->allowing([
-  AllowedSort::descendant('created_at'),
-]);
-
-// or
-
 JsonApiResponse::from(Film::class)->allowSort(
   AllowedSort::descendant('created_at')
 );
 
-// or
+JsonApiResponse::from(Film::class)
+  ->allowSort('created_at', AllowedSort::DESCENDANT);
 
-JsonApiResponse::from(Film::class)->allowSort('created_at', 'desc');
+JsonApiResponse::from(Film::class)
+  ->allowSort('created_at', SortDirection::ASCENDANT->value);
+```
 
-// or if you have PHP8.1+
+Default sorts can be applied by using the following method:
 
-JsonApiResponse::from(Film::class)->allowSort('created_at', SortDirection::DESCENDANT->value);
+```php
+JsonApiResponse::from(Film::class)
+    ->applyDefaultSort('created_at'); // ascendant by default
+
+JsonApiResponse::from(Film::class)
+    ->applyDefaultSort('created_at', DefaultSort::ASCENDANT);
+
+JsonApiResponse::from(Film::class)
+    ->applyDefaultSort('created_at', DefaultSort::DESCENDANT);
 ```
 {% endtab %}
 
@@ -152,6 +139,16 @@ public function index(JsonApiResponse $response)
 <strong>    JsonApiResponse::from(Film::class);
 </strong>}
 </code></pre>
+
+You can apply some sorts by default when no others are being sent by:
+
+```php
+#[ApplyDefaultSort('created_at', DefaultSort::DESCENDANT)]
+public function index(JsonApiResponse $response)
+{
+    JsonApiResponse::from(Film::class);
+}
+```
 {% endtab %}
 {% endtabs %}
 
@@ -207,6 +204,16 @@ JsonApiResponse::from(Film::class)->allowing([
   AllowedFilter::exact('author.name', ['Rubén Robles', 'Taylor Otwell']),
 ]);
 ```
+
+Same with sorts you can apply default filters whenever a user didn't send any via HTTP query parameters that were allowed:
+
+```php
+JsonApiResponse::from(Film::class)
+    ->applyDefaultFilter('name', AllowedFilter::EXACT, '2012');
+
+JsonApiResponse::from(Film::class)
+    ->applyDefaultFilter('name', AllowedFilter::SIMILAR, 'The');
+```
 {% endtab %}
 
 {% tab title="Using attributes" %}
@@ -218,6 +225,16 @@ JsonApiResponse::from(Film::class)->allowing([
 #[FilterQueryParam('review_points', AllowedFilter::LOWER_THAN)]
 #[FilterQueryParam('review_points', AllowedFilter::LOWER_OR_EQUAL_THAN)]
 #[FilterQueryParam('active', AllowedFilter::SCOPE)]
+public function index(JsonApiResponse $response)
+{
+    JsonApiResponse::from(Film::class);
+}
+```
+
+You can apply default filters as well via attributes:
+
+```php
+#[FilterQueryParam('status', AllowedFilter::EXACT, FilmStatus::Published->value)]
 public function index(JsonApiResponse $response)
 {
     JsonApiResponse::from(Film::class);

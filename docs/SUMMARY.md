@@ -1,7 +1,7 @@
 # Table of contents
 
 * [Introduction](README.md)
-* [Requests](requests.md)
 * [Responses](responses.md)
+* [Requests](requests.md)
 * [Testing](testing.md)
 * [API](api.md)
