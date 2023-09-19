@@ -13,7 +13,7 @@ class ApplySortsToQuery implements HandlesRequestQueries
      * Apply modifications to the query based on allowed query fragments.
      *
      * @param  \OpenSoutheners\LaravelApiable\Http\RequestQueryObject  $request
-     * @param  \Closure  $next
+     * @param \Closure(\OpenSoutheners\LaravelApiable\Http\RequestQueryObject): \Illuminate\Database\Eloquent\Builder $next
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function from(RequestQueryObject $request, Closure $next)
@@ -30,15 +30,12 @@ class ApplySortsToQuery implements HandlesRequestQueries
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @param  array  $sorts
-     * @return \Illuminate\Database\Eloquent\Builder
      */
-    protected function applySorts(Builder $query, array $sorts)
+    protected function applySorts(Builder $query, array $sorts): void
     {
         foreach ($sorts as $attribute => $direction) {
             $query->orderBy($this->getQualifiedAttribute($query, $attribute, $direction), $direction);
         }
-
-        return $query;
     }
 
     /**
@@ -98,6 +95,5 @@ class ApplySortsToQuery implements HandlesRequestQueries
         );
 
         return "{$joinAsRelationshipTable}.{$column}";
-
     }
 }

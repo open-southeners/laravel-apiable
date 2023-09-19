@@ -66,9 +66,8 @@ trait AllowsFilters
      * @param  \OpenSoutheners\LaravelApiable\Http\AllowedFilter|string  $attribute
      * @param  array<string>|string|int  $operator
      * @param  array<string>|string  $values
-     * @return $this
      */
-    public function allowFilter($attribute, $operator = ['*'], $values = ['*'])
+    public function allowFilter($attribute, $operator = ['*'], $values = ['*']): self
     {
         if ($values === ['*'] && (is_array($operator) || is_string($operator))) {
             $values = $operator;

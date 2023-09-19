@@ -23,10 +23,8 @@ trait AllowsSorts
 
     /**
      * Get user sorts from request.
-     *
-     * @return array
      */
-    public function sorts()
+    public function sorts(): array
     {
         $sortsSourceArr = array_filter(explode(',', $this->request->get('sort', '')));
         $sortsArr = [];
@@ -50,9 +48,8 @@ trait AllowsSorts
      *
      * @param  \OpenSoutheners\LaravelApiable\Http\AllowedSort|array<string>|string  $attribute
      * @param  int|null  $direction
-     * @return $this
      */
-    public function allowSort($attribute, $direction = null)
+    public function allowSort($attribute, $direction = null): self
     {
         $this->allowedSorts = array_merge(
             $this->allowedSorts,
@@ -65,7 +62,6 @@ trait AllowsSorts
         return $this;
     }
 
-    public function userAllowedSorts()
     /**
      * Default sort by the following attribute and direction when no user sorts are being applied.
      *
@@ -84,6 +80,11 @@ trait AllowsSorts
 
         return $this;
     }
+
+    /**
+     * Get allowed user sorts.
+     */
+    public function userAllowedSorts(): array
     {
         return $this->validator($this->sorts())
             ->givingRules($this->allowedSorts)
@@ -102,7 +103,7 @@ trait AllowsSorts
      *
      * @return array<string, string>
      */
-    public function getAllowedSorts()
+    public function getAllowedSorts(): array
     {
         return $this->allowedSorts;
     }
