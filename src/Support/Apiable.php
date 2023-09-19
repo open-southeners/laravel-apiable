@@ -135,4 +135,19 @@ class Apiable
     {
         return "{$value}_scoped";
     }
+
+    /**
+     * Force responses to be formatted in a specific format type.
+     * 
+     * @param string|null $format
+     * @return void
+     */
+    public static function forceResponseFormatting(string|null $format = null)
+    {
+        config(['apiable.responses.formatting.force' => true]);
+
+        if ($format) {
+            config(['apiable.responses.formatting.type' => $format]);
+        }
+    }
 }
