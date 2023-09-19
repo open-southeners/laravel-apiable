@@ -136,10 +136,11 @@ class JsonApiResponse implements Arrayable, Responsable
     /**
      * Get results from processing RequestQueryObject pipeline.
      *
-     * @return \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection|\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource
+     * @return mixed
      */
     protected function getResults()
     {
+
         $query = $this->buildPipeline()->query;
 
         if (
@@ -147,6 +148,7 @@ class JsonApiResponse implements Arrayable, Responsable
             && (is_a($this->model, ViewQueryable::class, true)
                 || is_a($query, ViewableBuilder::class))
         ) {
+            /** @var \OpenSoutheners\LaravelApiable\Contracts\ViewableBuilder $query */
             $query->viewable(Auth::user());
         }
 
@@ -219,7 +221,7 @@ class JsonApiResponse implements Arrayable, Responsable
             ? $results->toResponse($request)
             : response()->json($results);
 
-        if ($this->withinInertia($request)) {
+        if ($this->withinInertia($request) && $response instanceof Response && method_exists($response, 'getData')) {
             return $response->getData();
         }
 

@@ -16,8 +16,8 @@ trait IteratesResultsAfterQuery
     /**
      * Post-process result from query to apply appended attributes.
      *
-     * @param  \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection|\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource|string  $result
-     * @return \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection|\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource|string
+     * @param  mixed  $result
+     * @return mixed
      */
     protected function resultPostProcessing($result)
     {
