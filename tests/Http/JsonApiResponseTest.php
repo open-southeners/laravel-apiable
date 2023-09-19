@@ -37,7 +37,7 @@ class JsonApiResponseTest extends TestCase
             return JsonApiResponse::from(Tag::class);
         });
 
-        $response = $this->get('/?filter[name]=in');
+        $response = $this->get('/?filter[name]=in', ['Accept' => 'application/vnd.api+json']);
 
         $response->assertSuccessful();
 
@@ -50,7 +50,7 @@ class JsonApiResponseTest extends TestCase
             return JsonApiResponse::from(Tag::class)->allowFilter('name');
         });
 
-        $response = $this->get('/?filter[name]=in');
+        $response = $this->get('/?filter[name]=in', ['Accept' => 'application/vnd.api+json']);
 
         $response->assertSuccessful();
 
@@ -66,7 +66,7 @@ class JsonApiResponseTest extends TestCase
                 ]);
         });
 
-        $response = $this->get('/?filter[status]=Active,Inactive');
+        $response = $this->get('/?filter[status]=Active,Inactive', ['Accept' => 'application/vnd.api+json']);
 
         $response->assertJsonCount(4, 'data');
     }
@@ -80,7 +80,7 @@ class JsonApiResponseTest extends TestCase
                 ]);
         });
 
-        $response = $this->get('/?filter[active]=1');
+        $response = $this->get('/?filter[active]=1', ['Accept' => 'application/vnd.api+json']);
 
         $response->assertJsonCount(2, 'data');
     }
@@ -96,7 +96,7 @@ class JsonApiResponseTest extends TestCase
                 ]);
         });
 
-        $response = $this->get('/?filter[status_scoped]=Active');
+        $response = $this->get('/?filter[status_scoped]=Active', ['Accept' => 'application/vnd.api+json']);
 
         $response->assertJsonCount(2, 'data');
     }
@@ -110,7 +110,7 @@ class JsonApiResponseTest extends TestCase
                 ])->includeAllowedToResponse();
         });
 
-        $response = $this->get('/?filter[status]=Active,Inactive');
+        $response = $this->get('/?filter[status]=Active,Inactive', ['Accept' => 'application/vnd.api+json']);
 
         $response->assertJsonCount(1, 'meta.allowed_filters');
         $response->assertJsonFragment([
@@ -134,7 +134,7 @@ class JsonApiResponseTest extends TestCase
                 ]);
         });
 
-        $response = $this->get('/?filter[status]=Active,Inactive');
+        $response = $this->get('/?filter[status]=Active,Inactive', ['Accept' => 'application/vnd.api+json']);
 
         $response->assertJsonCount(1, 'meta.allowed_filters');
         $response->assertJsonFragment([
@@ -160,7 +160,7 @@ class JsonApiResponseTest extends TestCase
                 ]);
         });
 
-        $response = $this->get('/?include=author&filter[author.name]=Ruben');
+        $response = $this->get('/?include=author&filter[author.name]=Ruben', ['Accept' => 'application/vnd.api+json']);
 
         $response->assertJsonCount(1, 'data');
     }
@@ -176,7 +176,7 @@ class JsonApiResponseTest extends TestCase
                 ]);
         });
 
-        $response = $this->get('/?include=author&filter[author.name]=Ruben&filter[author.email]=d8vjork');
+        $response = $this->get('/?include=author&filter[author.name]=Ruben&filter[author.email]=d8vjork', ['Accept' => 'application/vnd.api+json']);
 
         $response->assertJsonCount(1, 'data');
     }
@@ -190,7 +190,7 @@ class JsonApiResponseTest extends TestCase
                 ]);
         });
 
-        $response = $this->get('/?fields[client]=name');
+        $response = $this->get('/?fields[client]=name', ['Accept' => 'application/vnd.api+json']);
 
         $response->assertJsonApi(function (AssertableJsonApi $assert) {
             $assert->isCollection()->at(0)->hasAttribute('name');
@@ -206,7 +206,7 @@ class JsonApiResponseTest extends TestCase
                 ]);
         });
 
-        $response = $this->get('/?fields[client]=name,email_verified_at');
+        $response = $this->get('/?fields[client]=name,email_verified_at', ['Accept' => 'application/vnd.api+json']);
 
         $response->assertJsonApi(function (AssertableJsonApi $assert) {
             $assert->isCollection()->at(0)
@@ -224,7 +224,7 @@ class JsonApiResponseTest extends TestCase
                 ]);
         });
 
-        $response = $this->get('/?sort=-name');
+        $response = $this->get('/?sort=-name', ['Accept' => 'application/vnd.api+json']);
 
         $response->assertJsonApi(function (AssertableJsonApi $assert) {
             $assert->isCollection()->at(0)->hasAttribute('name', 'Ruben');
@@ -240,7 +240,7 @@ class JsonApiResponseTest extends TestCase
                 ]);
         });
 
-        $response = $this->getJson('/?sort=name');
+        $response = $this->get('/?sort=name', ['Accept' => 'application/vnd.api+json']);
 
         $response->assertJsonApi(function (AssertableJsonApi $assert) {
             $assert->isCollection()->at(0)->hasAttribute('name', 'Aysha');
@@ -256,7 +256,7 @@ class JsonApiResponseTest extends TestCase
                 ]);
         });
 
-        $response = $this->getJson('/?sort=tags.name');
+        $response = $this->get('/?sort=tags.name', ['Accept' => 'application/vnd.api+json']);
 
         $response->assertJsonApi(function (AssertableJsonApi $assert) {
             $assert->isCollection();
@@ -275,7 +275,7 @@ class JsonApiResponseTest extends TestCase
                 ]);
         });
 
-        $response = $this->getJson('/?sort=-tags.name');
+        $response = $this->get('/?sort=-tags.name', ['Accept' => 'application/vnd.api+json']);
 
         $response->assertJsonApi(function (AssertableJsonApi $assert) {
             $assert->isCollection();
@@ -294,7 +294,7 @@ class JsonApiResponseTest extends TestCase
                 ]);
         });
 
-        $response = $this->getJson('/?sort=author.name');
+        $response = $this->get('/?sort=author.name', ['Accept' => 'application/vnd.api+json']);
 
         $response->assertJsonApi(function (AssertableJsonApi $assert) {
             $assert->isCollection();
@@ -313,7 +313,7 @@ class JsonApiResponseTest extends TestCase
                 ]);
         });
 
-        $response = $this->getJson('/?sort=-author.name');
+        $response = $this->get('/?sort=-author.name', ['Accept' => 'application/vnd.api+json']);
 
         $response->assertJsonApi(function (AssertableJsonApi $assert) {
             $assert->isCollection();
@@ -332,7 +332,7 @@ class JsonApiResponseTest extends TestCase
                 ]);
         });
 
-        $response = $this->get('/?appends[post]=is_published');
+        $response = $this->get('/?appends[post]=is_published', ['Accept' => 'application/vnd.api+json']);
 
         $response->assertJsonApi(function (AssertableJsonApi $assert) {
             $assert->isCollection()->at(0)->hasAttribute('is_published');
@@ -348,7 +348,7 @@ class JsonApiResponseTest extends TestCase
                 ])->gettingOne();
         });
 
-        $response = $this->get('/?appends[post]=is_published');
+        $response = $this->get('/?appends[post]=is_published', ['Accept' => 'application/vnd.api+json']);
 
         $response->assertJsonApi(function (AssertableJsonApi $assert) {
             $assert->isResource()->hasAttribute('is_published');
@@ -362,7 +362,7 @@ class JsonApiResponseTest extends TestCase
                 ->allowSearch();
         });
 
-        $response = $this->get('/?q=español');
+        $response = $this->get('/?q=español', ['Accept' => 'application/vnd.api+json']);
 
         $response->assertJsonApi(function (AssertableJsonApi $assert) {
             $assert->hasSize(1)->hasAttribute('title', 'Y esto en español');
@@ -382,7 +382,7 @@ class JsonApiResponseTest extends TestCase
             ]));
         });
 
-        $response = $this->getJson('/');
+        $response = $this->get('/', ['Accept' => 'application/vnd.api+json']);
 
         $response->assertJsonCount(4, 'data');
         $response->assertJsonCount(1, 'meta.allowed_filters');
