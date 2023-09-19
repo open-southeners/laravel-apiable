@@ -56,7 +56,6 @@ trait ResolvesFromRouteAction
     {
         $allowedQueryParams = array_filter($reflected->getAttributes(), function (ReflectionAttribute $attribute) {
             return is_subclass_of($attribute->getName(), QueryParam::class)
-                || $attribute->getName() === ForceAppendAttribute::class
                 || in_array($attribute->getName(), [ApplyDefaultFilter::class, ApplyDefaultSort::class]);
         });
 
