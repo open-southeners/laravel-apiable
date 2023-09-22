@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.11.3] - 2023-09-22
+
+### Fixed
+
+- Force formatting always coming through even thought is not forced by config
+
 ## [3.11.2] - 2023-09-19
 
 ### Changed
