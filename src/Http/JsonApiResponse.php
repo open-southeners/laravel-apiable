@@ -182,7 +182,7 @@ class JsonApiResponse implements Arrayable, Responsable
         $request = $this->request->getRequest();
         $requesterAccepts = $request->header('Accept');
 
-        if ($this->withinInertia($request) || $requesterAccepts === null || Apiable::config('responses.formatting.type')) {
+        if ($this->withinInertia($request) || $requesterAccepts === null || Apiable::config('responses.formatting.force')) {
             $requesterAccepts = Apiable::config('responses.formatting.type');
         }
 
