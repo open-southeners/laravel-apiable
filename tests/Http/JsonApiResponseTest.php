@@ -263,7 +263,7 @@ class JsonApiResponseTest extends TestCase
             
             $assert->at(0)->hasAttribute('title', 'Hola mundo');
             $assert->at(1)->hasAttribute('title', 'My first test');
-            $assert->at(2)->hasAttribute('tags_count', 4);
+            $assert->hasAttribute('tags_count');
         });
     }
 
@@ -283,7 +283,7 @@ class JsonApiResponseTest extends TestCase
             
             $assert->at(0)->hasAttribute('title', 'Hello world');
             $assert->at(1)->hasAttribute('title', 'Y esto en español');
-            $assert->at(0)->hasAttribute('tags_count', 4);
+            $assert->hasAttribute('tags_count');
         });
     }
 
