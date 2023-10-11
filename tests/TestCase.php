@@ -13,6 +13,18 @@ use Orchestra\Testbench\TestCase as Orchestra;
 abstract class TestCase extends Orchestra
 {
     /**
+     * Setup the test environment.
+     *
+     * @return void
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+        
+        $this->withoutExceptionHandling();
+    }
+
+    /**
      * Get package providers.
      *
      * @param  \Illuminate\Foundation\Application  $app
