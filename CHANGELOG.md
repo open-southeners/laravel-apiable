@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.11.4] - 2023-10-11
+
+### Fixed
+
+- Query `withCount` method usage with apiable is replacing the underlying added selects for these counts
+
 ## [3.11.3] - 2023-09-22
 
 ### Fixed
