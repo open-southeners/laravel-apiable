@@ -18,7 +18,7 @@ class Post extends Model implements JsonApiable
      *
      * @var string[]
      */
-    protected $visible = ['status', 'title', 'content', 'abstract', 'author_id'];
+    protected $visible = ['status', 'title', 'content', 'abstract', 'author_id', 'tags_count'];
 
     /**
      * The attributes that aren't mass assignable.

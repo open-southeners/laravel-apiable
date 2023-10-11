@@ -250,7 +250,7 @@ class JsonApiResponseTest extends TestCase
     public function testSortingBelongsToManyRelationshipFieldAsAscendant()
     {
         Route::get('/', function () {
-            return JsonApiResponse::from(Post::class)
+            return JsonApiResponse::from(Post::query()->withCount('tags'))
                 ->allowing([
                     AllowedSort::ascendant('tags.name'),
                 ]);
@@ -263,13 +263,14 @@ class JsonApiResponseTest extends TestCase
             
             $assert->at(0)->hasAttribute('title', 'Hola mundo');
             $assert->at(1)->hasAttribute('title', 'My first test');
+            $assert->at(2)->hasAttribute('tags_count', 4);
         });
     }
 
     public function testSortingBelongsToManyRelationshipFieldAsDescendant()
     {
         Route::get('/', function () {
-            return JsonApiResponse::from(Post::class)
+            return JsonApiResponse::from(Post::query()->withCount('tags'))
                 ->allowing([
                     AllowedSort::descendant('tags.name'),
                 ]);
@@ -282,6 +283,7 @@ class JsonApiResponseTest extends TestCase
             
             $assert->at(0)->hasAttribute('title', 'Hello world');
             $assert->at(1)->hasAttribute('title', 'Y esto en español');
+            $assert->at(0)->hasAttribute('tags_count', 4);
         });
     }
 
@@ -420,5 +422,21 @@ class JsonApiResponseTest extends TestCase
             'id' => '1',
             'type' => 'post',
         ]);
+    }
+
+    public function testResponseWithModifiedQueryWithCountMethodGetsRelationshipsCountsAsAttribute()
+    {
+        Route::get('/', function () {
+            return response()->json(
+                JsonApiResponse::from(Post::query()->withCount('tags'))
+            );
+        });
+
+        $response = $this->get('/', ['Accept' => 'application/vnd.api+json']);
+
+        $response->assertJsonApi(fn (AssertableJsonApi $assert) => $assert
+            ->isCollection()
+            ->hasAttribute('tags_count')
+        );
     }
 }

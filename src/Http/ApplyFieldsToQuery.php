@@ -18,9 +18,11 @@ class ApplyFieldsToQuery implements HandlesRequestQueries
      */
     public function from(RequestQueryObject $request, Closure $next)
     {
-        $request->query->select($request->query->getModel()->qualifyColumn('*'));
+        if (count($request->query->toBase()->getColumns()) === 0) {
+            $request->query->select($request->query->qualifyColumn('*'));
+        }
 
-        if (empty($request->fields()) || empty($request->getAllowedFields())) {
+        if (count($request->fields()) === 0 || count($request->getAllowedFields()) === 0) {
             return $next($request);
         }
 
