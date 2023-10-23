@@ -117,7 +117,7 @@ class Apiable
     }
 
     /**
-     * Get model class from
+     * Get model class from given resource type.
      *
      * @return \Illuminate\Database\Eloquent\Model|false
      */

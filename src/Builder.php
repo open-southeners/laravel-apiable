@@ -52,7 +52,7 @@ class Builder
     public function hasJoin()
     {
         /**
-         * Check wether join is already on the query instance.
+         * Check whether join is already on the query instance.
          *
          * @param  string  $joinTable
          * @return bool

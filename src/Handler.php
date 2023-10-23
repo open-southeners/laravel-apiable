@@ -23,7 +23,7 @@ class Handler implements Responsable
     }
 
     /**
-     * Check wether include error trace.
+     * Check whether include error trace.
      */
     protected function includesTrace(): bool
     {

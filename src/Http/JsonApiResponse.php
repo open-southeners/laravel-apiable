@@ -194,7 +194,7 @@ class JsonApiResponse implements Arrayable, Responsable
     }
 
     /**
-     * Get wether request is made within InertiaJS context.
+     * Get whether request is made within InertiaJS context.
      * 
      * @param  \Illuminate\Http\Request  $request
      */
