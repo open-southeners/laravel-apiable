@@ -4,7 +4,8 @@ namespace OpenSoutheners\LaravelApiable\Http;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Symfony\Component\HttpFoundation\HeaderUtils;
+
+use function OpenSoutheners\LaravelHelpers\Utils\parse_http_query;
 
 /**
  * @template T of \Illuminate\Database\Eloquent\Model
@@ -57,13 +58,9 @@ class RequestQueryObject
     public function queryParameters(): Collection
     {
         if (! $this->queryParameters) {
-            $queryParameters = array_filter(
-                array_map(
-                    [HeaderUtils::class, 'parseQuery'],
-                    explode('&', $this->request->server('QUERY_STRING', ''))
-                )
-            )->groupBy(fn ($item, $key) => head(array_keys($item)), true)
-                ->map(fn (Collection $collection) => $collection->flatten(1)->all());
+            $this->queryParameters = Collection::make(
+                parse_http_query($this->request->server('QUERY_STRING'))
+            );
         }
 
         return $this->queryParameters;
