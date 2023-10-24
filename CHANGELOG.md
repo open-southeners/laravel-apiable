@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.11.5] - 2023-10-24
+
+### Changed
+
+- Fix `open-southeners/laravel-helpers` utilities package version constrain so other packages can use similar versions under the same major release
+
 ## [3.11.4] - 2023-10-11
 
 ### Fixed
