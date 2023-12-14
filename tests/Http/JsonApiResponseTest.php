@@ -260,7 +260,7 @@ class JsonApiResponseTest extends TestCase
 
         $response->assertJsonApi(function (AssertableJsonApi $assert) {
             $assert->isCollection();
-            
+
             $assert->at(0)->hasAttribute('title', 'Hola mundo');
             $assert->at(1)->hasAttribute('title', 'My first test');
             $assert->hasAttribute('tags_count');
@@ -280,7 +280,7 @@ class JsonApiResponseTest extends TestCase
 
         $response->assertJsonApi(function (AssertableJsonApi $assert) {
             $assert->isCollection();
-            
+
             $assert->at(0)->hasAttribute('title', 'Hello world');
             $assert->at(1)->hasAttribute('title', 'Y esto en español');
             $assert->hasAttribute('tags_count');
@@ -300,7 +300,7 @@ class JsonApiResponseTest extends TestCase
 
         $response->assertJsonApi(function (AssertableJsonApi $assert) {
             $assert->isCollection();
-            
+
             $assert->at(0)->hasAttribute('title', 'My first test');
             $assert->at(1)->hasAttribute('title', 'Y esto en español');
         });
@@ -319,7 +319,7 @@ class JsonApiResponseTest extends TestCase
 
         $response->assertJsonApi(function (AssertableJsonApi $assert) {
             $assert->isCollection();
-            
+
             $assert->at(0)->hasAttribute('title', 'Hello world');
             $assert->at(1)->hasAttribute('title', 'Y esto en español');
         });
@@ -433,6 +433,22 @@ class JsonApiResponseTest extends TestCase
         });
 
         $response = $this->get('/', ['Accept' => 'application/vnd.api+json']);
+
+        $response->assertJsonApi(fn (AssertableJsonApi $assert) => $assert
+            ->isCollection()
+            ->hasAttribute('tags_count')
+        );
+    }
+
+    public function testResponseWithAllowedIncludedEndsWithCountGetsRelationshipCountAsAttribute()
+    {
+        Route::get('/', function () {
+            return response()->json(
+                JsonApiResponse::from(Post::class)->allowInclude(['tags_count'])
+            );
+        });
+
+        $response = $this->get('/?include=tags_count', ['Accept' => 'application/vnd.api+json']);
 
         $response->assertJsonApi(fn (AssertableJsonApi $assert) => $assert
             ->isCollection()
