@@ -27,7 +27,7 @@
     "require-dev": {
         "laravel/pint": "^1.1",
         "laravel/scout": "^9.0",
-        "nunomaduro/larastan": "^2.1",
+        "larastan/larastan": "^2.1",
         "orchestra/testbench": "^7.0 || ^8.0",
         "phpstan/phpstan": "^1.0",
         "phpunit/phpunit": "^9.0 || ^10.0"
