@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.12.0] - 2023-12-14
+
+### Added
+
+- Includes relationships counts with `tags_count` (needs to end with `_count`). E.g:
+
+```php
+JsonApiResponse::using(Post::class)->allowInclude(['tags_count']);
+
+// Then request this with ?include=tags_count
+```
+
+### Fixed
+
+- Some IDEs getting confused with returning `self` types in traits (replaced to `static`)
+
 ## [3.11.5] - 2023-10-24
 
 ### Changed
