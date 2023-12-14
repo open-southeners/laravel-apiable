@@ -4,7 +4,6 @@
   bootstrap="vendor/autoload.php"
   backupGlobals="false"
   colors="true"
-  processIsolation="true"
   stopOnFailure="false"
   cacheDirectory=".phpunit.cache"
   backupStaticProperties="false"
