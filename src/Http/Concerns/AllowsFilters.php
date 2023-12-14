@@ -67,7 +67,7 @@ trait AllowsFilters
      * @param  array<string>|string|int  $operator
      * @param  array<string>|string  $values
      */
-    public function allowFilter($attribute, $operator = ['*'], $values = ['*']): self
+    public function allowFilter($attribute, $operator = ['*'], $values = ['*']): static
     {
         if ($values === ['*'] && (is_array($operator) || is_string($operator))) {
             $values = $operator;
@@ -92,7 +92,7 @@ trait AllowsFilters
      * @param  array<string>|string|int  $operator
      * @param  array<string>|string  $values
      */
-    public function applyDefaultFilter($attribute, $operator = ['*'], $values = ['*']): self
+    public function applyDefaultFilter($attribute, $operator = ['*'], $values = ['*']): static
     {
         if ($values === ['*'] && (is_array($operator) || is_string($operator))) {
             $values = $operator;
@@ -115,7 +115,7 @@ trait AllowsFilters
      *
      * @param  array<string>|string  $value
      */
-    public function allowScopedFilter(string $attribute, array|string $value = '*'): self
+    public function allowScopedFilter(string $attribute, array|string $value = '*'): static
     {
         $this->allowedFilters = array_merge_recursive(
             $this->allowedFilters,

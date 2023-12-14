@@ -49,7 +49,7 @@ trait AllowsSorts
      * @param  \OpenSoutheners\LaravelApiable\Http\AllowedSort|array<string>|string  $attribute
      * @param  int|null  $direction
      */
-    public function allowSort($attribute, $direction = null): self
+    public function allowSort($attribute, $direction = null): static
     {
         $this->allowedSorts = array_merge(
             $this->allowedSorts,
@@ -68,7 +68,7 @@ trait AllowsSorts
      * @param  \OpenSoutheners\LaravelApiable\Http\DefaultSort|array<string>|string  $attribute
      * @param  int|null  $direction
      */
-    public function applyDefaultSort($attribute, $direction = null): self
+    public function applyDefaultSort($attribute, $direction = null): static
     {
         $this->defaultSorts = array_merge(
             $this->defaultSorts,
