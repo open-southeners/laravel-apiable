@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Traits\ForwardsCalls;
 use OpenSoutheners\LaravelApiable\Contracts\HandlesRequestQueries;
 use OpenSoutheners\LaravelApiable\Support\Apiable;
+
 use function OpenSoutheners\LaravelHelpers\Classes\class_namespace;
 
 class ApplyFiltersToQuery implements HandlesRequestQueries
@@ -24,8 +25,7 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
     /**
      * Apply modifications to the query based on allowed query fragments.
      *
-     * @param  \OpenSoutheners\LaravelApiable\Http\RequestQueryObject  $request
-     * @param \Closure(\OpenSoutheners\LaravelApiable\Http\RequestQueryObject): \Illuminate\Database\Eloquent\Builder $next
+     * @param  \Closure(\OpenSoutheners\LaravelApiable\Http\RequestQueryObject): \Illuminate\Database\Eloquent\Builder  $next
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function from(RequestQueryObject $request, Closure $next)
@@ -146,7 +146,7 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
      *
      * @param  \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Relations\Relation  $query
      */
-    protected function applyFilterAsScope($query, string|null $relationship, string $scope, string $operator, string $value, string $condition): void
+    protected function applyFilterAsScope($query, $relationship, string $scope, string $operator, string $value, string $condition): void
     {
         $wrappedQueryFn = fn ($query) => $this->forwardCallTo($query, $scope, (array) $value);
 
