@@ -16,6 +16,18 @@ use OpenSoutheners\LaravelApiable\Tests\Fixtures\Post;
 
 class ApiableTest extends TestCase
 {
+    public function testApiableFacadeIsRegisteredIntoTheContainer()
+    {
+        $this->assertTrue($this->app->bound('apiable'));
+        $this->assertInstanceOf(Apiable::class, $this->app->make('apiable'));
+    }
+
+    public function testApiableHelperReturnsSupportFromContainer()
+    {
+        $this->assertTrue(function_exists('apiable'));
+        $this->assertInstanceOf(Apiable::class, apiable());
+    }
+
     public function testToJsonApiReturnsEmptyJsonApiCollectionWhenInvalidInput()
     {
         $this->assertEquals(new JsonApiCollection(Collection::make([])), Apiable::toJsonApi(new \stdClass));
