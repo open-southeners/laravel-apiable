@@ -195,7 +195,7 @@ class JsonApiResponse implements Arrayable, Responsable
 
     /**
      * Get whether request is made within InertiaJS context.
-     * 
+     *
      * @param  \Illuminate\Http\Request  $request
      */
     protected function withinInertia($request): bool
@@ -213,7 +213,7 @@ class JsonApiResponse implements Arrayable, Responsable
     public function toResponse($request): mixed
     {
         $results = $this->getResults();
-        
+
         $response = $results instanceof Responsable
             ? $results->toResponse($request)
             : response()->json($results);
@@ -300,7 +300,7 @@ class JsonApiResponse implements Arrayable, Responsable
     /**
      * Force response serialisation with the specified format otherwise use default.
      */
-    public function forceFormatting(string|null $format = null): self
+    public function forceFormatting(string $format = null): self
     {
         Apiable::forceResponseFormatting($format);
 

@@ -12,8 +12,7 @@ class ApplySortsToQuery implements HandlesRequestQueries
     /**
      * Apply modifications to the query based on allowed query fragments.
      *
-     * @param  \OpenSoutheners\LaravelApiable\Http\RequestQueryObject  $request
-     * @param \Closure(\OpenSoutheners\LaravelApiable\Http\RequestQueryObject): \Illuminate\Database\Eloquent\Builder $next
+     * @param  \Closure(\OpenSoutheners\LaravelApiable\Http\RequestQueryObject): \Illuminate\Database\Eloquent\Builder  $next
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function from(RequestQueryObject $request, Closure $next)
@@ -27,9 +26,6 @@ class ApplySortsToQuery implements HandlesRequestQueries
 
     /**
      * Apply array of sorts to the query.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @param  array  $sorts
      */
     protected function applySorts(Builder $query, array $sorts): void
     {
@@ -40,10 +36,7 @@ class ApplySortsToQuery implements HandlesRequestQueries
 
     /**
      * Get attribute adding a join when sorting by relationship or a column sort.
-     *  
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param string $attribute
-     * @param string $direction
+     *
      * @return string|\Closure|\Illuminate\Database\Eloquent\Builder
      */
     protected function getQualifiedAttribute(Builder $query, string $attribute, string $direction)
@@ -80,7 +73,7 @@ class ApplySortsToQuery implements HandlesRequestQueries
             $joinAsRelationshipTable = "{$relationship}_{$relationshipTable}";
         }
 
-        $joinName = $relationshipTable . ($joinAsRelationshipTable !== $relationshipTable ? " as {$joinAsRelationshipTable}" : '');
+        $joinName = $relationshipTable.($joinAsRelationshipTable !== $relationshipTable ? " as {$joinAsRelationshipTable}" : '');
 
         $query->select($queryModel->qualifyColumn('*'));
 

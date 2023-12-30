@@ -24,7 +24,6 @@ trait HasRelationships
     /**
      * Assert on the related resource by its model instance.
      *
-     * @param  \Illuminate\Database\Eloquent\Model  $model
      * @return \OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi
      */
     public function atRelation(Model $model)
@@ -91,7 +90,6 @@ trait HasRelationships
     /**
      * Assert that a resource has any relationship and included (optional) by model instance.
      *
-     * @param  \Illuminate\Database\Eloquent\Model  $model
      * @param  bool  $withIncluded
      * @return $this
      */
@@ -117,7 +115,6 @@ trait HasRelationships
     /**
      * Assert that a resource does not have any relationship and included (optional) by model instance.
      *
-     * @param  \Illuminate\Database\Eloquent\Model  $model
      * @param  bool  $withIncluded
      * @return $this
      */
@@ -143,8 +140,6 @@ trait HasRelationships
     /**
      * Filter array of resources by a provided identifier.
      *
-     * @param  array  $resources
-     * @param  string  $type
      * @param  mixed  $id
      * @return array
      */
@@ -158,8 +153,6 @@ trait HasRelationships
     /**
      * Filter provided resource with given identifier.
      *
-     * @param  array  $resource
-     * @param  string  $type
      * @param  mixed  $id
      * @return bool
      */

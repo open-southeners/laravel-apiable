@@ -78,8 +78,8 @@ trait CollectsResources
         }
 
         return (new ReflectionClass($collects))
-                  ->newInstanceWithoutConstructor()
-                  ->jsonOptions();
+            ->newInstanceWithoutConstructor()
+            ->jsonOptions();
     }
 
     /**

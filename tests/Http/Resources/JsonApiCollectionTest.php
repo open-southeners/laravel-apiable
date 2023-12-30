@@ -14,8 +14,6 @@ class JsonApiCollectionTest extends TestCase
 {
     /**
      * Setup the test environment.
-     *
-     * @return void
      */
     protected function setUp(): void
     {

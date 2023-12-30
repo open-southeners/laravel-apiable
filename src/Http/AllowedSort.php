@@ -22,7 +22,7 @@ class AllowedSort implements Arrayable
      *
      * @return void
      */
-    public function __construct(string $attribute, int|null $direction = null)
+    public function __construct(string $attribute, int $direction = null)
     {
         $this->attribute = $attribute;
         $this->direction = (int) ($direction ?? Apiable::config('requests.sorts.default_direction') ?? static::BOTH);

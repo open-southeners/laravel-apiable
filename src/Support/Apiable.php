@@ -138,11 +138,10 @@ class Apiable
 
     /**
      * Force responses to be formatted in a specific format type.
-     * 
-     * @param string|null $format
+     *
      * @return void
      */
-    public static function forceResponseFormatting(string|null $format = null)
+    public static function forceResponseFormatting(string $format = null)
     {
         config(['apiable.responses.formatting.force' => true]);
 

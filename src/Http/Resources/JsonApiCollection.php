@@ -6,6 +6,7 @@ use OpenSoutheners\LaravelApiable\Http\Resources\Json\ResourceCollection;
 
 /**
  * @template TCollectedResource
+ *
  * @extends ResourceCollection<TCollectedResource>
  */
 class JsonApiCollection extends ResourceCollection

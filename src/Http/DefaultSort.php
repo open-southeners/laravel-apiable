@@ -3,7 +3,6 @@
 namespace OpenSoutheners\LaravelApiable\Http;
 
 use Illuminate\Contracts\Support\Arrayable;
-use OpenSoutheners\LaravelApiable\Support\Apiable;
 
 class DefaultSort implements Arrayable
 {
@@ -18,7 +17,7 @@ class DefaultSort implements Arrayable
     /**
      * Make an instance of this class.
      */
-    public function __construct(string $attribute, int|null $direction = null)
+    public function __construct(string $attribute, int $direction = null)
     {
         $this->attribute = $attribute;
         $this->direction = $direction ?? static::ASCENDANT;

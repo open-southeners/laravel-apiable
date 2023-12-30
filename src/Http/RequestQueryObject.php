@@ -12,8 +12,8 @@ class RequestQueryObject
     use Concerns\AllowsFields;
     use Concerns\AllowsFilters;
     use Concerns\AllowsIncludes;
-    use Concerns\AllowsSorts;
     use Concerns\AllowsSearch;
+    use Concerns\AllowsSorts;
     use Concerns\ValidatesParams;
 
     protected Request $request;
@@ -26,12 +26,12 @@ class RequestQueryObject
     /**
      * @var \Illuminate\Support\Collection<array>|null
      */
-    protected Collection|null $queryParameters = null;
+    protected ?Collection $queryParameters = null;
 
     /**
      * Construct the request query object.
      */
-    public function __construct(Request|null $request = null)
+    public function __construct(Request $request = null)
     {
         $this->request = $request ?? app(Request::class);
     }
@@ -62,7 +62,7 @@ class RequestQueryObject
                     explode('&', $this->request->server('QUERY_STRING', ''))
                 )
             )->groupBy(fn ($item, $key) => head(array_keys($item)), true)
-            ->map(fn (Collection $collection) => $collection->flatten(1)->all());
+                ->map(fn (Collection $collection) => $collection->flatten(1)->all());
         }
 
         return $this->queryParameters;

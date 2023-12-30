@@ -10,8 +10,8 @@ use OpenSoutheners\LaravelApiable\Contracts\JsonApiable;
 
 class Post extends Model implements JsonApiable
 {
-    use Searchable;
     use HasJsonApi;
+    use Searchable;
 
     /**
      * The attributes that should be visible in serialization.
@@ -84,7 +84,6 @@ class Post extends Model implements JsonApiable
     /**
      * Query posts by active status.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @param  string  $value
      * @return void
      */
@@ -96,7 +95,6 @@ class Post extends Model implements JsonApiable
     /**
      * Query posts by active status.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return void
      */
     public function scopeActive(Builder $query)

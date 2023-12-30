@@ -57,7 +57,6 @@ trait AllowsSearch
     /**
      * Allow fulltext search to be performed.
      *
-     * @param  bool  $value
      * @return $this
      */
     public function allowSearch(bool $value = true)

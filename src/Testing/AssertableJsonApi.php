@@ -13,10 +13,10 @@ use PHPUnit\Framework\AssertionFailedError;
 
 class AssertableJsonApi extends AssertableJson
 {
-    use HasIdentifications;
     use HasAttributes;
-    use HasRelationships;
     use HasCollections;
+    use HasIdentifications;
+    use HasRelationships;
     use Macroable;
 
     /**
@@ -74,7 +74,6 @@ class AssertableJsonApi extends AssertableJson
     /**
      * Check if data contains a collection of resources.
      *
-     * @param  array  $data
      * @return bool
      */
     public static function responseContainsCollection(array $data = [])
@@ -98,7 +97,6 @@ class AssertableJsonApi extends AssertableJson
      * Get the identifier in a pretty printable message by id and type.
      *
      * @param  mixed  $id
-     * @param  string  $type
      * @return string
      */
     protected function getIdentifierMessageFor($id = null, string $type = null)

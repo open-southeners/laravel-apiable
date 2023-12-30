@@ -4,7 +4,6 @@ namespace OpenSoutheners\LaravelApiable\Tests\Http;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use OpenSoutheners\LaravelApiable\Http\Request as HttpRequest;
 use OpenSoutheners\LaravelApiable\Tests\TestCase;
 
 class RequestTest extends TestCase

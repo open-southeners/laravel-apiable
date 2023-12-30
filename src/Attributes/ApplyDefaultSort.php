@@ -9,7 +9,7 @@ final class ApplyDefaultSort
 {
     public function __construct(
         public string $attribute,
-        public int|null $direction = null
+        public ?int $direction = null
     ) {
         //
     }

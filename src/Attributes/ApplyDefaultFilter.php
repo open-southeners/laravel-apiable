@@ -3,7 +3,6 @@
 namespace OpenSoutheners\LaravelApiable\Attributes;
 
 use Attribute;
-use OpenSoutheners\LaravelApiable\Http\AllowedSort;
 
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
 final class ApplyDefaultFilter
@@ -13,6 +12,6 @@ final class ApplyDefaultFilter
         public int|array|null $operator = null,
         public string|array $values = ''
     ) {
-        // 
+        //
     }
 }
