@@ -15,9 +15,11 @@ class Handler implements Responsable
 {
     protected JsonApiException $jsonApiException;
 
+    protected array $headers = [];
+
     public function __construct(
         protected Throwable $exception,
-        protected bool|null $withTrace = null
+        protected ?bool $withTrace = null
     ) {
         $this->jsonApiException = new JsonApiException();
     }
@@ -45,8 +47,21 @@ class Handler implements Responsable
         return new JsonResponse(
             $this->jsonApiException->toArray(),
             max(array_column($this->jsonApiException->getErrors(), 'status')),
-            $this->exception instanceof HttpExceptionInterface ? $this->exception->getHeaders() : []
+            array_merge(
+                $this->exception instanceof HttpExceptionInterface ? $this->exception->getHeaders() : [],
+                $this->headers
+            )
         );
+    }
+
+    /**
+     * Add header to the resulting response.
+     */
+    public function withHeader(string $key, string $value): self
+    {
+        $this->headers[$key] = $value;
+
+        return $this;
     }
 
     /**
