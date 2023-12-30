@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.13.0] - 2023-12-30
+
+### Added
+
+- `Handler::withHeader` (used as `apiable()->jsonApiRenderable()->withHeader`) to add headers to JSON errors
+
 ## [3.12.0] - 2023-12-14
 
 ### Added
