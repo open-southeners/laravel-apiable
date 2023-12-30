@@ -9,12 +9,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Get latest release info
-        id: get-release-info
-        uses: release-flow/keep-a-changelog-action/get-release-info@v1
+      - name: Get release info
+        id: query-release-info
+        uses: release-flow/keep-a-changelog-action@v2
         with:
+          command: query
           release-version: latest
 
       - name: Publish to Github releases
