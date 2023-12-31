@@ -27,7 +27,7 @@ class DefaultFilter extends AllowedFilter
      *
      * @return array<string, array<string>>
      */
-    public function toArray()
+    public function toArray(): array
     {
         $defaultFilterArr = parent::toArray();
 
