@@ -1,0 +1,16 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Call to an undefined method Throwable\\:\\:errors\\(\\)\\.$#"
+			count: 1
+			path: src/Handler.php
+
+		-
+			message: "#^Static call to instance method stdClass\\:\\:search\\(\\)\\.$#"
+			count: 1
+			path: src/Http/ApplyFulltextSearchToQuery.php
+
+		-
+			message: "#^Comparison operation \"\\>\" between 0 and 0 is always false\\.$#"
+			count: 2
+			path: src/Http/QueryParamsValidator.php

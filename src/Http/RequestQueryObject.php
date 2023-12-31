@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 
+/**
+ * @template T of \Illuminate\Database\Eloquent\Model
+ */
 class RequestQueryObject
 {
     use Concerns\AllowsAppends;
@@ -16,24 +19,22 @@ class RequestQueryObject
     use Concerns\AllowsSorts;
     use Concerns\ValidatesParams;
 
-    protected Request $request;
-
     /**
-     * @var \Illuminate\Database\Eloquent\Builder
+     * @var \Illuminate\Database\Eloquent\Builder<T>
      */
     public $query;
 
     /**
-     * @var \Illuminate\Support\Collection<array>|null
+     * @var \Illuminate\Support\Collection<(int|string), array<int, mixed>>|null
      */
     protected ?Collection $queryParameters = null;
 
     /**
      * Construct the request query object.
      */
-    public function __construct(Request $request = null)
+    public function __construct(protected Request $request)
     {
-        $this->request = $request ?? app(Request::class);
+        //
     }
 
     /**
@@ -86,6 +87,7 @@ class RequestQueryObject
         array $fields = [],
         array $appends = []
     ): self {
+        /** @var array<string, array> $allowedArr */
         $allowedArr = compact('sorts', 'filters', 'includes', 'fields', 'appends');
 
         foreach ($allowedArr as $allowedKey => $alloweds) {
@@ -98,6 +100,7 @@ class RequestQueryObject
                     'includes' => $this->allowInclude(...$allowedItemAsArg),
                     'fields' => $this->allowFields(...$allowedItemAsArg),
                     'appends' => $this->allowAppends(...$allowedItemAsArg),
+                    default => null,
                 };
             }
         }

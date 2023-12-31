@@ -89,9 +89,12 @@ class ResourceCollection extends JsonApiResource implements Countable, IteratorA
      *
      * @param  \Illuminate\Http\Request  $request
      */
-    public function toArray($request): mixed
+    public function toArray($request): array
     {
-        return $this->collection->map->toArray($request);
+        /** @var \Illuminate\Support\Collection<array> $collectionArray */
+        $collectionArray = $this->collection->map->toArray($request);
+
+        return $collectionArray->toArray();
     }
 
     /**

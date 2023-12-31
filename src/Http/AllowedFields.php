@@ -7,10 +7,7 @@ use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
 
 class AllowedFields implements Arrayable
 {
-    /**
-     * @var string
-     */
-    protected $type;
+    protected string $type;
 
     /**
      * @var array<string|array<string>>
@@ -23,20 +20,20 @@ class AllowedFields implements Arrayable
      * @param  string|array<string>  $attributes
      * @return void
      */
-    public function __construct(string $type, $attributes)
+    public function __construct(string $type, string|array $attributes)
     {
         $this->type = class_exists($type) ? Apiable::getResourceType($type) : $type;
         $this->attributes = (array) $attributes;
     }
 
     /**
-     * Allow include fields (attributes) to resource type.
+     * Allow restrict the result to specified columns in the resource type.
      *
      * @param  string|array<string>  $attributes
      */
-    public static function make(string $type, $attributes): static
+    public static function make(string $type, string|array $attributes): self
     {
-        return new static($type, $attributes);
+        return new self($type, $attributes);
     }
 
     /**

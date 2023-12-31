@@ -7,12 +7,9 @@ class DefaultFilter extends AllowedFilter
     /**
      * Make an instance of this class.
      *
-     * @param  string  $attribute
-     * @param  int|null  $operator
-     * @param  string|array<string>  $values
      * @return void
      */
-    public function __construct($attribute, $operator = null, $values = '*')
+    public function __construct(string $attribute, int $operator = null, string|array $values = '*')
     {
         if (! is_null($operator) && ! $this->isValidOperator($operator)) {
             throw new \Exception(
@@ -28,7 +25,7 @@ class DefaultFilter extends AllowedFilter
     /**
      * Get the instance as an array.
      *
-     * @return array<string, array<string, array<string>>>
+     * @return array<string, array<string>>
      */
     public function toArray()
     {

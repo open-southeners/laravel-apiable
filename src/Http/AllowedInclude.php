@@ -22,9 +22,9 @@ class AllowedInclude implements Arrayable
      *
      * @param  string|string[]  $relationship
      */
-    public static function make(string|array $relationship): static
+    public static function make(string|array $relationship): self
     {
-        return new static($relationship);
+        return new self($relationship);
     }
 
     /**

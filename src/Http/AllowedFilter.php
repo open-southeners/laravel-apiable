@@ -32,19 +32,17 @@ class AllowedFilter implements Arrayable
     protected $operator;
 
     /**
-     * @var string|array<string>
+     * @var string|array
      */
     protected $values;
 
     /**
      * Make an instance of this class.
      *
-     * @param  string  $attribute
      * @param  int|array<int>|null  $operator
-     * @param  string|array<string>  $values
      * @return void
      */
-    public function __construct($attribute, $operator = null, $values = '*')
+    public function __construct(string $attribute, int|array $operator = null, array|string $values = '*')
     {
         if (! is_null($operator) && ! $this->isValidOperator($operator)) {
             throw new \Exception(
@@ -62,11 +60,10 @@ class AllowedFilter implements Arrayable
      *
      * @param  string  $attribute
      * @param  string|array<string>  $values
-     * @return static
      */
-    public static function make($attribute, $values = '*')
+    public static function make($attribute, $values = '*'): self
     {
-        return new static($attribute, null, $values);
+        return new self($attribute, null, $values);
     }
 
     /**
@@ -74,11 +71,10 @@ class AllowedFilter implements Arrayable
      *
      * @param  string  $attribute
      * @param  string|array<string>  $values
-     * @return static
      */
-    public static function exact($attribute, $values = '*')
+    public static function exact($attribute, $values = '*'): self
     {
-        return new static($attribute, static::EXACT, $values);
+        return new self($attribute, static::EXACT, $values);
     }
 
     /**
@@ -86,11 +82,10 @@ class AllowedFilter implements Arrayable
      *
      * @param  string  $attribute
      * @param  string|array<string>|null  $values
-     * @return static
      */
-    public static function similar($attribute, $values = '*')
+    public static function similar($attribute, $values = '*'): self
     {
-        return new static($attribute, static::SIMILAR, $values);
+        return new self($attribute, static::SIMILAR, $values);
     }
 
     /**
@@ -98,11 +93,10 @@ class AllowedFilter implements Arrayable
      *
      * @param  string  $attribute
      * @param  string|array<string>|null  $values
-     * @return static
      */
-    public static function greaterThan($attribute, $values = '*')
+    public static function greaterThan($attribute, $values = '*'): self
     {
-        return new static($attribute, static::GREATER_THAN, $values);
+        return new self($attribute, static::GREATER_THAN, $values);
     }
 
     /**
@@ -110,11 +104,10 @@ class AllowedFilter implements Arrayable
      *
      * @param  string  $attribute
      * @param  string|array<string>|null  $values
-     * @return static
      */
-    public static function greaterOrEqualThan($attribute, $values = '*')
+    public static function greaterOrEqualThan($attribute, $values = '*'): self
     {
-        return new static($attribute, static::GREATER_OR_EQUAL_THAN, $values);
+        return new self($attribute, static::GREATER_OR_EQUAL_THAN, $values);
     }
 
     /**
@@ -122,11 +115,10 @@ class AllowedFilter implements Arrayable
      *
      * @param  string  $attribute
      * @param  string|array<string>|null  $values
-     * @return static
      */
-    public static function lowerThan($attribute, $values = '*')
+    public static function lowerThan($attribute, $values = '*'): self
     {
-        return new static($attribute, static::LOWER_THAN, $values);
+        return new self($attribute, static::LOWER_THAN, $values);
     }
 
     /**
@@ -134,11 +126,10 @@ class AllowedFilter implements Arrayable
      *
      * @param  string  $attribute
      * @param  string|array<string>|null  $values
-     * @return static
      */
-    public static function lowerOrEqualThan($attribute, $values = '*')
+    public static function lowerOrEqualThan($attribute, $values = '*'): self
     {
-        return new static($attribute, static::LOWER_OR_EQUAL_THAN, $values);
+        return new self($attribute, static::LOWER_OR_EQUAL_THAN, $values);
     }
 
     /**
@@ -146,11 +137,10 @@ class AllowedFilter implements Arrayable
      *
      * @param  string  $attribute
      * @param  string|array<string>  $values
-     * @return static
      */
-    public static function scoped($attribute, $values = '1')
+    public static function scoped($attribute, $values = '1'): self
     {
-        return new static(
+        return new self(
             Apiable::config('requests.filters.enforce_scoped_names') ? Apiable::scopedFilterSuffix($attribute) : $attribute,
             static::SCOPE,
             $values
@@ -161,9 +151,8 @@ class AllowedFilter implements Arrayable
      * Check if passed operators are valid.
      *
      * @param  int|array  $value
-     * @return bool
      */
-    protected function isValidOperator($value)
+    protected function isValidOperator($value): bool
     {
         $valuesArr = (array) $value;
 
@@ -181,9 +170,9 @@ class AllowedFilter implements Arrayable
     /**
      * Get the instance as an array.
      *
-     * @return array<string, array<string, array<string>>>
+     * @return array<string, array<string>>
      */
-    public function toArray()
+    public function toArray(): array
     {
         $operators = [];
 

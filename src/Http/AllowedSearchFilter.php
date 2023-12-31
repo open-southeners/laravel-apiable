@@ -34,11 +34,10 @@ class AllowedSearchFilter implements Arrayable
      *
      * @param  string  $attribute
      * @param  string|array<string>  $values
-     * @return static
      */
-    public static function make($attribute, $values = '*')
+    public static function make($attribute, $values = '*'): self
     {
-        return new static($attribute, $values);
+        return new self($attribute, $values);
     }
 
     /**

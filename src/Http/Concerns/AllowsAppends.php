@@ -19,10 +19,8 @@ trait AllowsAppends
 
     /**
      * Get user append attributes from request.
-     *
-     * @return array
      */
-    public function appends()
+    public function appends(): array
     {
         $appends = $this->request->get('appends', []);
 
@@ -37,10 +35,8 @@ trait AllowsAppends
      * Allow the include of model accessors (attributes).
      *
      * @param  \OpenSoutheners\LaravelApiable\Http\AllowedAppends|class-string<\Illuminate\Database\Eloquent\Model>|string  $type
-     * @param  array  $attributes
-     * @return $this
      */
-    public function allowAppends($type, $attributes = null)
+    public function allowAppends(AllowedAppends|string $type, array $attributes = null): self
     {
         if ($type instanceof AllowedAppends) {
             $this->allowedAppends = array_merge($this->allowedAppends, $type->toArray());
@@ -57,7 +53,10 @@ trait AllowsAppends
         return $this;
     }
 
-    public function userAllowedAppends()
+    /**
+     * Get appends that passed the validation.
+     */
+    public function userAllowedAppends(): array
     {
         return $this->validator($this->appends())
             ->givingRules($this->allowedAppends)
@@ -77,7 +76,7 @@ trait AllowsAppends
      *
      * @return array<string, array<string>>
      */
-    public function getAllowedAppends()
+    public function getAllowedAppends(): array
     {
         return $this->allowedAppends;
     }

@@ -96,8 +96,8 @@ class QueryParamsValidator
                     is_callable($exception) ? $exception($key, $queryParamValues) : throw $exception;
                 }
 
-                if ($conditionResult || ! empty($valids)) {
-                    $filteredResults[$key] = ! empty($valids) ? $valids : $values;
+                if ($conditionResult || count($valids) > 0) {
+                    $filteredResults[$key] = count($valids) > 0 ? $valids : $values;
                 }
             }
         }

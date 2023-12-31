@@ -25,12 +25,13 @@
         "open-southeners/laravel-helpers": "~0.9"
     },
     "require-dev": {
+        "larastan/larastan": "^2.1",
         "laravel/pint": "^1.1",
         "laravel/scout": "^9.0",
-        "larastan/larastan": "^2.1",
         "orchestra/testbench": "^7.0 || ^8.0",
         "phpstan/phpstan": "^1.0",
-        "phpunit/phpunit": "^9.0 || ^10.0"
+        "phpunit/phpunit": "^9.0 || ^10.0",
+        "tomasvotruba/type-coverage": "^0.2.1"
     },
     "suggest": {
         "hammerstone/fast-paginate": "Improves jsonApiPaginate method performance (SQL database query pagination)",

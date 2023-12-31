@@ -17,6 +17,9 @@ class Handler implements Responsable
 
     protected array $headers = [];
 
+    /**
+     * @param  \Throwable|\Illuminate\Validation\ValidationException  $exception
+     */
     public function __construct(
         protected Throwable $exception,
         protected ?bool $withTrace = null

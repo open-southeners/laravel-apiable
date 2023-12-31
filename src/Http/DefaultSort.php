@@ -26,25 +26,25 @@ class DefaultSort implements Arrayable
     /**
      * Allow default sort by attribute.
      */
-    public static function make(string $attribute): static
+    public static function make(string $attribute): self
     {
-        return new static($attribute);
+        return new self($attribute);
     }
 
     /**
      * Allow sort by attribute as ascendant.
      */
-    public static function ascendant(string $attribute): static
+    public static function ascendant(string $attribute): self
     {
-        return new static($attribute, static::ASCENDANT);
+        return new self($attribute, static::ASCENDANT);
     }
 
     /**
      * Allow sort by attribute as descendant.
      */
-    public static function descendant(string $attribute): static
+    public static function descendant(string $attribute): self
     {
-        return new static($attribute, static::DESCENDANT);
+        return new self($attribute, static::DESCENDANT);
     }
 
     /**

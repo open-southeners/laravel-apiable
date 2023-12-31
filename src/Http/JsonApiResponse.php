@@ -4,12 +4,14 @@ namespace OpenSoutheners\LaravelApiable\Http;
 
 use Closure;
 use Exception;
+use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pipeline\Pipeline;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Traits\ForwardsCalls;
 use OpenSoutheners\LaravelApiable\Contracts\ViewableBuilder;
 use OpenSoutheners\LaravelApiable\Contracts\ViewQueryable;
@@ -18,7 +20,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
- * @mixin \OpenSoutheners\LaravelApiable\Http\RequestQueryObject
+ * @template T of \Illuminate\Database\Eloquent\Model
+ *
+ * @mixin \OpenSoutheners\LaravelApiable\Http\RequestQueryObject<T>
  */
 class JsonApiResponse implements Arrayable, Responsable
 {
@@ -31,7 +35,7 @@ class JsonApiResponse implements Arrayable, Responsable
     protected ?RequestQueryObject $request;
 
     /**
-     * @var class-string<\Illuminate\Database\Eloquent\Model>|class-string<\OpenSoutheners\LaravelApiable\Contracts\ViewQueryable>
+     * @var class-string<T>|class-string<\OpenSoutheners\LaravelApiable\Contracts\ViewQueryable<T>>
      */
     protected string $model;
 
@@ -51,7 +55,7 @@ class JsonApiResponse implements Arrayable, Responsable
      *
      * @return void
      */
-    public function __construct(Request $request = null)
+    public function __construct(Request $request)
     {
         $this->request = new RequestQueryObject($request);
 
@@ -63,23 +67,23 @@ class JsonApiResponse implements Arrayable, Responsable
     /**
      * Create new instance of repository from query.
      *
-     * @param  class-string<\Illuminate\Database\Eloquent\Model>|\Illuminate\Database\Eloquent\Builder  $modelOrQuery
+     * @param  class-string<T>|\Illuminate\Database\Eloquent\Builder<T>  $modelOrQuery
      */
     public static function from($modelOrQuery): self
     {
-        return (new static())->using($modelOrQuery);
+        return App::make(self::class)->using($modelOrQuery);
     }
 
     /**
      * Use the specified model for this JSON:API response.
      *
-     * @param  class-string<\Illuminate\Database\Eloquent\Model>|\Illuminate\Database\Eloquent\Builder  $modelOrQuery
+     * @param  class-string<T>|\Illuminate\Database\Eloquent\Builder<T>  $modelOrQuery
      */
     public function using($modelOrQuery): self
     {
         $this->model = is_string($modelOrQuery) ? $modelOrQuery : get_class($modelOrQuery->getModel());
 
-        /** @var \Illuminate\Database\Eloquent\Builder|\OpenSoutheners\LaravelApiable\Contracts\ViewableBuilder $query */
+        /** @var \Illuminate\Database\Eloquent\Builder<T>|\OpenSoutheners\LaravelApiable\Contracts\ViewableBuilder<T> $query */
         $query = is_string($modelOrQuery) ? $modelOrQuery::query() : clone $modelOrQuery;
 
         $this->request->setQuery($query);
@@ -133,10 +137,8 @@ class JsonApiResponse implements Arrayable, Responsable
 
     /**
      * Get results from processing RequestQueryObject pipeline.
-     *
-     * @return mixed
      */
-    protected function getResults()
+    public function getResults(Guard $guard): mixed
     {
         $query = $this->buildPipeline()->query;
 
@@ -145,8 +147,8 @@ class JsonApiResponse implements Arrayable, Responsable
             && (is_a($this->model, ViewQueryable::class, true)
                 || is_a($query, ViewableBuilder::class))
         ) {
-            /** @var \OpenSoutheners\LaravelApiable\Contracts\ViewableBuilder $query */
-            $query->viewable(Auth::user());
+            /** @var \OpenSoutheners\LaravelApiable\Contracts\ViewableBuilder<T> $query */
+            $query->viewable($guard->user());
         }
 
         return $this->resultPostProcessing(
@@ -171,7 +173,7 @@ class JsonApiResponse implements Arrayable, Responsable
     /**
      * Serialize response with pagination using a custom function that user provides or the default one.
      *
-     * @param  \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Builder  $response
+     * @param  T|\Illuminate\Database\Eloquent\Builder<T>  $response
      */
     protected function serializeResponse(mixed $response): mixed
     {
@@ -212,11 +214,12 @@ class JsonApiResponse implements Arrayable, Responsable
      */
     public function toResponse($request): mixed
     {
-        $results = $this->getResults();
+        /** @var \Illuminate\Contracts\Support\Responsable|mixed $results */
+        $results = App::call([$this, 'getResults']);
 
         $response = $results instanceof Responsable
             ? $results->toResponse($request)
-            : response()->json($results);
+            : new JsonResponse($results);
 
         if ($this->withinInertia($request) && $response instanceof Response && method_exists($response, 'getData')) {
             return $response->getData();
@@ -232,7 +235,7 @@ class JsonApiResponse implements Arrayable, Responsable
     {
         $response = $this->toResponse(app(Request::class));
 
-        if ($response instanceof Response && method_exists($response, 'getData')) {
+        if ($response instanceof JsonResponse) {
             return (array) $response->getData();
         }
 
@@ -242,7 +245,7 @@ class JsonApiResponse implements Arrayable, Responsable
     /**
      * Force append attributes to be included without being allowed.
      *
-     * @param  string|array|class-string<\Illuminate\Database\Eloquent\Model>  $type
+     * @param  string|array|class-string<T>  $type
      */
     public function forceAppend(string|array $type, array $attributes = []): self
     {
@@ -262,7 +265,7 @@ class JsonApiResponse implements Arrayable, Responsable
     /**
      * Force append attributes to be included without being allowed only when condition matches.
      *
-     * @param  string|array|class-string<\Illuminate\Database\Eloquent\Model>  $type
+     * @param  string|array|class-string<T>  $type
      */
     public function forceAppendWhen(Closure|bool $condition, string|array $type, array $attributes = []): self
     {

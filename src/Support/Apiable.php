@@ -78,14 +78,17 @@ class Apiable
     /**
      * Prepare response allowing user requests from query.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder|\OpenSoutheners\LaravelApiable\Contracts\JsonApiable|class-string<\OpenSoutheners\LaravelApiable\Contracts\JsonApiable>  $query
+     * @template T of \Illuminate\Database\Eloquent\Model
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder<T>|T|class-string<T>  $query
+     * @return \OpenSoutheners\LaravelApiable\Http\JsonApiResponse<T>
      */
     public static function response($query, array $alloweds = []): JsonApiResponse
     {
         $response = JsonApiResponse::from($query);
 
         if (! empty($alloweds)) {
-            return $response->allowing($alloweds);
+            $response->allowing($alloweds);
         }
 
         return $response;
