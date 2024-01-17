@@ -6,7 +6,6 @@ use Exception;
 use OpenSoutheners\LaravelApiable\Http\AllowedFilter;
 use OpenSoutheners\LaravelApiable\Http\DefaultFilter;
 use OpenSoutheners\LaravelApiable\Support\Apiable;
-use Symfony\Component\HttpFoundation\HeaderUtils;
 
 /**
  * @mixin \OpenSoutheners\LaravelApiable\Http\RequestQueryObject
@@ -97,7 +96,7 @@ trait AllowsFilters
     }
 
     /**
-     * Get user requested filters filtered by allowed ones.
+     * Get filters filtered by user allowed.
      */
     public function userAllowedFilters(): array
     {

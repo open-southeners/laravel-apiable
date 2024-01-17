@@ -71,7 +71,7 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
      * Wrap query if relationship found applying its operator and conditional to the filtered attribute.
      *
      * @param  callable(\Illuminate\Database\Eloquent\Builder, string|null, string, string, string, string): mixed  $callback
-     * @param  array<string>  $filterValues
+     * @param  array<string|array>  $filterValues
      */
     protected function wrapIfRelatedQuery(callable $callback, Builder $query, string $filterAttribute, array $filterValues): void
     {

@@ -16,5 +16,5 @@ interface ViewQueryable
      * @param  \Illuminate\Database\Eloquent\Builder<T>  $query
      * @return void
      */
-    public function scopeViewable(Builder $query, Authenticatable $user = null);
+    public function scopeViewable(Builder $query, ?Authenticatable $user = null);
 }

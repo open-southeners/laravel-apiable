@@ -70,7 +70,7 @@ class Apiable
     /**
      * Transforms error rendering to a JSON:API complaint error response.
      */
-    public static function jsonApiRenderable(Throwable $e, bool $withTrace = null): Handler
+    public static function jsonApiRenderable(Throwable $e, ?bool $withTrace = null): Handler
     {
         return new Handler($e, $withTrace);
     }
@@ -144,7 +144,7 @@ class Apiable
      *
      * @return void
      */
-    public static function forceResponseFormatting(string $format = null)
+    public static function forceResponseFormatting(?string $format = null)
     {
         config(['apiable.responses.formatting.force' => true]);
 

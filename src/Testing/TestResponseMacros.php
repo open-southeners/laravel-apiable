@@ -8,7 +8,7 @@ class TestResponseMacros
 {
     public function assertJsonApi()
     {
-        return function (Closure $callback = null) {
+        return function (?Closure $callback = null) {
             $assert = AssertableJsonApi::fromTestResponse($this);
 
             if ($callback === null) {
