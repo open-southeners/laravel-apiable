@@ -15,10 +15,12 @@ trait AllowsAppends
     /**
      * @var array<string, array<string>>
      */
-    protected $allowedAppends = [];
+    protected array $allowedAppends = [];
 
     /**
      * Get user append attributes from request.
+     *
+     * @return array<string>
      */
     public function appends(): array
     {
@@ -36,7 +38,7 @@ trait AllowsAppends
      *
      * @param  \OpenSoutheners\LaravelApiable\Http\AllowedAppends|class-string<\Illuminate\Database\Eloquent\Model>|string  $type
      */
-    public function allowAppends(AllowedAppends|string $type, array $attributes = null): self
+    public function allowAppends(AllowedAppends|string $type, ?array $attributes = null): self
     {
         if ($type instanceof AllowedAppends) {
             $this->allowedAppends = array_merge($this->allowedAppends, $type->toArray());
@@ -54,7 +56,7 @@ trait AllowsAppends
     }
 
     /**
-     * Get appends that passed the validation.
+     * Get appends filtered by user allowed.
      */
     public function userAllowedAppends(): array
     {
