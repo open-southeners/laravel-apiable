@@ -2,6 +2,7 @@
 
 namespace OpenSoutheners\LaravelApiable\Http;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
@@ -23,7 +24,7 @@ class RequestQueryObject
     /**
      * @var \Illuminate\Database\Eloquent\Builder<T>
      */
-    public $query;
+    public Builder $query;
 
     /**
      * @var \Illuminate\Support\Collection<(int|string), array<int, mixed>>|null
@@ -33,7 +34,7 @@ class RequestQueryObject
     /**
      * Construct the request query object.
      */
-    public function __construct(protected Request $request)
+    public function __construct(public Request $request)
     {
         //
     }
@@ -41,9 +42,9 @@ class RequestQueryObject
     /**
      * Set query for this request query object.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  \Illuminate\Database\Eloquent\Builder<T>  $query
      */
-    public function setQuery($query): self
+    public function setQuery(Builder $query): self
     {
         $this->query = $query;
 
@@ -64,14 +65,6 @@ class RequestQueryObject
         }
 
         return $this->queryParameters;
-    }
-
-    /**
-     * Get the underlying request object.
-     */
-    public function getRequest(): Request
-    {
-        return $this->request;
     }
 
     /**

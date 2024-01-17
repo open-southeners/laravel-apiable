@@ -15,11 +15,8 @@ trait IteratesResultsAfterQuery
 {
     /**
      * Post-process result from query to apply appended attributes.
-     *
-     * @param  mixed  $result
-     * @return mixed
      */
-    protected function resultPostProcessing($result)
+    protected function resultPostProcessing(mixed $result): mixed
     {
         if (! $result instanceof JsonApiResource) {
             return $result;
@@ -33,15 +30,15 @@ trait IteratesResultsAfterQuery
 
         if ($includeAllowed) {
             $result->additional(['meta' => array_filter([
-                'allowed_filters' => $this->request->getAllowedFilters(),
-                'allowed_sorts' => $this->request->getAllowedSorts(),
+                'allowed_filters' => $this->getAllowedFilters(),
+                'allowed_sorts' => $this->getAllowedSorts(),
             ])]);
         }
 
         if ($result instanceof JsonApiCollection) {
             $result->withQuery(
                 array_filter(
-                    $this->getRequest()->query->all(),
+                    $this->request->query->all(),
                     fn ($queryParam) => $queryParam !== 'page',
                     ARRAY_FILTER_USE_KEY
                 )
@@ -55,14 +52,13 @@ trait IteratesResultsAfterQuery
      * Add allowed user appends to result.
      *
      * @param  \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection|\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource  $result
-     * @return void
      */
-    protected function addAppendsToResult($result)
+    protected function addAppendsToResult($result): void
     {
         $filteredUserAppends = (new QueryParamsValidator(
-            $this->request->appends(),
-            $this->request->enforcesValidation(),
-            $this->request->getAllowedAppends()
+            $this->appends(),
+            $this->enforcesValidation(),
+            $this->getAllowedAppends()
         ))->when(
             function ($key, $modifiers, $values, $rules, &$valids) {
                 $valids = array_intersect($values, $rules);
@@ -91,9 +87,8 @@ trait IteratesResultsAfterQuery
      * Append array of attributes to the resulted JSON:API resource.
      *
      * @param  \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource|mixed  $resource
-     * @return void
      */
-    protected function appendToApiResource(mixed $resource, array $appends)
+    protected function appendToApiResource(mixed $resource, array $appends): void
     {
         if (! ($resource instanceof JsonApiResource)) {
             return;

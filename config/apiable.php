@@ -54,4 +54,21 @@ return [
         'include_ids_on_attributes' => false,
     ],
 
+    /**
+     * Default options for responses like: normalize relations names, include allowed filters and sorts, etc.
+     *
+     * @see https://docs.opensoutheners.com/laravel-apiable/guide/documentation.html
+     */
+    'documentation' => [
+
+        'markdown' => [
+            'base_path' => 'storage/exports/markdown',
+        ],
+
+        'postman' => [
+            'base_path' => 'storage/exports',
+        ],
+
+    ],
+
 ];

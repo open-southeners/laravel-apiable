@@ -3,7 +3,6 @@
 namespace OpenSoutheners\LaravelApiable\Http;
 
 use Closure;
-use Exception;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Responsable;
@@ -22,17 +21,17 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 /**
  * @template T of \Illuminate\Database\Eloquent\Model
  *
- * @mixin \OpenSoutheners\LaravelApiable\Http\RequestQueryObject<T>
+ * @template-extends \OpenSoutheners\LaravelApiable\Http\RequestQueryObject<T>
+ *
+ * @mixin \Illuminate\Database\Eloquent\Builder<T>
  */
-class JsonApiResponse implements Arrayable, Responsable
+class JsonApiResponse extends RequestQueryObject implements Arrayable, Responsable
 {
     use Concerns\IteratesResultsAfterQuery;
     use Concerns\ResolvesFromRouteAction;
     use ForwardsCalls;
 
     protected Pipeline $pipeline;
-
-    protected ?RequestQueryObject $request;
 
     /**
      * @var class-string<T>|class-string<\OpenSoutheners\LaravelApiable\Contracts\ViewQueryable<T>>
@@ -55,9 +54,9 @@ class JsonApiResponse implements Arrayable, Responsable
      *
      * @return void
      */
-    public function __construct(Request $request)
+    public function __construct(public Request $request)
     {
-        $this->request = new RequestQueryObject($request);
+        parent::__construct($request);
 
         $this->pipeline = app(Pipeline::class);
 
@@ -86,25 +85,17 @@ class JsonApiResponse implements Arrayable, Responsable
         /** @var \Illuminate\Database\Eloquent\Builder<T>|\OpenSoutheners\LaravelApiable\Contracts\ViewableBuilder<T> $query */
         $query = is_string($modelOrQuery) ? $modelOrQuery::query() : clone $modelOrQuery;
 
-        $this->request->setQuery($query);
+        $this->setQuery($query);
 
         return $this;
     }
 
     /**
      * Build pipeline and return resulting request query object instance.
-     *
-     * @return \OpenSoutheners\LaravelApiable\Http\RequestQueryObject
-     *
-     * @throws \Exception
      */
-    protected function buildPipeline()
+    protected function buildPipeline(): self
     {
-        if (! $this->request?->query) {
-            throw new Exception('RequestQueryObject needs a base query to work, none provided');
-        }
-
-        return $this->pipeline->send($this->request)
+        return $this->pipeline->send($this)
             ->via('from')
             ->through([
                 ApplyFulltextSearchToQuery::class,
@@ -181,10 +172,9 @@ class JsonApiResponse implements Arrayable, Responsable
             ? call_user_func_array($this->pagination, [$response])
             : $response;
 
-        $request = $this->request->getRequest();
-        $requesterAccepts = $request->header('Accept');
+        $requesterAccepts = $this->request->header('Accept');
 
-        if ($this->withinInertia($request) || $requesterAccepts === null || Apiable::config('responses.formatting.force')) {
+        if ($this->withinInertia($this->request) || $requesterAccepts === null || Apiable::config('responses.formatting.force')) {
             $requesterAccepts = Apiable::config('responses.formatting.type');
         }
 
@@ -312,10 +302,10 @@ class JsonApiResponse implements Arrayable, Responsable
     }
 
     /**
-     * Call method of RequestQueryObject if not exists on this.
+     * Call methods of the underlying query builder if not exists on this.
      */
     public function __call(string $name, array $arguments): mixed
     {
-        return $this->forwardDecoratedCallTo($this->request, $name, $arguments);
+        return $this->forwardDecoratedCallTo($this->query, $name, $arguments);
     }
 }

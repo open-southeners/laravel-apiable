@@ -11,13 +11,16 @@ class QueryParamsValidator
     /**
      * @var array{0: callable(string, array, array, array, array): bool, 1: \Throwable|callable}|array
      */
-    protected $validationCallbacks = [];
+    protected array $validationCallbacks = [];
 
     /**
      * Create new validator instance.
      */
-    public function __construct(protected array $params, protected bool $enforceValidation, protected array|bool $rules = [])
-    {
+    public function __construct(
+        protected array $params,
+        protected bool $enforceValidation,
+        protected array|bool $rules = []
+    ) {
         //
     }
 

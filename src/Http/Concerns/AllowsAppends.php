@@ -15,10 +15,12 @@ trait AllowsAppends
     /**
      * @var array<string, array<string>>
      */
-    protected $allowedAppends = [];
+    protected array $allowedAppends = [];
 
     /**
      * Get user append attributes from request.
+     *
+     * @return array<string>
      */
     public function appends(): array
     {
@@ -54,7 +56,7 @@ trait AllowsAppends
     }
 
     /**
-     * Get appends that passed the validation.
+     * Get appends filtered by user allowed.
      */
     public function userAllowedAppends(): array
     {
