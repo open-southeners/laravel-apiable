@@ -124,6 +124,15 @@ class FilmBuilder extends Builder implements ViewableBuilder
 }
 ```
 
+#### Disable viewable per request
+
+If the **viewable is implemented at the model or query builder** level **this will get called** whenever you use Apiable, you can disable it per request using the following method:
+
+```php
+JsonApiResponse::from(Film::where('title', 'LIKE', 'The%'))
+    ->conditionallyLoadResults(false);
+```
+
 #### Customise pagination method
 
 In case you want to customise the pagination used you can actually use the `paginateUsing` method:
