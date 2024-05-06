@@ -13,10 +13,10 @@ class JsonApiException extends Exception
      */
     public function addError(
         string $title,
-        string $detail = null,
-        string $source = null,
+        ?string $detail = null,
+        ?string $source = null,
         ?int $status = 500,
-        int|string $code = null,
+        int|string|null $code = null,
         array $trace = []
     ): void {
         $error = [];

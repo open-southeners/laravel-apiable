@@ -9,7 +9,7 @@ class DefaultFilter extends AllowedFilter
      *
      * @return void
      */
-    public function __construct(string $attribute, int $operator = null, string|array $values = '*')
+    public function __construct(string $attribute, ?int $operator = null, string|array $values = '*')
     {
         if (! is_null($operator) && ! $this->isValidOperator($operator)) {
             throw new \Exception(

@@ -29,6 +29,7 @@ class JsonApiResponseTest extends TestCase
         parent::setUp();
 
         $this->generateTestData();
+        $this->withoutExceptionHandling();
     }
 
     public function testFilteringByNonAllowedAttributeWillGetEverything()
