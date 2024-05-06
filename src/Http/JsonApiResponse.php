@@ -181,6 +181,7 @@ class JsonApiResponse extends RequestQueryObject implements Arrayable, Responsab
         return match ($requesterAccepts) {
             'application/json' => $response instanceof Builder ? $response->simplePaginate() : $response,
             'application/vnd.api+json' => Apiable::toJsonApi($response),
+            'raw' => $response,
             default => throw new HttpException(406, 'Not acceptable response formatting'),
         };
     }
