@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.13.3] - 2024-05-06
+
+### Fixed
+
+- Raw response without pagination returning query builder
+
 ## [3.13.2] - 2024-05-06
 
 ### Added
