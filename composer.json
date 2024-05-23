@@ -21,14 +21,14 @@
     "homepage": "https://docs.opensoutheners.com/laravel-apiable/",
     "require": {
         "php": "^8.0",
-        "illuminate/support": "^9.0 || ^10.0",
+        "illuminate/support": "^9.0 || ^10.0 || ^11.0",
         "open-southeners/laravel-helpers": "~0.9"
     },
     "require-dev": {
         "larastan/larastan": "^2.1",
         "laravel/pint": "^1.1",
-        "laravel/scout": "^9.0",
-        "orchestra/testbench": "^7.0 || ^8.0",
+        "laravel/scout": "^10.0",
+        "orchestra/testbench": "^7.0 || ^8.0 || ^9.0",
         "phpstan/phpstan": "^1.0",
         "phpunit/phpunit": "^9.0 || ^10.0",
         "tomasvotruba/type-coverage": "^0.2.1"
