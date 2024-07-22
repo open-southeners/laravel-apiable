@@ -97,7 +97,6 @@ trait RelationshipsWithIncludes
     {
         $includesCol = Collection::make([
             $resource,
-            array_values($this->getIncluded()),
             array_values($resource->getIncluded()),
         ])->flatten();
 
