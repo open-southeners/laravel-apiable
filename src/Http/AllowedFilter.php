@@ -42,7 +42,7 @@ class AllowedFilter implements Arrayable
      * @param  int|array<int>|null  $operator
      * @return void
      */
-    public function __construct(string $attribute, int|array $operator = null, array|string $values = '*')
+    public function __construct(string $attribute, int|array|null $operator = null, array|string $values = '*')
     {
         if (! is_null($operator) && ! $this->isValidOperator($operator)) {
             throw new \Exception(

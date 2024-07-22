@@ -304,7 +304,7 @@ class JsonApiResponse implements Arrayable, Responsable
     /**
      * Force response serialisation with the specified format otherwise use default.
      */
-    public function forceFormatting(string $format = null): self
+    public function forceFormatting(?string $format = null): self
     {
         Apiable::forceResponseFormatting($format);
 

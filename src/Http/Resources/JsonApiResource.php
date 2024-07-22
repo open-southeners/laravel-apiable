@@ -4,7 +4,6 @@ namespace OpenSoutheners\LaravelApiable\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\MissingValue;
-use OpenSoutheners\LaravelApiable\Http\Request;
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
 
 /**

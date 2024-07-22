@@ -14,5 +14,5 @@ interface ViewableBuilder
      *
      * @return \Illuminate\Database\Eloquent\Builder<T>
      */
-    public function viewable(Authenticatable $user = null);
+    public function viewable(?Authenticatable $user = null);
 }

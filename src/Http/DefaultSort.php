@@ -17,7 +17,7 @@ class DefaultSort implements Arrayable
     /**
      * Make an instance of this class.
      */
-    public function __construct(string $attribute, int $direction = null)
+    public function __construct(string $attribute, ?int $direction = null)
     {
         $this->attribute = $attribute;
         $this->direction = $direction ?? static::ASCENDANT;

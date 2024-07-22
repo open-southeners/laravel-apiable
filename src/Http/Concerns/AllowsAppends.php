@@ -36,7 +36,7 @@ trait AllowsAppends
      *
      * @param  \OpenSoutheners\LaravelApiable\Http\AllowedAppends|class-string<\Illuminate\Database\Eloquent\Model>|string  $type
      */
-    public function allowAppends(AllowedAppends|string $type, array $attributes = null): self
+    public function allowAppends(AllowedAppends|string $type, ?array $attributes = null): self
     {
         if ($type instanceof AllowedAppends) {
             $this->allowedAppends = array_merge($this->allowedAppends, $type->toArray());

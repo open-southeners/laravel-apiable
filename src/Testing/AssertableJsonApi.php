@@ -99,7 +99,7 @@ class AssertableJsonApi extends AssertableJson
      * @param  mixed  $id
      * @return string
      */
-    protected function getIdentifierMessageFor($id = null, string $type = null)
+    protected function getIdentifierMessageFor($id = null, ?string $type = null)
     {
         $messagePrefix = '{ id: %s, type: "%s" }';
 
