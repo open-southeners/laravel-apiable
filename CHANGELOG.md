@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.14.1] - 2024-07-22
+
+### Fixed
+
+- Performance degradation issue on serialisation (infinite loop on nested includeds)
+
 ## [3.14.0] - 2024-05-24
 
 ### Added
@@ -99,7 +105,7 @@ JsonApiResponse::using(Post::class)->allowInclude(['tags_count']);
 
 - Default sorts using `JsonApiResponse::applyDefaultSort` method or `OpenSoutheners\LaravelApiable\Attributes\ApplyDefaultSort` attribute
 - Default filters using `JsonApiResponse::applyDefaultFilter` method or `OpenSoutheners\LaravelApiable\Attributes\ApplyDefaultFilter` attribute
-- Default formatting bypass using `JsonApiResponse::forceFormatting` method 
+- Default formatting bypass using `JsonApiResponse::forceFormatting` method
 
 ### Changed
 
@@ -200,7 +206,7 @@ JsonApiResponse::using(Post::class)->allowInclude(['tags_count']);
 
 ### Added
 
-- `JsonApiResponse::conditionallyLoadResults` to manage adding viewable query or not to the response 
+- `JsonApiResponse::conditionallyLoadResults` to manage adding viewable query or not to the response
 
 ## [3.3.0] - 2023-02-14
 
@@ -538,4 +544,4 @@ JsonApiResponse::using(Post::class)->allowInclude(['tags_count']);
 
 ### Added
 
-- Initial pre-release! 
+- Initial pre-release!
