@@ -11,7 +11,7 @@ use Illuminate\Support\Traits\ForwardsCalls;
 use OpenSoutheners\LaravelApiable\Contracts\HandlesRequestQueries;
 use OpenSoutheners\LaravelApiable\Support\Apiable;
 
-use function OpenSoutheners\LaravelHelpers\Classes\class_namespace;
+use function OpenSoutheners\ExtendedPhp\Classes\class_namespace;
 
 class ApplyFiltersToQuery implements HandlesRequestQueries
 {

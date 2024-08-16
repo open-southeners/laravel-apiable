@@ -5,7 +5,7 @@ namespace OpenSoutheners\LaravelApiable\Http;
 use Closure;
 use OpenSoutheners\LaravelApiable\Contracts\HandlesRequestQueries;
 
-use function OpenSoutheners\LaravelHelpers\Classes\class_use;
+use function OpenSoutheners\ExtendedPhp\Classes\class_use;
 
 class ApplyFulltextSearchToQuery implements HandlesRequestQueries
 {
