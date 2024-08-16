@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
-use function OpenSoutheners\LaravelHelpers\Utils\parse_http_query;
+use function OpenSoutheners\ExtendedPhp\Utils\parse_http_query;
 
 /**
  * @template T of \Illuminate\Database\Eloquent\Model
