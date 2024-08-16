@@ -3,7 +3,7 @@ name: Publish
 on:
   push:
     tags:
-      - '**'
+      - "**"
 
 jobs:
   # @see https://stackoverflow.com/a/72959712/8179249
