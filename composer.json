@@ -22,7 +22,7 @@
     "require": {
         "php": "^8.0",
         "illuminate/support": "^9.0 || ^10.0 || ^11.0",
-        "open-southeners/laravel-helpers": "~0.9"
+        "open-southeners/extended-php": "~1.0"
     },
     "require-dev": {
         "larastan/larastan": "^2.1",
