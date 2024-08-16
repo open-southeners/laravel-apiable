@@ -1,8 +1,11 @@
 <?php
 
-namespace OpenSoutheners\LaravelApiable\Attributes;
+namespace OpenSoutheners\LaravelApiable\Documentation\Attributes;
 
-class ResourceResponse
+use Attribute;
+
+#[Attribute(Attribute::TARGET_CLASS)]
+class EndpointResource
 {
     /**
      * @param  class-string<\Illuminate\Database\Eloquent\Model>  $resource

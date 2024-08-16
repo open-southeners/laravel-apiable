@@ -6,6 +6,7 @@ use Exception;
 use OpenSoutheners\LaravelApiable\Http\QueryParamsValidator;
 use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection;
 use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource;
+use OpenSoutheners\LaravelApiable\ServiceProvider;
 use OpenSoutheners\LaravelApiable\Support\Apiable;
 
 /**
@@ -96,15 +97,20 @@ trait IteratesResultsAfterQuery
 
         /** @var array<\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource> $resourceIncluded */
         $resourceIncluded = $resource->with['included'] ?? [];
-        $resourceType = Apiable::getResourceType($resource->resource);
+        $resourceType = ServiceProvider::getTypeForModel(
+            is_string($resource->resource) ? $resource->resource : get_class($resource->resource)
+        );
 
         if ($appendsArr = $appends[$resourceType] ?? null) {
             $resource->resource->makeVisible($appendsArr)->append($appendsArr);
         }
 
         foreach ($resourceIncluded as $included) {
-            $includedResourceType = Apiable::getResourceType($included->resource);
+            $includedResourceType = ServiceProvider::getTypeForModel(
+                is_string($included->resource) ? $included->resource : get_class($included->resource)
+            );
 
+            // dump($includedResourceType);
             if ($appendsArr = $appends[$includedResourceType] ?? null) {
                 $included->resource->makeVisible($appendsArr)->append($appendsArr);
             }

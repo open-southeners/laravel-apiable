@@ -6,6 +6,12 @@ use Illuminate\Routing\Route;
 use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
 use OpenSoutheners\LaravelApiable\Http\JsonApiResponse;
+use PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocTextNode;
+use PHPStan\PhpDocParser\Lexer\Lexer;
+use PHPStan\PhpDocParser\Parser\ConstExprParser;
+use PHPStan\PhpDocParser\Parser\PhpDocParser;
+use PHPStan\PhpDocParser\Parser\TokenIterator;
+use PHPStan\PhpDocParser\Parser\TypeParser;
 use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionMethod;
@@ -40,10 +46,38 @@ final class Endpoint
 
         $attribute = $documentedEndpointAttribute->newInstance();
 
-        return new self($resource, $route, $method, $attribute->title, $attribute->description);
+        return new self(
+            $resource,
+            $route,
+            $method,
+            $attribute->title,
+            $attribute->description ?: self::getDescriptionFromMethodDoc($controllerMethod->getDocComment())
+        );
     }
 
-    public static function fromResourceAction(Resource $resource, Route $route, string $method): ?self
+    protected static function getDescriptionFromMethodDoc(string $comment): string
+    {
+        $lexer = new Lexer();
+        $constExprParser = new ConstExprParser();
+        $typeParser = new TypeParser($constExprParser);
+        $phpDocParser = new PhpDocParser($typeParser, $constExprParser);
+
+        $tokens = new TokenIterator(
+            $lexer->tokenize($comment)
+        );
+
+        $description = '';
+
+        foreach ($phpDocParser->parse($tokens)->children as $node) {
+            if ($node instanceof PhpDocTextNode) {
+                $description .= (string) $node;
+            }
+        }
+
+        return $description;
+    }
+
+    public static function fromResourceAction(ReflectionMethod $controllerMethod, Resource $resource, Route $route, string $method): ?self
     {
         $endpointResource = $resource->getName();
         $endpointResourcePlural = Str::plural($endpointResource);
@@ -58,6 +92,8 @@ final class Endpoint
             'destroy' => ["Remove {$endpointResource}", "This endpoint allows you to delete a {$endpointResource}."],
             default => ['', '']
         };
+
+        $description = self::getDescriptionFromMethodDoc($controllerMethod) ?: $description;
 
         return new self($resource, $route, $method, $title, $description);
     }
@@ -95,10 +131,11 @@ final class Endpoint
         $postmanItem = [
             'name' => $this->title,
             'request' => [
-                'method' => $this->route->getActionMethod(),
+                'description' => $this->description,
+                'method' => $this->method,
                 'header' => [],
+                'url' => [],
             ],
-            'url' => [],
             'response' => [],
         ];
 
@@ -122,11 +159,11 @@ final class Endpoint
                 )->value()
             );
 
-        $postmanItem['url']['raw'] = "{{base_url}}/{$routeUriString->join('/')}";
-        $postmanItem['url']['host'] = ['{{base_url}}'];
-        $postmanItem['url']['path'] = $routeUriString->toArray();
+        $postmanItem['request']['url']['raw'] = "{{base_url}}/{$routeUriString->join('/')}";
+        $postmanItem['request']['url']['host'] = ['{{base_url}}'];
+        $postmanItem['request']['url']['path'] = $routeUriString->toArray();
 
-        $postmanItem['url']['query'] = array_map(
+        $postmanItem['request']['url']['query'] = array_map(
             fn (QueryParam $param): array => $param->toPostman(),
             $this->query
         );

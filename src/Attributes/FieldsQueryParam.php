@@ -3,7 +3,7 @@
 namespace OpenSoutheners\LaravelApiable\Attributes;
 
 use Attribute;
-use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
+use OpenSoutheners\LaravelApiable\ServiceProvider;
 
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
 final class FieldsQueryParam extends QueryParam
@@ -19,6 +19,6 @@ final class FieldsQueryParam extends QueryParam
             return $this->type;
         }
 
-        return Apiable::getResourceType($this->type);
+        return ServiceProvider::getTypeForModel($this->type);
     }
 }

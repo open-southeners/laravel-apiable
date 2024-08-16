@@ -5,6 +5,7 @@ namespace OpenSoutheners\LaravelApiable\Http;
 use Closure;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
 
 class QueryParamsValidator
 {
@@ -76,6 +77,10 @@ class QueryParamsValidator
      */
     public function validate(): array
     {
+        if (! Apiable::config('requests.validate')) {
+            return $this->params;
+        }
+
         $filteredResults = [];
 
         foreach ($this->params as $key => $values) {

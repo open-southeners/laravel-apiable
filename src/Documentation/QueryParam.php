@@ -26,6 +26,7 @@ class QueryParam
             //     $documentedRoute['name'] = $this->attribute->title;
             //     $documentedRoute['description'] = $this->attribute->description;
             // },
+
             Attributes\FilterQueryParam::class => static::fromFilterAttribute($attribute),
             Attributes\FieldsQueryParam::class => static::fromFieldsAttribute($attribute),
             Attributes\AppendsQueryParam::class => static::fromAppendsAttribute($attribute),

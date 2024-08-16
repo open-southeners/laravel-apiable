@@ -6,18 +6,13 @@ use OpenSoutheners\LaravelApiable\Http\AllowedSort;
 return [
 
     /**
-     * Resource type model map.
-     *
-     * @see https://docs.opensoutheners.com/laravel-apiable/guide/#getting-started
-     */
-    'resource_type_map' => [],
-
-    /**
      * Default options for request query filters, sorts, etc.
      *
      * @see https://docs.opensoutheners.com/laravel-apiable/guide/requests.html
      */
     'requests' => [
+        'validate' => ! ((bool) env('APIABLE_DEV_MODE', false)),
+
         'validate_params' => false,
 
         'filters' => [

@@ -5,7 +5,7 @@ namespace OpenSoutheners\LaravelApiable\Http\Concerns;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use OpenSoutheners\LaravelApiable\Http\AllowedAppends;
-use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
+use OpenSoutheners\LaravelApiable\ServiceProvider;
 
 /**
  * @mixin \OpenSoutheners\LaravelApiable\Http\RequestQueryObject
@@ -47,7 +47,7 @@ trait AllowsAppends
         }
 
         if (class_exists($type) && is_subclass_of($type, Model::class)) {
-            $type = Apiable::getResourceType($type);
+            $type = ServiceProvider::getTypeForModel($type);
         }
 
         $this->allowedAppends = array_merge($this->allowedAppends, [$type => (array) $attributes]);

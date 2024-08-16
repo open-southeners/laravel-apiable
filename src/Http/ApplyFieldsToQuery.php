@@ -5,6 +5,7 @@ namespace OpenSoutheners\LaravelApiable\Http;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use OpenSoutheners\LaravelApiable\Contracts\HandlesRequestQueries;
+use OpenSoutheners\LaravelApiable\ServiceProvider;
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
 
 class ApplyFieldsToQuery implements HandlesRequestQueries
@@ -39,7 +40,7 @@ class ApplyFieldsToQuery implements HandlesRequestQueries
     {
         /** @var \OpenSoutheners\LaravelApiable\Contracts\JsonApiable|\Illuminate\Database\Eloquent\Model $mainQueryModel */
         $mainQueryModel = $query->getModel();
-        $mainQueryResourceType = Apiable::getResourceType($mainQueryModel);
+        $mainQueryResourceType = ServiceProvider::getTypeForModel($mainQueryModel);
         $queryEagerLoaded = $query->getEagerLoads();
 
         // TODO: Move this to some class methods

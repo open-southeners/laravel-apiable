@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
+use Illuminate\Support\Traits\ForwardsCalls;
 use function OpenSoutheners\ExtendedPhp\Utils\parse_http_query;
 
 /**
@@ -20,6 +21,7 @@ class RequestQueryObject
     use Concerns\AllowsSearch;
     use Concerns\AllowsSorts;
     use Concerns\ValidatesParams;
+    use ForwardsCalls;
 
     /**
      * @var \Illuminate\Database\Eloquent\Builder<T>
@@ -116,5 +118,13 @@ class RequestQueryObject
         }
 
         return $this;
+    }
+
+    /**
+     * Call methods of the underlying query builder if not exists on this.
+     */
+    public function __call(string $name, array $arguments): mixed
+    {
+        return $this->forwardDecoratedCallTo($this->query, $name, $arguments);
     }
 }

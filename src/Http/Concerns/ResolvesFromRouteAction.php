@@ -11,7 +11,7 @@ use OpenSoutheners\LaravelApiable\Attributes\FilterQueryParam;
 use OpenSoutheners\LaravelApiable\Attributes\ForceAppendAttribute;
 use OpenSoutheners\LaravelApiable\Attributes\IncludeQueryParam;
 use OpenSoutheners\LaravelApiable\Attributes\QueryParam;
-use OpenSoutheners\LaravelApiable\Attributes\ResourceResponse;
+use OpenSoutheners\LaravelApiable\Documentation\Attributes\EndpointResource;
 use OpenSoutheners\LaravelApiable\Attributes\SearchFilterQueryParam;
 use OpenSoutheners\LaravelApiable\Attributes\SearchQueryParam;
 use OpenSoutheners\LaravelApiable\Attributes\SortQueryParam;
@@ -53,10 +53,11 @@ trait ResolvesFromRouteAction
      */
     protected function resolveAttributesFrom($reflected): void
     {
-        $allowedQueryParams = array_filter($reflected->getAttributes(), function (ReflectionAttribute $attribute) {
-            return is_subclass_of($attribute->getName(), QueryParam::class)
-                || in_array($attribute->getName(), [ApplyDefaultFilter::class, ApplyDefaultSort::class]);
-        });
+        $allowedQueryParams = array_filter(
+            $reflected->getAttributes(),
+            fn (ReflectionAttribute $attribute): bool => is_subclass_of($attribute->getName(), QueryParam::class)
+                || in_array($attribute->getName(), [EndpointResource::class, ApplyDefaultFilter::class, ApplyDefaultSort::class])
+        );
 
         foreach ($allowedQueryParams as $allowedQueryParam) {
             $attributeInstance = $allowedQueryParam->newInstance();
@@ -72,7 +73,7 @@ trait ResolvesFromRouteAction
                 AppendsQueryParam::class => $this->allowAppends($attributeInstance->type, $attributeInstance->attributes),
                 ApplyDefaultSort::class => $this->applyDefaultSort($attributeInstance->attribute, $attributeInstance->direction),
                 ApplyDefaultFilter::class => $this->applyDefaultFilter($attributeInstance->attribute, $attributeInstance->operator, $attributeInstance->values),
-                ResourceResponse::class => $this->using($attributeInstance->resource),
+                EndpointResource::class => $this->using($attributeInstance->resource),
                 default => null,
             };
         }

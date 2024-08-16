@@ -11,9 +11,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Traits\ForwardsCalls;
 use OpenSoutheners\LaravelApiable\Contracts\ViewableBuilder;
 use OpenSoutheners\LaravelApiable\Contracts\ViewQueryable;
+use OpenSoutheners\LaravelApiable\ServiceProvider;
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -29,7 +29,6 @@ class JsonApiResponse extends RequestQueryObject implements Arrayable, Responsab
 {
     use Concerns\IteratesResultsAfterQuery;
     use Concerns\ResolvesFromRouteAction;
-    use ForwardsCalls;
 
     protected Pipeline $pipeline;
 
@@ -108,8 +107,18 @@ class JsonApiResponse extends RequestQueryObject implements Arrayable, Responsab
 
     /**
      * Get single resource from response.
+     *
+     * @deprecated use single() instead
      */
     public function gettingOne(): self
+    {
+        return $this->single();
+    }
+
+    /**
+     * Get single resource from response.
+     */
+    public function single(): self
     {
         $this->singleResourceResponse = true;
 
@@ -129,17 +138,18 @@ class JsonApiResponse extends RequestQueryObject implements Arrayable, Responsab
     /**
      * Get results from processing RequestQueryObject pipeline.
      */
-    public function getResults(Guard $guard): mixed
+    public function getResults(): mixed
     {
         $query = $this->buildPipeline()->query;
 
         if (
-            Apiable::config('responses.viewable')
+            app()->bound(Guard::class)
+            && Apiable::config('responses.viewable')
             && (is_a($this->model, ViewQueryable::class, true)
                 || is_a($query, ViewableBuilder::class))
         ) {
             /** @var \OpenSoutheners\LaravelApiable\Contracts\ViewableBuilder<T> $query */
-            $query->viewable($guard->user());
+            $query->viewable(app(Guard::class)->user());
         }
 
         return $this->resultPostProcessing(
@@ -206,7 +216,7 @@ class JsonApiResponse extends RequestQueryObject implements Arrayable, Responsab
     public function toResponse($request): mixed
     {
         /** @var \Illuminate\Contracts\Support\Responsable|mixed $results */
-        $results = App::call([$this, 'getResults']);
+        $results = $this->getResults();
 
         $response = $results instanceof Responsable
             ? $results->toResponse($request)
@@ -246,7 +256,7 @@ class JsonApiResponse extends RequestQueryObject implements Arrayable, Responsab
             $type = $this->model;
         }
 
-        $resourceType = class_exists($type) ? Apiable::getResourceType($type) : $type;
+        $resourceType = class_exists($type) ? ServiceProvider::getTypeForModel($type) : $type;
 
         $this->forceAppends = array_merge_recursive($this->forceAppends, [$resourceType => $attributes]);
 
@@ -299,13 +309,5 @@ class JsonApiResponse extends RequestQueryObject implements Arrayable, Responsab
         Apiable::forceResponseFormatting($format);
 
         return $this;
-    }
-
-    /**
-     * Call methods of the underlying query builder if not exists on this.
-     */
-    public function __call(string $name, array $arguments): mixed
-    {
-        return $this->forwardDecoratedCallTo($this->query, $name, $arguments);
     }
 }

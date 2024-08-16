@@ -44,7 +44,7 @@ final class Generator
 
             foreach ($routeMethods as $routeMethod) {
                 $endpoint = Endpoint::fromMethodAttribute($method, $resource, $route, $routeMethod)
-                    ?? Endpoint::fromResourceAction($resource, $route, $routeMethod);
+                    ?? Endpoint::fromResourceAction($method, $resource, $route, $routeMethod);
 
                 $endpoint->getQueryFromAttributes($controller, $method);
 

@@ -5,7 +5,7 @@ namespace OpenSoutheners\LaravelApiable\Http\Concerns;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use OpenSoutheners\LaravelApiable\Http\AllowedFields;
-use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
+use OpenSoutheners\LaravelApiable\ServiceProvider;
 
 /**
  * @mixin \OpenSoutheners\LaravelApiable\Http\RequestQueryObject
@@ -48,7 +48,7 @@ trait AllowsFields
         }
 
         if (class_exists($type) && is_subclass_of($type, Model::class)) {
-            $type = Apiable::getResourceType($type);
+            $type = ServiceProvider::getTypeForModel($type);
         }
 
         $this->allowedFields = array_merge($this->allowedFields, [$type => (array) $attributes]);
