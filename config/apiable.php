@@ -1,5 +1,6 @@
 <?php
 
+use OpenSoutheners\LaravelApiable\Enums\ResponseType;
 use OpenSoutheners\LaravelApiable\Http\AllowedFilter;
 use OpenSoutheners\LaravelApiable\Http\AllowedSort;
 
@@ -32,7 +33,7 @@ return [
      */
     'responses' => [
         'formatting' => [
-            'type' => 'application/vnd.api+json',
+            'type' => ResponseType::JsonApi->value,
             'force' => false,
         ],
 
