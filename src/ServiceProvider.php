@@ -76,4 +76,14 @@ class ServiceProvider extends BaseServiceProvider
     {
         return self::$customModelTypes[$model] ?? Str::snake(class_basename($model));
     }
+    
+    /**
+     * Get model from given JSON:API type.
+     *
+     * @param  string  $type
+     */
+    public static function getModelForType(string $type): string
+    {
+        return array_flip(self::$customModelTypes)[$type] ?? $type;
+    }
 }

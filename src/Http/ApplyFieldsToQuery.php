@@ -45,7 +45,7 @@ class ApplyFieldsToQuery implements HandlesRequestQueries
 
         // TODO: Move this to some class methods
         foreach ($fields as $type => $columns) {
-            $typeModel = Apiable::getModelFromResourceType($type);
+            $typeModel = ServiceProvider::getModelForType($type);
 
             $matchedFn = match (true) {
                 $mainQueryResourceType === $type => function () use ($query, $mainQueryModel, $columns) {
