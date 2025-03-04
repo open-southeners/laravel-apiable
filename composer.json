@@ -20,18 +20,18 @@
     ],
     "homepage": "https://docs.opensoutheners.com/laravel-apiable/",
     "require": {
-        "php": "^8.0",
-        "illuminate/support": "^9.0 || ^10.0 || ^11.0",
+        "php": "^8.2",
+        "illuminate/support": "^11.0 || ^12.0",
         "open-southeners/extended-php": "~1.0"
     },
     "require-dev": {
-        "larastan/larastan": "^2.1",
+        "larastan/larastan": "^3.0",
         "laravel/pint": "^1.1",
         "laravel/scout": "^10.0",
-        "orchestra/testbench": "^7.0 || ^8.0 || ^9.0",
-        "phpstan/phpstan": "^1.0",
-        "phpunit/phpunit": "^9.0 || ^10.0",
-        "tomasvotruba/type-coverage": "^0.2.1"
+        "orchestra/testbench": "^9.0 || ^10.0",
+        "phpstan/phpstan": "^2.0",
+        "phpunit/phpunit": "^11.0",
+        "tomasvotruba/type-coverage": "^2.0"
     },
     "suggest": {
         "hammerstone/fast-paginate": "Improves jsonApiPaginate method performance (SQL database query pagination)",
