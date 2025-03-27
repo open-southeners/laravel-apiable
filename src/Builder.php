@@ -21,8 +21,8 @@ class Builder
          * @return \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection
          */
         return function ($pageSize = null, $columns = ['*'], $page = null) {
-            $pageName = 'page[number]';
-            $page = $page ?: Paginator::resolveCurrentPage($pageName);
+            $pageName = '';
+            $page = $page ?: Paginator::resolveCurrentPage('page.number');
             $pageSize = $pageSize ?: $this->model->getPerPage();
             $requestedPageSize = (int) request('page.size', Apiable::config('responses.pagination.default_size'));
 
@@ -31,7 +31,7 @@ class Builder
             }
 
             // @codeCoverageIgnoreStart
-            if (class_exists("Hammerstone\FastPaginate\FastPaginate")) {
+            if (class_exists("Hammerstone\FastPaginate\FastPaginate") || class_exists("AaronFrancis\FastPaginate\FastPaginate")) {
                 return Apiable::toJsonApi(
                     $this->fastPaginate($pageSize, $columns, 'page[number]', (int) request('page.number'))
                 );
@@ -44,7 +44,7 @@ class Builder
 
             return Apiable::toJsonApi($this->paginator($results, $total, $pageSize, $page, [
                 'path' => Paginator::resolveCurrentPath(),
-                'pageName' => $pageName,
+                'pageName' => page[number],
             ]));
         };
     }
