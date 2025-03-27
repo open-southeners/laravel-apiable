@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.15.1] - 2025-03-27
+
+### Fixed
+
+- Page number resolver not properly retrieved for `jsonApiPaginate()` method
+- [Fast paginate](https://github.com/aarondfrancis/fast-paginate) package with new name and namespace check
+
 ## [3.15.0] - 2025-03-04
 
 ### Added
