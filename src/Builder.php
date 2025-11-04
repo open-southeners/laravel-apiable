@@ -15,15 +15,12 @@ class Builder
         /**
          * Paginate the given query using JSON:API.
          *
-         * @param  int|string  $pageSize
-         * @param  array  $columns
-         * @param  int  $page
+         * @param  array<string>  $columns
          * @return \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection
          */
-        return function ($pageSize = null, $columns = ['*'], $page = null) {
-            $pageName = '';
-            $page = $page ?: Paginator::resolveCurrentPage('page.number');
-            $pageSize = $pageSize ?: $this->model->getPerPage();
+        return function (null|int|string $pageSize = null, array $columns = ['*'], string $pageName = 'page.number', ?int $page = null) {
+            $page ??= Paginator::resolveCurrentPage($pageName);
+            $pageSize ??= $this->model->getPerPage();
             $requestedPageSize = (int) request('page.size', Apiable::config('responses.pagination.default_size'));
 
             if ($requestedPageSize && (! $pageSize || $requestedPageSize !== $pageSize)) {
@@ -33,7 +30,7 @@ class Builder
             // @codeCoverageIgnoreStart
             if (class_exists("Hammerstone\FastPaginate\FastPaginate") || class_exists("AaronFrancis\FastPaginate\FastPaginate")) {
                 return Apiable::toJsonApi(
-                    $this->fastPaginate($pageSize, $columns, 'page[number]', (int) request('page.number'))
+                    $this->fastPaginate($pageSize, $columns, $pageName, $page)
                 );
             }
             // @codeCoverageIgnoreEnd
@@ -44,7 +41,7 @@ class Builder
 
             return Apiable::toJsonApi($this->paginator($results, $total, $pageSize, $page, [
                 'path' => Paginator::resolveCurrentPath(),
-                'pageName' => page[number],
+                'pageName' => $pageName,
             ]));
         };
     }
