@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.16.1] - 2025-11-06
+
+### Fixed
+
+- `Apiable::toJsonApi()` given collection as input returns empty response
+
 ## [3.16.0] - 2025-11-04
 
 ### Fixed
