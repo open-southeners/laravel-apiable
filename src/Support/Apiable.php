@@ -37,10 +37,8 @@ class Apiable
     public static function toJsonApi(mixed $resource): JsonApiResource|JsonApiCollection
     {
         return match (true) {
-            ! is_object($resource) => new JsonApiCollection(Collection::make([])),
-            $resource instanceof Collection, $resource instanceof JsonApiable => $resource->toJsonApi(),
             $resource instanceof Builder => $resource->jsonApiPaginate(),
-            $resource instanceof AbstractPaginator => new JsonApiCollection($resource),
+            $resource instanceof AbstractPaginator, $resource instanceof Collection => new JsonApiCollection($resource),
             $resource instanceof Model, $resource instanceof MissingValue => new JsonApiResource($resource),
             default => new JsonApiCollection(Collection::make([])),
         };
