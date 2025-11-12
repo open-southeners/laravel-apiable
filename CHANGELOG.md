@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.16.2] - 2025-11-12
+
+### Fixed
+
+- Pagination returns wrong page name query parameter (Laravel framework is inconsistent around this)
+
 ## [3.16.1] - 2025-11-06
 
 ### Fixed
