@@ -3,6 +3,8 @@
 namespace OpenSoutheners\LaravelApiable;
 
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
 
 /**
@@ -19,8 +21,8 @@ class Builder
          * @return \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection
          */
         return function (null|int|string $pageSize = null, array $columns = ['*'], string $pageName = 'page.number', ?int $page = null) {
-            $page ??= Paginator::resolveCurrentPage($pageName);
-            $pageSize ??= $this->model->getPerPage();
+            $page ??= request($pageName, 1);
+            $pageSize ??= $this->getModel()->getPerPage();
             $requestedPageSize = (int) request('page.size', Apiable::config('responses.pagination.default_size'));
 
             if ($requestedPageSize && (! $pageSize || $requestedPageSize !== $pageSize)) {
@@ -37,11 +39,11 @@ class Builder
 
             $results = ($total = $this->toBase()->getCountForPagination())
                 ? $this->forPage($page, $pageSize)->get($columns)
-                : $this->model->newCollection();
+                : $this->getModel()->newCollection();
 
             return Apiable::toJsonApi($this->paginator($results, $total, $pageSize, $page, [
                 'path' => Paginator::resolveCurrentPath(),
-                'pageName' => $pageName,
+                'pageName' => Str::beforeLast(Arr::query(Arr::undot([$pageName => ''])), '='),
             ]));
         };
     }
