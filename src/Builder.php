@@ -29,10 +29,16 @@ class Builder
                 $pageSize = $requestedPageSize;
             }
 
+            /**
+             * FIXME: This is needed as Laravel is very inconsistent, request get is using dots 
+             * while paginator doesn't represent them...
+             */
+            $pageNumberParamName = Str::beforeLast(Arr::query(Arr::undot([$pageName => ''])), '=');
+
             // @codeCoverageIgnoreStart
             if (class_exists("Hammerstone\FastPaginate\FastPaginate") || class_exists("AaronFrancis\FastPaginate\FastPaginate")) {
                 return Apiable::toJsonApi(
-                    $this->fastPaginate($pageSize, $columns, $pageName, $page)
+                    $this->fastPaginate($pageSize, $columns, $pageNumberParamName, $page)
                 );
             }
             // @codeCoverageIgnoreEnd
@@ -43,7 +49,7 @@ class Builder
 
             return Apiable::toJsonApi($this->paginator($results, $total, $pageSize, $page, [
                 'path' => Paginator::resolveCurrentPath(),
-                'pageName' => Str::beforeLast(Arr::query(Arr::undot([$pageName => ''])), '='),
+                'pageName' => $pageNumberParamName,
             ]));
         };
     }
