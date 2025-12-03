@@ -147,9 +147,6 @@ class JsonApiResponseTest extends TestCase
         ]);
     }
 
-    /**
-     * @group betterInLaravel916
-     */
     public function testFilteringByRelationship()
     {
         Route::get('/', function () {

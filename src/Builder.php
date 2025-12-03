@@ -33,7 +33,7 @@ class Builder
              * FIXME: This is needed as Laravel is very inconsistent, request get is using dots 
              * while paginator doesn't represent them...
              */
-            $pageNumberParamName = Str::beforeLast(Arr::query(Arr::undot([$pageName => ''])), '=');
+            $pageNumberParamName = rawurldecode(Str::beforeLast(Arr::query(Arr::undot([$pageName => ''])), '='));
 
             // @codeCoverageIgnoreStart
             if (class_exists("Hammerstone\FastPaginate\FastPaginate") || class_exists("AaronFrancis\FastPaginate\FastPaginate")) {

@@ -8,6 +8,7 @@ use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
 use OpenSoutheners\LaravelApiable\Tests\Fixtures\Post;
 use OpenSoutheners\LaravelApiable\Tests\Fixtures\Tag;
 use OpenSoutheners\LaravelApiable\Tests\Fixtures\User;
+use PHPUnit\Framework\Attributes\Group;
 
 class JsonApiRelationshipsTest extends TestCase
 {
@@ -72,9 +73,7 @@ class JsonApiRelationshipsTest extends TestCase
         });
     }
 
-    /**
-     * @group requiresDatabase
-     */
+    #[Group('requiresDatabase')]
     public function testResourceHasTagsRelationships()
     {
         // TODO: setRelation method doesn't work with hasMany relationships, so need migrations loaded
