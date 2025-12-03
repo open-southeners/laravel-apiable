@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.16.4] - 2025-12-03
+
+### Fixed
+
+- URL params getting double encoded
+
 ## [3.16.3] - 2025-11-27
 
 ### Fixed
