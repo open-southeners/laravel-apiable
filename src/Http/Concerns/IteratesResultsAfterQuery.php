@@ -2,7 +2,12 @@
 
 namespace OpenSoutheners\LaravelApiable\Http\Concerns;
 
+use App\Domain\Process\Models\Box\Box;
+use App\Models\ModelForm;
 use Exception;
+use Illuminate\Contracts\Pagination\Paginator;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use OpenSoutheners\LaravelApiable\Http\QueryParamsValidator;
 use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection;
 use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource;
@@ -21,17 +26,13 @@ trait IteratesResultsAfterQuery
      */
     protected function resultPostProcessing($result)
     {
-        if (! $result instanceof JsonApiResource) {
-            return $result;
-        }
-
         $this->addAppendsToResult($result);
 
         $includeAllowed = is_null($this->includeAllowedToResponse)
             ? Apiable::config('responses.include_allowed')
             : $this->includeAllowedToResponse;
 
-        if ($includeAllowed) {
+        if ($includeAllowed && $result instanceof JsonApiResource) {
             $result->additional(['meta' => array_filter([
                 'allowed_filters' => $this->request->getAllowedFilters(),
                 'allowed_sorts' => $this->request->getAllowedSorts(),
@@ -55,9 +56,8 @@ trait IteratesResultsAfterQuery
      * Add allowed user appends to result.
      *
      * @param  \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection|\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource  $result
-     * @return void
      */
-    protected function addAppendsToResult($result)
+    protected function addAppendsToResult($result): void
     {
         $filteredUserAppends = (new QueryParamsValidator(
             $this->request->appends(),
@@ -79,11 +79,19 @@ trait IteratesResultsAfterQuery
         }
 
         if (! empty($filteredUserAppends)) {
-            // TODO: Not really optimised, need to think of a better solution...
-            // TODO: Or refactor old "transformers" classes with a "plain tree" of resources
-            $result instanceof JsonApiCollection
-                ? $result->collection->each(fn (JsonApiResource $item) => $this->appendToApiResource($item, $filteredUserAppends))
-                : $this->appendToApiResource($result, $filteredUserAppends);
+            if ($result instanceof JsonApiResource) {
+                // TODO: Not really optimised, need to think of a better solution...
+                // TODO: Or refactor old "transformers" classes with a "plain tree" of resources
+                $result instanceof JsonApiCollection
+                    ? $result->collection->each(fn (JsonApiResource $item) => $this->appendToApiResource($item, $filteredUserAppends))
+                    : $this->appendToApiResource($result, $filteredUserAppends);
+            } else if ($result instanceof Paginator) {
+                $result->through(function (mixed $paginatorItem) use ($filteredUserAppends) {
+                    $this->appendToApiResource($paginatorItem, $filteredUserAppends);
+
+                    return $paginatorItem;
+                });
+            }
         }
     }
 
@@ -93,26 +101,27 @@ trait IteratesResultsAfterQuery
      * @param  \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource|mixed  $resource
      * @return void
      */
-    protected function appendToApiResource(mixed $resource, array $appends)
+    protected function appendToApiResource(mixed $resource, array $appends): void
     {
-        if (! ($resource instanceof JsonApiResource)) {
-            return;
-        }
+        $resourceModel = $resource instanceof JsonApiResource
+            ? $resource->resource
+            : $resource;
 
-        /** @var array<\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource> $resourceIncluded */
-        $resourceIncluded = $resource->with['included'] ?? [];
-        $resourceType = Apiable::getResourceType($resource->resource);
+        /** @var array<\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource|\Illuminate\Database\Eloquent\Model> $resourceIncluded */
+        $resourceIncluded = match (true) {
+            $resource instanceof JsonApiResource => $resource->with['included'] ?? [],
+            $resource instanceof Model => Arr::flatten($resource->getRelations(), 1),
+            default => [],
+        };
+
+        $resourceType = Apiable::getResourceType($resourceModel);
 
         if ($appendsArr = $appends[$resourceType] ?? null) {
-            $resource->resource->makeVisible($appendsArr)->append($appendsArr);
+            $resourceModel->makeVisible($appendsArr)->append($appendsArr);
         }
 
         foreach ($resourceIncluded as $included) {
-            $includedResourceType = Apiable::getResourceType($included->resource);
-
-            if ($appendsArr = $appends[$includedResourceType] ?? null) {
-                $included->resource->makeVisible($appendsArr)->append($appendsArr);
-            }
+            $this->appendToApiResource($included, $appends);
         }
     }
 }
