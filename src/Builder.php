@@ -21,6 +21,7 @@ class Builder
          * @return \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection
          */
         return function (null|int|string $pageSize = null, array $columns = ['*'], string $pageName = 'page.number', ?int $page = null) {
+            $paginationType = Apiable::config('responses.pagination.type') ?? 'length-aware';
             $page ??= request($pageName, 1);
             $pageSize ??= $this->getModel()->getPerPage();
             $requestedPageSize = (int) request('page.size', Apiable::config('responses.pagination.default_size'));
@@ -36,21 +37,39 @@ class Builder
             $pageNumberParamName = rawurldecode(Str::beforeLast(Arr::query(Arr::undot([$pageName => ''])), '='));
 
             // @codeCoverageIgnoreStart
-            if (class_exists("Hammerstone\FastPaginate\FastPaginate") || class_exists("AaronFrancis\FastPaginate\FastPaginate")) {
+            if ($paginationType === 'length-aware' && (class_exists("Hammerstone\FastPaginate\FastPaginate") || class_exists("AaronFrancis\FastPaginate\FastPaginate"))) {
                 return Apiable::toJsonApi(
                     $this->fastPaginate($pageSize, $columns, $pageNumberParamName, $page)
                 );
             }
             // @codeCoverageIgnoreEnd
 
+            $paginator = match ($paginationType) {
+                'simple' => $this->simplePaginate($pageSize, $columns, $pageNumberParamName, $page),
+                'cursor' => $this->cursorPaginate($pageSize, $columns, 'cursor', request('cursor')),
+                default => $this->buildLengthAwarePaginator($columns, $page, $pageSize, $pageNumberParamName),
+            };
+
+            return Apiable::toJsonApi($paginator);
+        };
+    }
+
+    public function buildLengthAwarePaginator()
+    {
+        /**
+         * Build a length-aware paginator with a COUNT query.
+         *
+         * @return \Illuminate\Pagination\LengthAwarePaginator
+         */
+        return function (array $columns, int $page, int $pageSize, string $pageNumberParamName) {
             $results = ($total = $this->toBase()->getCountForPagination())
                 ? $this->forPage($page, $pageSize)->get($columns)
                 : $this->getModel()->newCollection();
 
-            return Apiable::toJsonApi($this->paginator($results, $total, $pageSize, $page, [
+            return $this->paginator($results, $total, $pageSize, $page, [
                 'path' => Paginator::resolveCurrentPath(),
                 'pageName' => $pageNumberParamName,
-            ]));
+            ]);
         };
     }
 

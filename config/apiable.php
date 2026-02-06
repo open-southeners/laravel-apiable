@@ -47,9 +47,12 @@ return [
 
         'pagination' => [
             'default_size' => 50,
+            'type' => 'length-aware',
         ],
 
         'viewable' => true,
+
+        'max_include_depth' => 3,
 
         'include_ids_on_attributes' => false,
     ],

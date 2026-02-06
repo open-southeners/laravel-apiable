@@ -302,6 +302,26 @@ class JsonApiResponse implements Arrayable, Responsable
     }
 
     /**
+     * Use simple pagination (no COUNT query) for this response.
+     */
+    public function simplePaginating(): self
+    {
+        config(['apiable.responses.pagination.type' => 'simple']);
+
+        return $this;
+    }
+
+    /**
+     * Use cursor-based pagination (no COUNT query) for this response.
+     */
+    public function cursorPaginating(): self
+    {
+        config(['apiable.responses.pagination.type' => 'cursor']);
+
+        return $this;
+    }
+
+    /**
      * Force response serialisation with the specified format otherwise use default.
      */
     public function forceFormatting(?string $format = null): self

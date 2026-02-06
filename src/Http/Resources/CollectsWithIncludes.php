@@ -2,8 +2,6 @@
 
 namespace OpenSoutheners\LaravelApiable\Http\Resources;
 
-use Illuminate\Support\Collection;
-
 /**
  * @property \Illuminate\Support\Collection $collection
  */
@@ -16,22 +14,33 @@ trait CollectsWithIncludes
      */
     protected function withIncludes()
     {
-        $collectionIncludes = Collection::make(
-            $this->with['included'] ?? []
-        );
+        $seen = [];
+        $collectionIncludes = [];
 
-        /** @var \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource $jsonResource */
-        foreach ($this->collection->toArray() as $jsonResource) {
-            /** @var \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource $resource */
-            foreach ($jsonResource->getIncluded() as $resource) {
-                $collectionIncludes->push($resource);
+        foreach ($this->with['included'] ?? [] as $resource) {
+            $key = $this->getResourceKey($resource);
+
+            if (! isset($seen[$key])) {
+                $seen[$key] = true;
+                $collectionIncludes[] = $resource;
             }
         }
 
-        $included = $this->checkUniqueness($collectionIncludes)->values()->all();
+        /** @var \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource $jsonResource */
+        foreach ($this->collection as $jsonResource) {
+            /** @var \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource $resource */
+            foreach ($jsonResource->getIncluded() as $resource) {
+                $key = $this->getResourceKey($resource);
 
-        if (! empty($included)) {
-            $this->with = array_merge_recursive($this->with, compact('included'));
+                if (! isset($seen[$key])) {
+                    $seen[$key] = true;
+                    $collectionIncludes[] = $resource;
+                }
+            }
+        }
+
+        if (! empty($collectionIncludes)) {
+            $this->with = array_merge_recursive($this->with, ['included' => $collectionIncludes]);
         }
     }
 }

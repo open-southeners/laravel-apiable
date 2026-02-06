@@ -5,7 +5,6 @@ namespace OpenSoutheners\LaravelApiable\Http\Resources;
 use Illuminate\Database\Eloquent\Collection as DatabaseCollection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Pivot;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
 
@@ -20,10 +19,28 @@ trait RelationshipsWithIncludes
     protected array $relationships = [];
 
     /**
+     * Hash-set index for O(1) included resource deduplication.
+     *
+     * @var array<string, true>
+     */
+    protected array $includedIndex = [];
+
+    /**
+     * Current depth of nested resource construction.
+     */
+    protected int $currentDepth = 0;
+
+    /**
      * Attach relationships to the resource.
      */
     protected function attachModelRelations(): void
     {
+        $maxDepth = Apiable::config('responses.max_include_depth');
+
+        if ($maxDepth !== null && $this->currentDepth >= $maxDepth) {
+            return;
+        }
+
         $relations = $this->resource->getRelations();
 
         foreach ($relations as $relation => $relationObj) {
@@ -61,6 +78,7 @@ trait RelationshipsWithIncludes
     {
         /** @var \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource $modelResource */
         $modelResource = new self($model);
+        $modelResource->currentDepth = $this->currentDepth + 1;
         $modelIdentifier = $modelResource->getResourceIdentifier();
 
         if (empty($modelIdentifier[$model->getKeyName()] ?? null)) {
@@ -95,16 +113,26 @@ trait RelationshipsWithIncludes
      */
     protected function addIncluded(JsonApiResource $resource): void
     {
-        $includesCol = Collection::make([
-            $resource,
-            array_values($resource->getIncluded()),
-        ])->flatten();
+        $this->addToIncludedIfUnique($resource);
 
-        $includesArr = $this->checkUniqueness($includesCol)->values()->all();
-
-        if (! empty($includesArr)) {
-            $this->with = array_merge_recursive($this->with, ['included' => $includesArr]);
+        foreach ($resource->getIncluded() as $nestedResource) {
+            $this->addToIncludedIfUnique($nestedResource);
         }
+    }
+
+    /**
+     * Add a resource to the included array if not already present.
+     */
+    private function addToIncludedIfUnique(JsonApiResource $resource): void
+    {
+        $key = $this->getResourceKey($resource);
+
+        if (isset($this->includedIndex[$key])) {
+            return;
+        }
+
+        $this->includedIndex[$key] = true;
+        $this->with['included'][] = $resource;
     }
 
     /**
@@ -116,12 +144,12 @@ trait RelationshipsWithIncludes
     }
 
     /**
-     * Check and return unique resources on a collection.
+     * Build a unique key string for a JSON:API resource.
      */
-    protected function checkUniqueness(Collection $collection): Collection
+    protected function getResourceKey(JsonApiResource $resource): string
     {
-        return $collection->unique(static function ($resource): string {
-            return implode('', $resource->getResourceIdentifier());
-        });
+        $identifier = $resource->getResourceIdentifier();
+
+        return $identifier['type'] . ':' . $identifier[$resource->resource->getKeyName()];
     }
 }
