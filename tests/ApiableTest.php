@@ -82,6 +82,23 @@ class ApiableTest extends TestCase
         $this->assertNotEmpty(Apiable::getModelResourceTypeMap());
     }
 
+    public function testHandlerCanBeSentDirectlyWithoutCallingToResponseFirst()
+    {
+        // Reproduces: "Call to undefined method OpenSoutheners\LaravelApiable\Handler::send()"
+        // This happens when Handler is returned from an app's render() method directly
+        // instead of via a renderable() callback, causing HandleExceptions to call ->send() on it.
+        $handler = Apiable::jsonApiRenderable(new \Exception('My error'), false);
+
+        $this->assertTrue(method_exists($handler, 'send'));
+
+        ob_start();
+        $handler->send();
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('"status":"500"', $output);
+        $this->assertStringContainsString('"title":"Internal server error."', $output);
+    }
+
     public function testJsonApiRenderableReturnsExceptionAsFormatted500ErrorJson()
     {
         $handler = Apiable::jsonApiRenderable(new \Exception('My error'), true);

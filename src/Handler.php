@@ -58,6 +58,19 @@ class Handler implements Responsable
     }
 
     /**
+     * Send the response directly to the browser.
+     *
+     * Called when Handler is returned from an exception handler render() method
+     * without first calling toResponse(), causing the framework to call send() on it.
+     */
+    public function send(): static
+    {
+        $this->toResponse(app('request'))->send();
+
+        return $this;
+    }
+
+    /**
      * Add header to the resulting response.
      */
     public function withHeader(string $key, string $value): self
