@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.0] - 2026-04-11
+
+### Added
+
+- `apiable:docs` command to generate API documentation from PHP attributes in Postman v2.1, Markdown/MDX, and OpenAPI 3.1 formats
+- `$description` property to all `*QueryParam` attributes for documentation generation
+- `#[DocumentedResource]`, `#[DocumentedEndpointSection]`, and `#[EndpointResource]` PHP attributes for annotating controllers
+- `OpenSoutheners\LaravelApiable\Documentation\Generator` class for building resource documentation trees from registered routes
+- `OpenSoutheners\LaravelApiable\Http\JsonApiPaginator` class exposing pagination logic as a typed static method
+- Laravel 13 support
+
+### Fixed
+
+- `Handler::includesTrace()` was calling `env('APP_DEBUG')` outside of the config directory, which returns `null` in production; now uses `config('app.debug')`
+- `IteratesResultsAfterQuery` had leaked application-specific imports (`App\Domain\Process\Models\Box\Box`, `App\Models\ModelForm`) left over from a real project
+- `addAppendsToResult()` `instanceof JsonApiCollection` check was unreachable because it was nested inside an `instanceof JsonApiResource` branch (since `JsonApiCollection` extends `JsonApiResource`); logic restructured to check the most-specific subtype first
+- `addAppendsToResult()` `instanceof Paginator` branch was using the `Paginator` contract which does not declare `through()`; changed to `AbstractPaginator`
+- `CollectsResources::collects()` was missing a `return null` fallback, causing PHPStan to report a missing return statement
+- `isScope()` in `ApplyFiltersToQuery` was using `get_parent_class()` to exclude base builder methods, which could return `false` for unknown types; now diffs against `Illuminate\Database\Eloquent\Builder::class` directly, which is also more accurate
+- Various PHPDoc type corrections in documentation exporters and `Generator` (malformed class name `OpenSouthenersLaravelApiableDocumentationResource` → `\OpenSoutheners\LaravelApiable\Documentation\Resource`)
+
+### Removed
+
+- Laravel 11 support
+
 ## [3.17.1] - 2026-01-26
 
 ### Fixed
