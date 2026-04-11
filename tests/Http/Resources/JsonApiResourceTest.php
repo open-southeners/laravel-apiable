@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use OpenSoutheners\LaravelApiable\Support\Apiable;
 use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
 use OpenSoutheners\LaravelApiable\Tests\Fixtures\Post;
+use OpenSoutheners\LaravelApiable\Tests\Fixtures\User;
 use OpenSoutheners\LaravelApiable\Tests\TestCase;
 
 class JsonApiResourceTest extends TestCase
@@ -203,5 +204,42 @@ class JsonApiResourceTest extends TestCase
                 'title' => 'Test Parent Title',
             ]))->hasAttribute('title', 'Test Parent Title');
         });
+    }
+
+    public function testSameResourceThroughMultipleRelationshipPathsPreservesNestedIncludes()
+    {
+        Route::get('/', function () {
+            // User ID=2 appearing as 'editor' without any nested includes
+            $editorUser = new User(['id' => 2, 'name' => 'John', 'email' => 'john@example.com']);
+
+            // Same User ID=2 appearing as 'author' but with a nested post loaded
+            $authorUser = new User(['id' => 2, 'name' => 'John', 'email' => 'john@example.com']);
+            $authorUser->setRelation('latestPost', new Post([
+                'id' => 10,
+                'status' => 'Published',
+                'title' => 'Authored Post',
+            ]));
+
+            $post = new Post(['id' => 5, 'status' => 'Published', 'title' => 'Test Title']);
+            $post->setRelation('editor', $editorUser);
+            $post->setRelation('author', $authorUser);
+
+            return Apiable::toJsonApi($post);
+        });
+
+        $response = $this->get('/', ['Accept' => 'application/json']);
+
+        $response->assertStatus(200);
+
+        $included = $response->json('included');
+
+        // User ID=2 should appear exactly once (deduplicated); User maps to 'client' type
+        $users = array_values(array_filter($included, fn ($item) => $item['type'] === 'client'));
+        $this->assertCount(1, $users);
+        $this->assertSame('2', $users[0]['id']);
+
+        // The nested post from 'author.latestPost' should be preserved (the more complete version wins)
+        $nestedPosts = array_values(array_filter($included, fn ($item) => $item['type'] === 'post' && $item['id'] === '10'));
+        $this->assertCount(1, $nestedPosts);
     }
 }

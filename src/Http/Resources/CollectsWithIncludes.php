@@ -21,7 +21,7 @@ trait CollectsWithIncludes
         );
 
         /** @var \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource $jsonResource */
-        foreach ($this->collection->toArray() as $jsonResource) {
+        foreach ($this->collection as $jsonResource) {
             /** @var \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource $resource */
             foreach ($jsonResource->getIncluded() as $resource) {
                 $collectionIncludes->push($resource);

@@ -95,15 +95,17 @@ trait RelationshipsWithIncludes
      */
     protected function addIncluded(JsonApiResource $resource): void
     {
-        $includesCol = Collection::make([
+        $newIncludes = Collection::make([
             $resource,
             array_values($resource->getIncluded()),
         ])->flatten();
 
-        $includesArr = $this->checkUniqueness($includesCol)->values()->all();
+        $existingIncludes = Collection::make($this->with['included'] ?? []);
+
+        $includesArr = $this->checkUniqueness($existingIncludes->merge($newIncludes))->values()->all();
 
         if (! empty($includesArr)) {
-            $this->with = array_merge_recursive($this->with, ['included' => $includesArr]);
+            $this->with['included'] = $includesArr;
         }
     }
 
@@ -117,11 +119,22 @@ trait RelationshipsWithIncludes
 
     /**
      * Check and return unique resources on a collection.
+     *
+     * When duplicates are found, the resource with more nested includes is preferred
+     * to avoid losing relationship data that was eager-loaded on only some relationship paths.
      */
     protected function checkUniqueness(Collection $collection): Collection
     {
-        return $collection->unique(static function ($resource): string {
-            return implode('', $resource->getResourceIdentifier());
-        });
+        $seen = [];
+
+        foreach ($collection as $resource) {
+            $key = implode('', $resource->getResourceIdentifier());
+
+            if (! isset($seen[$key]) || count($resource->getIncluded()) > count($seen[$key]->getIncluded())) {
+                $seen[$key] = $resource;
+            }
+        }
+
+        return Collection::make(array_values($seen));
     }
 }
