@@ -4,6 +4,7 @@ namespace OpenSoutheners\LaravelApiable\Http;
 
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use OpenSoutheners\LaravelApiable\Contracts\HandlesRequestQueries;
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
 
@@ -54,7 +55,7 @@ class ApplyFieldsToQuery implements HandlesRequestQueries
 
                     $query->select($mainQueryModel->qualifyColumns($columns));
                 },
-                in_array($typeModel, $queryEagerLoaded) => fn () => $query->with($type, function (Builder $query) use ($queryEagerLoaded, $type, $columns) {
+                in_array($typeModel, $queryEagerLoaded) => fn () => $query->with($type, function (Relation $query) use ($queryEagerLoaded, $type, $columns) {
                     $relatedModel = $query->getModel();
 
                     if (! in_array($relatedModel->getKeyName(), $columns)) {

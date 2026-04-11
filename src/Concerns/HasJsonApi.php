@@ -2,8 +2,12 @@
 
 namespace OpenSoutheners\LaravelApiable\Concerns;
 
+use OpenSoutheners\LaravelApiable\Contracts\JsonApiable;
 use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource;
 
+/**
+ * @phpstan-require-implements JsonApiable
+ */
 trait HasJsonApi
 {
     /**

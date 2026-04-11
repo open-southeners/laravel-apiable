@@ -18,7 +18,7 @@ class PostmanExporter implements ExporterInterface
     }
 
     /**
-     * @param  OpenSouthenersLaravelApiableDocumentationResource[]  $resources
+     * @param  \OpenSoutheners\LaravelApiable\Documentation\Resource[]  $resources
      * @return array<string, string>
      */
     public function export(array $resources): array
@@ -128,7 +128,7 @@ class PostmanExporter implements ExporterInterface
     /**
      * Determine a collection-level auth block from the first auth scheme found.
      *
-     * @param  OpenSouthenersLaravelApiableDocumentationResource[]  $resources
+     * @param  \OpenSoutheners\LaravelApiable\Documentation\Resource[]  $resources
      * @return array<string, mixed>|null
      */
     private function resolveCollectionAuth(array $resources): ?array

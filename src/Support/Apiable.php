@@ -11,6 +11,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use OpenSoutheners\LaravelApiable\Contracts\JsonApiable;
 use OpenSoutheners\LaravelApiable\Handler;
+use OpenSoutheners\LaravelApiable\Http\JsonApiPaginator;
 use OpenSoutheners\LaravelApiable\Http\JsonApiResponse;
 use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection;
 use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource;
@@ -37,7 +38,7 @@ class Apiable
     public static function toJsonApi(mixed $resource): JsonApiResource|JsonApiCollection
     {
         return match (true) {
-            $resource instanceof Builder => $resource->jsonApiPaginate(),
+            $resource instanceof Builder => JsonApiPaginator::paginate($resource),
             $resource instanceof AbstractPaginator, $resource instanceof Collection => new JsonApiCollection($resource),
             $resource instanceof Model, $resource instanceof MissingValue => new JsonApiResource($resource),
             default => new JsonApiCollection(Collection::make([])),

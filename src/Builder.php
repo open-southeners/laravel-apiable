@@ -5,6 +5,8 @@ namespace OpenSoutheners\LaravelApiable;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use OpenSoutheners\LaravelApiable\Http\JsonApiPaginator;
+use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection;
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
 
 /**
@@ -21,36 +23,20 @@ class Builder
          * @return \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection
          */
         return function (null|int|string $pageSize = null, array $columns = ['*'], string $pageName = 'page.number', ?int $page = null) {
-            $page ??= request($pageName, 1);
-            $pageSize ??= $this->getModel()->getPerPage();
-            $requestedPageSize = (int) request('page.size', Apiable::config('responses.pagination.default_size'));
-
-            if ($requestedPageSize && (! $pageSize || $requestedPageSize !== $pageSize)) {
-                $pageSize = $requestedPageSize;
-            }
-
-            /**
-             * FIXME: This is needed as Laravel is very inconsistent, request get is using dots 
-             * while paginator doesn't represent them...
-             */
-            $pageNumberParamName = rawurldecode(Str::beforeLast(Arr::query(Arr::undot([$pageName => ''])), '='));
-
             // @codeCoverageIgnoreStart
             if (class_exists("Hammerstone\FastPaginate\FastPaginate") || class_exists("AaronFrancis\FastPaginate\FastPaginate")) {
-                return Apiable::toJsonApi(
-                    $this->fastPaginate($pageSize, $columns, $pageNumberParamName, $page)
-                );
+                $pageSize ??= $this->getModel()->getPerPage();
+                $requestedPageSize = (int) request('page.size', Apiable::config('responses.pagination.default_size'));
+                if ($requestedPageSize && (! $pageSize || $requestedPageSize !== $pageSize)) {
+                    $pageSize = $requestedPageSize;
+                }
+                $pageNumberParamName = rawurldecode(Str::beforeLast(Arr::query(Arr::undot([$pageName => ''])), '='));
+
+                return new JsonApiCollection($this->fastPaginate($pageSize, $columns, $pageNumberParamName, request($pageName, 1)));
             }
             // @codeCoverageIgnoreEnd
 
-            $results = ($total = $this->toBase()->getCountForPagination())
-                ? $this->forPage($page, $pageSize)->get($columns)
-                : $this->getModel()->newCollection();
-
-            return Apiable::toJsonApi($this->paginator($results, $total, $pageSize, $page, [
-                'path' => Paginator::resolveCurrentPath(),
-                'pageName' => $pageNumberParamName,
-            ]));
+            return JsonApiPaginator::paginate($this, $pageSize, $columns, $pageName, $page);
         };
     }
 

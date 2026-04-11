@@ -158,7 +158,7 @@ trait HasRelationships
      */
     protected function filterResourceWithIdentifier(array $resource, string $type, $id = null)
     {
-        if (is_array($resource) && ! isset($resource['type'])) {
+        if (! isset($resource['type'])) {
             return count($this->filterResources($resource, $type, $id)) > 0;
         }
 

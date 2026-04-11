@@ -71,7 +71,7 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
      * Wrap query if relationship found applying its operator and conditional to the filtered attribute.
      *
      * @param  callable(\Illuminate\Database\Eloquent\Builder, string|null, string, string, string, string): mixed  $callback
-     * @param  array<string>|string  $filterValues
+     * @param  array<int|string, array<string>|string>|string  $filterValues
      */
     protected function wrapIfRelatedQuery(callable $callback, Builder $query, string $filterAttribute, array|string $filterValues): void
     {
@@ -179,14 +179,11 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
         $modelQueryBuilder = $model::query();
 
         if (! $isScope && class_namespace($modelQueryBuilder) !== 'Illuminate\Database\Eloquent') {
-            /** @var string */
-            $modelQueryBuilderParent = get_parent_class($modelQueryBuilder);
-
             return in_array(
                 $value,
                 array_diff(
                     get_class_methods($modelQueryBuilder),
-                    get_class_methods($modelQueryBuilderParent)
+                    get_class_methods(\Illuminate\Database\Eloquent\Builder::class)
                 )
             );
         }

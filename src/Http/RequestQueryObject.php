@@ -25,7 +25,7 @@ class RequestQueryObject
     public $query;
 
     /**
-     * @var \Illuminate\Support\Collection<(int|string), array<int, mixed>>|null
+     * @var \Illuminate\Support\Collection<int|string, mixed>|null
      */
     protected ?Collection $queryParameters = null;
 
@@ -52,7 +52,7 @@ class RequestQueryObject
     /**
      * Get request query parameters as array.
      *
-     * @return \Illuminate\Support\Collection<array>
+     * @return \Illuminate\Support\Collection<int|string, mixed>
      */
     public function queryParameters(): Collection
     {

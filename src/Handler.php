@@ -32,7 +32,7 @@ class Handler implements Responsable
      */
     protected function includesTrace(): bool
     {
-        return (bool) ($this->withTrace ?? env('APP_DEBUG'));
+        return (bool) ($this->withTrace ?? config('app.debug'));
     }
 
     /**

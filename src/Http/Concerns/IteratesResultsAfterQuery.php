@@ -2,10 +2,8 @@
 
 namespace OpenSoutheners\LaravelApiable\Http\Concerns;
 
-use App\Domain\Process\Models\Box\Box;
-use App\Models\ModelForm;
 use Exception;
-use Illuminate\Contracts\Pagination\Paginator;
+use Illuminate\Pagination\AbstractPaginator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use OpenSoutheners\LaravelApiable\Http\QueryParamsValidator;
@@ -55,7 +53,7 @@ trait IteratesResultsAfterQuery
     /**
      * Add allowed user appends to result.
      *
-     * @param  \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection|\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource  $result
+     * @param  mixed  $result
      */
     protected function addAppendsToResult($result): void
     {
@@ -79,13 +77,13 @@ trait IteratesResultsAfterQuery
         }
 
         if (! empty($filteredUserAppends)) {
-            if ($result instanceof JsonApiResource) {
+            if ($result instanceof JsonApiCollection) {
                 // TODO: Not really optimised, need to think of a better solution...
                 // TODO: Or refactor old "transformers" classes with a "plain tree" of resources
-                $result instanceof JsonApiCollection
-                    ? $result->collection->each(fn (JsonApiResource $item) => $this->appendToApiResource($item, $filteredUserAppends))
-                    : $this->appendToApiResource($result, $filteredUserAppends);
-            } else if ($result instanceof Paginator) {
+                $result->collection->each(fn (JsonApiResource $item) => $this->appendToApiResource($item, $filteredUserAppends));
+            } elseif ($result instanceof JsonApiResource) {
+                $this->appendToApiResource($result, $filteredUserAppends);
+            } elseif ($result instanceof AbstractPaginator) {
                 $result->through(function (mixed $paginatorItem) use ($filteredUserAppends) {
                     $this->appendToApiResource($paginatorItem, $filteredUserAppends);
 

@@ -34,7 +34,7 @@ trait CollectsResources
     /**
      * Get resource collection filtered by authorisation.
      *
-     * @param  \Illuminate\Pagination\AbstractPaginator<\OpenSoutheners\LaravelApiable\Contracts\JsonApiable>|\Illuminate\Support\Collection<\OpenSoutheners\LaravelApiable\Contracts\JsonApiable>  $resource
+     * @param  \Illuminate\Pagination\AbstractPaginator<int, \OpenSoutheners\LaravelApiable\Contracts\JsonApiable>|\Illuminate\Support\Collection<\OpenSoutheners\LaravelApiable\Contracts\JsonApiable>  $resource
      * @param  class-string<\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource>  $collects
      * @return \Illuminate\Support\Collection
      */
@@ -62,6 +62,8 @@ trait CollectsResources
             class_exists($class = Str::replaceLast('Collection', '', get_class($this)))) {
             return $class;
         }
+
+        return null;
     }
 
     /**

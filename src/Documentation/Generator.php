@@ -35,7 +35,7 @@ class Generator
      *
      * @param  array<string>  $only  Only include routes matching these patterns.
      * @param  array<string>  $exclude  Exclude routes matching these patterns (merged with config).
-     * @return OpenSouthenersLaravelApiableDocumentationResource[]
+     * @return \OpenSoutheners\LaravelApiable\Documentation\Resource[]
      */
     public function generate(array $only = [], array $exclude = []): array
     {

@@ -77,8 +77,11 @@ class ApplySortsToQuery implements HandlesRequestQueries
 
         $query->select($queryModel->qualifyColumn('*'));
 
+        $existingJoins = $query->getQuery()->joins ?? [];
+        $hasJoin = (bool) array_filter($existingJoins, fn ($join) => $join->table === $joinName);
+
         $query->when(
-            ! $query->hasJoin($joinName),
+            ! $hasJoin,
             fn (Builder $query) => $query->join(
                 $joinName,
                 "{$joinAsRelationshipTable}.{$relationshipMethod->getOwnerKeyName()}",

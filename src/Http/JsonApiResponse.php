@@ -222,7 +222,7 @@ class JsonApiResponse implements Arrayable, Responsable
             ? $results->toResponse($request)
             : new JsonResponse($results);
 
-        if ($this->withinInertia($request) && $response instanceof Response && method_exists($response, 'getData')) {
+        if ($this->withinInertia($request) && method_exists($response, 'getData')) {
             return $response->getData();
         }
 
