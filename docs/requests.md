@@ -19,6 +19,10 @@ As a new addition to this package, you can now allow your users to use:
 Remember that there are 2 ways to achieve the exact same behaviour on this package, you can use [PHP Attributes](https://www.php.net/manual/en/language.attributes.overview.php) or normal methods. Advantage of these is that **attributes can be at the method or class level.**
 {% endhint %}
 
+{% hint style="info" %}
+Every `*QueryParam` attribute accepts an optional `$description` string as its **last** parameter. This description is picked up by the `apiable:docs` command when generating API documentation. See [Generating Documentation](documentation.md) for details.
+{% endhint %}
+
 All of the following being conditionally allowed by you on your controllers, like the following example:
 
 ```php
