@@ -54,4 +54,37 @@ return [
         'include_ids_on_attributes' => false,
     ],
 
+    /**
+     * Options for the apiable:docs documentation generator command.
+     *
+     * @see https://docs.opensoutheners.com/laravel-apiable/guide/documentation.html
+     */
+    'documentation' => [
+        'output_path' => null, // defaults to storage_path('exports/apiable') at runtime
+
+        'default_format' => 'markdown', // markdown | postman | openapi
+
+        'default_stub' => 'protocol', // protocol | plain — markdown only
+
+        'excluded_routes' => [
+            '_debugbar/*',
+            '_ignition/*',
+            'nova-api/*',
+            'nova/*',
+            'nova',
+            'telescope*',
+            'horizon*',
+        ],
+
+        'auth' => [
+            'detect_middleware' => true,
+
+            'middleware_map' => [
+                'auth:sanctum' => 'bearer',
+                'auth:api'     => 'bearer',
+                'auth.basic'   => 'basic',
+            ],
+        ],
+    ],
+
 ];

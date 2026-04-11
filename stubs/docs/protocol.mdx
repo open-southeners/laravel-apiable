@@ -1,0 +1,73 @@
+@php
+echo "export const description = '" . addslashes($resource['description']) . "'\n";
+@endphp
+
+# {{ $resource['name'] }}
+
+{{ $resource['description'] }}
+
+@foreach ($resource['endpoints'] as $endpoint)
+
+---
+
+## {{ $endpoint['title'] }}
+
+@if (!empty($endpoint['auth']))
+> **Authentication required:** {{ ucfirst($endpoint['auth']['type']) }} token
+
+@endif
+{{ $endpoint['description'] }}
+
+@php echo '<Row>' @endphp
+  @php echo '<Col>' @endphp
+
+    ### Request
+
+    @php echo '<Properties>' @endphp
+      @php echo '<Property name="method" type="string">' @endphp
+        `{{ $endpoint['method'] }}`
+      @php echo '</Property>' @endphp
+      @php echo '<Property name="endpoint" type="string">' @endphp
+        `/{{ $endpoint['uri'] }}`
+      @php echo '</Property>' @endphp
+    @php echo '</Properties>' @endphp
+
+    @if (!empty($endpoint['queryParams']))
+    ### Query Parameters
+
+    @php echo '<Properties>' @endphp
+      @foreach ($endpoint['queryParams'] as $param)
+      @php echo '<Property name="' . e($param['key']) . '" type="string">' @endphp
+        @if ($param['description'])
+        {{ $param['description'] }}
+        @elseif ($param['values'] !== '*')
+        Allowed values: `{{ $param['values'] }}`
+        @endif
+      @php echo '</Property>' @endphp
+      @endforeach
+    @php echo '</Properties>' @endphp
+    @endif
+
+  @php echo '</Col>' @endphp
+  @php echo '<Col sticky>' @endphp
+
+    @php echo '<CodeGroup title="Request" tag="' . $endpoint['method'] . '" label="/' . $endpoint['uri'] . '">' @endphp
+
+    ```bash @{{ title: 'cURL' }}
+    curl -G https://api.example.com/{{ $endpoint['uri'] }} \
+      -H "Accept: application/vnd.api+json"@if (!empty($endpoint['auth']) && $endpoint['auth']['type'] === 'bearer') \
+      -H "Authorization: Bearer {token}"@elseif (!empty($endpoint['auth']) && $endpoint['auth']['type'] === 'basic') \
+      -H "Authorization: Basic {credentials}"@endif
+
+    @foreach ($endpoint['queryParams'] as $param)
+      --data '{{ $param['key'] }}={{ $param['values'] !== '*' ? $param['values'] : '' }}'@if (!$loop->last) \@endif
+
+    @endforeach
+    ```
+
+    @php echo '</CodeGroup>' @endphp
+
+  @php echo '</Col>' @endphp
+@php echo '</Row>' @endphp
+
+@endforeach
