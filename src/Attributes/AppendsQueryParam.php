@@ -7,7 +7,7 @@ use Attribute;
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
 final class AppendsQueryParam extends QueryParam
 {
-    public function __construct(public string $type, public array $attributes)
+    public function __construct(public string $type, public array $attributes, public string $description = '')
     {
         //
     }
