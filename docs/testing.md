@@ -1,14 +1,18 @@
 ---
-description: >-
-  This package also have some testing utilities built on top of PHPUnit and
-  Laravel's framework assertions.
+description: Test your JSON:API responses with built-in assertion helpers for PHPUnit.
 ---
 
 # Testing
 
-## Assertions
+Laravel Apiable ships with testing utilities built on top of PHPUnit and Laravel's test response helpers. They give you a fluent, chainable API for asserting the shape and content of your JSON:API responses.
 
-Simple assert that your API route is returning a proper JSON:API response:
+## Setup
+
+No extra configuration is required. The `assertJsonApi` macro is registered on `Illuminate\Testing\TestResponse` automatically when the package service provider boots.
+
+## assertJsonApi
+
+The entry point for all JSON:API assertions. Call it on any `TestResponse` instance. Without a callback it simply validates that the response contains a structurally valid JSON:API `data` payload and returns the response so you can continue chaining standard Laravel assertions.
 
 ```php
 $response = $this->getJson('/posts');
@@ -16,9 +20,59 @@ $response = $this->getJson('/posts');
 $response->assertJsonApi();
 ```
 
+Pass a closure to receive an `AssertableJsonApi` instance and make further assertions:
+
+```php
+use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
+
+$response = $this->getJson('/posts/1');
+
+$response->assertJsonApi(function (AssertableJsonApi $assert) {
+    $assert->hasType('post')->hasId(1);
+});
+```
+
+The callback receives the first resource in the response's `data` array, whether the response is a single resource or a collection.
+
+---
+
+## Response type assertions
+
+### isResource
+
+Assert that the response contains a single resource (not a collection).
+
+```php
+use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
+
+$response = $this->getJson('/posts/1');
+
+$response->assertJsonApi(function (AssertableJsonApi $assert) {
+    $assert->isResource();
+});
+```
+
+### isCollection
+
+Assert that the response contains a collection (list of resources).
+
+```php
+use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
+
+$response = $this->getJson('/posts');
+
+$response->assertJsonApi(function (AssertableJsonApi $assert) {
+    $assert->isCollection();
+});
+```
+
+---
+
+## Collection navigation
+
 ### at
 
-Assert the resource at position of the collection starting by 0.
+Get the resource at a zero-based position in the collection. Returns a new `AssertableJsonApi` scoped to that item, so you can chain further assertions against it.
 
 ```php
 use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
@@ -26,91 +80,32 @@ use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
 $response = $this->getJson('/posts');
 
 $response->assertJsonApi(function (AssertableJsonApi $assert) {
-  $assert->at(0)->hasAttribute('title', 'Hello world');
+    $assert->at(0)->hasAttribute('title', 'Hello world');
+    $assert->at(1)->hasType('post');
 });
 ```
 
-### atRelation
+### hasSize
 
-Assert the related model.
+Assert the number of resources present in the collection.
 
 ```php
 use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
 
 $response = $this->getJson('/posts');
 
-$relatedComment = Comment::find(4);
-
-$response->assertJsonApi(function (AssertableJsonApi $assert) use ($relatedComment) {
-  $assert->at(0)->atRelation($relatedComment)->hasAttribute('content', 'Foo bar');
-});
-```
-
-### hasAttribute
-
-Assert the resource has the specified attribute key and value.
-
-```php
-use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
-
-$response = $this->getJson('/posts/1');
-
 $response->assertJsonApi(function (AssertableJsonApi $assert) {
-  $assert->hasAttribute('title', 'Hello world');
+    $assert->hasSize(5);
 });
 ```
 
-### hasNotAttribute
+---
 
-Assert the resource does not has the specified attribute key and value.
-
-```php
-use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
-
-$response = $this->getJson('/posts/1');
-
-$response->assertJsonApi(function (AssertableJsonApi $assert) {
-  $assert->hasNotAttribute('title', 'Hello world');
-});
-```
-
-### hasAttributes
-
-Assert the resource has the specified attributes keys and values.
-
-```php
-use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
-
-$response = $this->getJson('/posts/1');
-
-$response->assertJsonApi(function (AssertableJsonApi $assert) {
-  $assert->hasAttributes([
-    'title' => 'Hello world'
-    'slug' => 'hello-world'
-  ]);
-});
-```
-
-### hasNotAttributes
-
-Assert the resource does not has the specified attributes keys and values.
-
-```php
-use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
-
-$response = $this->getJson('/posts/1');
-
-$response->assertJsonApi(function (AssertableJsonApi $assert) {
-  $assert->hasNotAttributes([
-    'title' => 'Hello world'
-    'slug' => 'hello-world'
-  ]);
-});
-```
+## Identification assertions
 
 ### hasId
 
-Assert the resource has the specified ID (or model key).
+Assert that the current resource has the given ID. The value is cast to string internally, so passing an integer or string both work.
 
 ```php
 use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
@@ -118,13 +113,13 @@ use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
 $response = $this->getJson('/posts/1');
 
 $response->assertJsonApi(function (AssertableJsonApi $assert) {
-  $assert->hasId(1);
+    $assert->hasId(1);
 });
 ```
 
 ### hasType
 
-Assert the resource has the specified type.
+Assert that the current resource has the given JSON:API type string.
 
 ```php
 use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
@@ -132,31 +127,120 @@ use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
 $response = $this->getJson('/posts/1');
 
 $response->assertJsonApi(function (AssertableJsonApi $assert) {
-  $assert->hasType('post');
+    $assert->hasType('post');
+});
+```
+
+---
+
+## Attribute assertions
+
+### hasAttribute
+
+Assert that the resource has the specified attribute key. Pass a second argument to also assert the value.
+
+```php
+use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
+
+$response = $this->getJson('/posts/1');
+
+$response->assertJsonApi(function (AssertableJsonApi $assert) {
+    $assert->hasAttribute('title');
+    $assert->hasAttribute('title', 'Hello world');
+});
+```
+
+### hasNotAttribute
+
+Assert that the resource does not have the specified attribute key. Pass a second argument to also assert the value is absent.
+
+```php
+use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
+
+$response = $this->getJson('/posts/1');
+
+$response->assertJsonApi(function (AssertableJsonApi $assert) {
+    $assert->hasNotAttribute('secret');
+    $assert->hasNotAttribute('title', 'Forbidden title');
+});
+```
+
+### hasAttributes
+
+Assert multiple attributes at once. Keys are attribute names, values are the expected values.
+
+```php
+use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
+
+$response = $this->getJson('/posts/1');
+
+$response->assertJsonApi(function (AssertableJsonApi $assert) {
+    $assert->hasAttributes([
+        'title' => 'Hello world',
+        'slug'  => 'hello-world',
+    ]);
+});
+```
+
+### hasNotAttributes
+
+Assert that multiple attributes are absent (or do not have the given values).
+
+```php
+use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
+
+$response = $this->getJson('/posts/1');
+
+$response->assertJsonApi(function (AssertableJsonApi $assert) {
+    $assert->hasNotAttributes([
+        'title' => 'Forbidden title',
+        'slug'  => 'forbidden-slug',
+    ]);
+});
+```
+
+---
+
+## Relationship assertions
+
+### atRelation
+
+Navigate to an included resource by its model instance and return a new `AssertableJsonApi` scoped to it. The model must be present in the response's `included` array.
+
+```php
+use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
+
+$response = $this->getJson('/posts?include=comments');
+
+$relatedComment = Comment::find(4);
+
+$response->assertJsonApi(function (AssertableJsonApi $assert) use ($relatedComment) {
+    $assert->at(0)
+        ->atRelation($relatedComment)
+        ->hasAttribute('content', 'Foo bar');
 });
 ```
 
 ### hasAnyRelationships
 
-Assert that the resource **has any** relationships with the specified **resource type**.
+Assert that the resource has at least one relationship of the given resource type. Pass a model class string or instance as the first argument — the type is resolved automatically.
 
-Second parameter is for assert that the response **includes** the relationship data at the `included`.
+Set the second argument to `true` to also assert that the related resources appear in the `included` top-level key.
 
 ```php
 use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
 
-$response = $this->getJson('/posts/1');
+$response = $this->getJson('/posts/1?include=comments');
 
 $response->assertJsonApi(function (AssertableJsonApi $assert) {
-  $assert->hasAnyRelationships('comment', true);
+    // Assert the relationship exists (and is included)
+    $assert->hasAnyRelationships('comment', true);
 });
 ```
 
 ### hasNotAnyRelationships
 
-Assert that the resource **doesn't have any** relationships with the specified **resource type**.
-
-Second parameter is for assert that the response **doesn't includes** the relationship data at the `included`.
+Assert that the resource has no relationships of the given resource type. Set the second argument to `true` to also assert that no resources of that type appear in `included`.
 
 ```php
 use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
@@ -164,68 +248,61 @@ use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
 $response = $this->getJson('/posts/2');
 
 $response->assertJsonApi(function (AssertableJsonApi $assert) {
-  $assert->hasNotAnyRelationships('comment', true);
+    $assert->hasNotAnyRelationships('comment', true);
 });
 ```
 
 ### hasRelationshipWith
 
-Assert that the specific model resource **is a** relationship with the parent resource.
-
-Second parameter is for assert that the response **includes** the relationship data at the `included`.
+Assert that a specific model instance is linked as a relationship of the current resource. Set the second argument to `true` to also verify the model appears in `included`.
 
 ```php
 use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
 
-$response = $this->getJson('/posts/1');
+$response = $this->getJson('/posts/1?include=comments');
 
 $relatedComment = Comment::find(4);
 
 $response->assertJsonApi(function (AssertableJsonApi $assert) use ($relatedComment) {
-  $assert->hasRelationshipWith($relatedComment, true);
+    $assert->hasRelationshipWith($relatedComment, true);
 });
 ```
 
 ### hasNotRelationshipWith
 
-Assert that the specific model resource **is not** a relationship with the parent resource.
-
-Second parameter is for assert that the response **doesn't includes** the relationship data at the `included`.
+Assert that a specific model instance is not linked as a relationship of the current resource. Set the second argument to `true` to also verify the model is absent from `included`.
 
 ```php
 use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
 
 $response = $this->getJson('/posts/1');
 
-$relatedComment = Comment::find(4);
+$unrelatedComment = Comment::find(99);
 
-$response->assertJsonApi(function (AssertableJsonApi $assert) use ($relatedComment) {
-  $assert->hasRelationshipWith($relatedComment, true);
+$response->assertJsonApi(function (AssertableJsonApi $assert) use ($unrelatedComment) {
+    $assert->hasNotRelationshipWith($unrelatedComment, true);
 });
 ```
 
-### isCollection
+---
 
-Assert that the response is a collection (list of resources).
+## Chaining assertions
+
+All assertion methods return `$this` (or a new `AssertableJsonApi` instance in the case of navigation methods), so you can chain them freely:
 
 ```php
 use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
 
-$response = $this->getJson('/posts');
+$response = $this->getJson('/posts?include=tags');
 
-$response->assertJsonApi(function (AssertableJsonApi $assert) {
-  $assert->isCollection();
-});
-```
+$relatedTag = Tag::find(1);
 
-### isResource
-
-```php
-use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
-
-$response = $this->getJson('/posts/1');
-
-$response->assertJsonApi(function (AssertableJsonApi $assert) {
-  $assert->isResource();
+$response->assertJsonApi(function (AssertableJsonApi $assert) use ($relatedTag) {
+    $assert->isCollection()
+        ->hasSize(3)
+        ->at(0)
+            ->hasType('post')
+            ->hasAttribute('title', 'Hello world')
+            ->hasRelationshipWith($relatedTag, true);
 });
 ```

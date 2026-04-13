@@ -1,102 +1,35 @@
 ---
-description: Installing and configuring Laravel Apiable into your Laravel application.
+description: A Laravel package that integrates JSON:API resources into your API projects with filtering, sorting, includes, pagination, and more.
 ---
 
 # Introduction
 
-Install with the following command:
+**Laravel Apiable** brings the [JSON:API specification](https://jsonapi.org/) to your Laravel application. It builds on top of Laravel's existing API resources, Eloquent query builder, and request handling -- so you keep using the tools you already know.
+
+## Features
+
+- **JSON:API serialization** -- Transform models and collections into spec-compliant responses
+- **Filtering** -- 7 filter operators including LIKE, exact match, comparison operators, and query scopes
+- **Sorting** -- Sort by attributes or relationships with automatic JOIN handling
+- **Includes** -- Eager-load and embed related resources as compound documents
+- **Sparse fieldsets** -- Let clients select only the fields they need
+- **Appends** -- Expose computed model accessors on demand
+- **Full-text search** -- Laravel Scout integration with search filters
+- **Pagination** -- Length-aware, simple, or cursor-based strategies with FastPaginate support
+- **Content negotiation** -- Automatic format switching based on Accept headers
+- **Error handling** -- Render exceptions in JSON:API error format
+- **Testing utilities** -- Fluent assertion helpers for JSON:API responses
+- **Documentation generator** -- Export Postman, Markdown, and OpenAPI docs from controller attributes
+
+## Requirements
+
+- PHP 8.1+
+- Laravel 10+
+
+## Quick start
 
 ```bash
 composer require open-southeners/laravel-apiable
 ```
 
-## Getting started
-
-First publish the config file once installed like this:
-
-```bash
-php artisan vendor:publish --provider="OpenSoutheners\LaravelApiable\ServiceProvider"
-```
-
-Then edit the `resource_type_map` part including all your models like this:
-
-```php
-/**
- * Resource type model map.
- *
- * @see https://docs.opensoutheners.com/laravel-apiable/guide/#getting-started
- */
-'resource_type_map' => [
-  App\Models\Film::class => 'film',
-  App\Models\Review::class => 'review',
-],
-```
-
-**If you see, this is same as Laravel's** [**`Relation::enforceMorphMap()`**](https://laravel.com/docs/master/eloquent-relationships#custom-polymorphic-types) **but reversed.**
-
-### Setup your models
-
-{% hint style="info" %}
-For more information about how to customise this check out Responses section.
-{% endhint %}
-
-This is a bit of manual work, but you need to setup your models in order for them to be JSON:API serializable entities:
-
-```php
-use Illuminate\Database\Eloquent\Model;
-use OpenSoutheners\LaravelApiable\Contracts\JsonApiable;
-use OpenSoutheners\LaravelApiable\Concerns\HasJsonApi;
-
-class Film extends Model implements JsonApiable
-{
-    use HasJsonApi;
-
-    // rest of your model
-}
-```
-
-You need to add that `implements JsonApiable` to your class importing this class and the `jsonApiableOptions` method.
-
-### Basic transformation usage
-
-And, finally, use as simple as importing the class `OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection` for collections or `OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource` for resources.
-
-```php
-use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection;
-use App\Models\Film;
-
-class FilmController extends Controller
-{
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection<\App\Models\Film>
-     */
-    public function index()
-    {
-        return new JsonApiCollection(Film::all());
-    }
-}
-```
-
-### Error handling
-
-When your application returns errors and your frontend only understand JSON:API, then these needs to be transform. So we've you cover, set them up by simply doing the following on your `app/Exceptions/Handler.php`
-
-```php
-/**
- * Register the exception handling callbacks for the application.
- *
- * @return void
- */
-public function register()
-{
-    $this->renderable(function (Throwable $e, $request) {
-        if ($request->is('api/*') && app()->bound('apiable')) {
-            return apiable()->jsonApiRenderable($e, $request);
-        }
-    });
-
-    // Rest of the register method...
-}
-```
+Then head to the [Installation](getting-started/installation.md) guide to set up your models and configuration.
