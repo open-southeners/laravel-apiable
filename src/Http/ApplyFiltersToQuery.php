@@ -51,6 +51,16 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
                 continue;
             }
 
+            $allowedOperator = $this->allowed[$filterAttribute]['operator'] ?? null;
+
+            // Scope filters with named arguments (e.g. filter[scope][arg1]=hello&filter[scope][arg2]=world)
+            // should pass all argument values in a single scope call instead of multiple calls.
+            if ($allowedOperator === 'scope' && $this->hasScopeArguments($filterValues)) {
+                $this->applyScopeWithNamedArguments($query, $filterAttribute, $filterValues, $enforceScopeNames);
+
+                continue;
+            }
+
             $this->wrapIfRelatedQuery(function ($query, $relationship, $attribute, $operator, $value, $condition) use ($enforceScopeNames) {
                 $scopeName = Str::camel($enforceScopeNames ? str_replace('_scoped', '', $attribute) : $attribute);
                 $isAttribute = $this->isAttribute($query->getModel(), $attribute);
@@ -65,6 +75,49 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
         }
 
         return $query;
+    }
+
+    /**
+     * Check whether filter values contain named scope arguments (array elements).
+     */
+    protected function hasScopeArguments(array $filterValues): bool
+    {
+        foreach ($filterValues as $filterValue) {
+            if (is_array($filterValue)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Apply a scope filter passing all named argument values as a single scope call.
+     */
+    protected function applyScopeWithNamedArguments(Builder $query, string $filterAttribute, array $filterValues, bool $enforceScopeNames): void
+    {
+        $attributePartsArr = explode('.', $filterAttribute);
+        $attribute = array_pop($attributePartsArr);
+        $relationship = implode($attributePartsArr);
+
+        $scopeName = Str::camel($enforceScopeNames ? str_replace('_scoped', '', $attribute) : $attribute);
+
+        $scopeArgs = array_values(array_map(
+            fn ($value) => is_array($value) ? reset($value) : $value,
+            $filterValues
+        ));
+
+        $wrappedQueryFn = function ($query) use ($scopeName, $scopeArgs) {
+            if ($this->isScope($query->getModel(), $scopeName)) {
+                $this->forwardCallTo($query, $scopeName, $scopeArgs);
+            }
+        };
+
+        if ($relationship) {
+            $query->has($relationship, callback: $wrappedQueryFn);
+        } else {
+            $query->where(column: $wrappedQueryFn);
+        }
     }
 
     /**

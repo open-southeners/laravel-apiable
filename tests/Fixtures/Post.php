@@ -101,4 +101,14 @@ class Post extends Model implements JsonApiable
     {
         $query->where('status', 'Active');
     }
+
+    /**
+     * Query posts matching either of two statuses.
+     *
+     * @return void
+     */
+    public function scopeWithStatuses(Builder $query, string $status1, string $status2)
+    {
+        $query->whereIn('status', [$status1, $status2]);
+    }
 }

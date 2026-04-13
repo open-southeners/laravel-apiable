@@ -248,6 +248,21 @@ class JsonApiResponseTest extends TestCase
         );
     }
 
+    public function testFilteringByScopeWithMultipleNamedArguments()
+    {
+        Route::get('/', function () {
+            return JsonApiResponse::from(Post::class)
+                ->allowing([
+                    AllowedFilter::scoped('withStatuses', '*'),
+                ]);
+        });
+
+        $response = $this->get('/?filter[withStatuses][0]=Active&filter[withStatuses][1]=Archived', ['Accept' => 'application/vnd.api+json']);
+
+        $response->assertSuccessful();
+        $response->assertJsonCount(3, 'data');
+    }
+
     // ---------------------------------------------------------------
     // Filters – Lower than / Lower or equal than
     // ---------------------------------------------------------------
