@@ -1,5 +1,5 @@
 ---
-description: Detailed reference for each documentation output format: Postman, Markdown, and OpenAPI.
+description: "Detailed reference for each documentation output format: Postman, Markdown, and OpenAPI."
 ---
 
 # Output Formats
