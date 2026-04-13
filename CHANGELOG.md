@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.1.0] - 2026-04-13
+
+### Added
+
+- Multiple scoped filters parameters values (e.g. `/?filter[withStatuses]=Active&filter[withStatuses]=Archived`) (#15)
+
+### Fixed
+
+- Issue when included repeated relationships replaced others (#11)
+
 ## [4.0.0] - 2026-04-11
 
 ### Added
@@ -27,7 +37,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `CollectsResources::collects()` was missing a `return null` fallback, causing PHPStan to report a missing return statement
 - `isScope()` in `ApplyFiltersToQuery` was using `get_parent_class()` to exclude base builder methods, which could return `false` for unknown types; now diffs against `Illuminate\Database\Eloquent\Builder::class` directly, which is also more accurate
 - Various PHPDoc type corrections in documentation exporters and `Generator` (malformed class name `OpenSouthenersLaravelApiableDocumentationResource` → `\OpenSoutheners\LaravelApiable\Documentation\Resource`)
-- Issue when included repeated relationships replaced others (#11)
 
 ### Removed
 
