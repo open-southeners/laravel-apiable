@@ -257,7 +257,7 @@ class JsonApiResponseTest extends TestCase
                 ]);
         });
 
-        $response = $this->get('/?filter[withStatuses][0]=Active&filter[withStatuses][1]=Archived', ['Accept' => 'application/vnd.api+json']);
+        $response = $this->get('/?filter[withStatuses]=Active&filter[withStatuses]=Archived', ['Accept' => 'application/vnd.api+json']);
 
         $response->assertSuccessful();
         $response->assertJsonCount(3, 'data');

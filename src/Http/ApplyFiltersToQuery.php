@@ -53,9 +53,10 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
 
             $allowedOperator = $this->allowed[$filterAttribute]['operator'] ?? null;
 
-            // Scope filters with named arguments (e.g. filter[scope][arg1]=hello&filter[scope][arg2]=world)
-            // should pass all argument values in a single scope call instead of multiple calls.
-            if ($allowedOperator === 'scope' && $this->hasScopeArguments($filterValues)) {
+            // Scope filters always pass all values in a single scope call as positional arguments.
+            // Named argument format (e.g. filter[scope][arg1]=hello) and repeated key format
+            // (e.g. filter[scope]=hello&filter[scope]=world) are both supported.
+            if ($allowedOperator === 'scope') {
                 $this->applyScopeWithNamedArguments($query, $filterAttribute, $filterValues, $enforceScopeNames);
 
                 continue;
@@ -75,20 +76,6 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
         }
 
         return $query;
-    }
-
-    /**
-     * Check whether filter values contain named scope arguments (array elements).
-     */
-    protected function hasScopeArguments(array $filterValues): bool
-    {
-        foreach ($filterValues as $filterValue) {
-            if (is_array($filterValue)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     /**
