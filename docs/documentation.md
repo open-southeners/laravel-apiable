@@ -13,7 +13,7 @@ The `apiable:docs` command introspects your routes and controller attributes to 
 
 Documentation is driven entirely by PHP Attributes placed on your controllers. Controllers without a `#[DocumentedResource]` attribute are silently skipped, so you opt in only where you want.
 
-### `#[DocumentedResource]`
+### `DocumentedResource`
 
 Place this on the **controller class** to mark it as a named API resource group.
 
@@ -33,7 +33,7 @@ class PostController extends Controller
 | `description` | `string` | no | Short description of the resource group |
 | `prefix` | `string` | no | Optional URI prefix hint for documentation purposes |
 
-### `#[DocumentedEndpointSection]`
+### `DocumentedEndpointSection`
 
 Place this on **controller methods** to set a custom title and description for each endpoint. When omitted, the command falls back to the method's PHPDoc summary.
 
@@ -63,7 +63,7 @@ public function index(JsonApiResponse $response): JsonApiCollection
 }
 ```
 
-### `#[EndpointResource]`
+### `EndpointResource`
 
 Place this on the **controller class** alongside `#[DocumentedResource]` to bind the controller to an Eloquent model. The generator uses this to resolve the JSON:API resource type for example payloads.
 
