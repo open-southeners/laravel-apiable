@@ -103,6 +103,78 @@ By default the resource type is derived from the model class name in snake_case 
 Resource type names must comply with the [JSON:API member naming rules](https://jsonapi.org/format/#document-member-names).
 {% endhint %}
 
+## Custom resource classes
+
+By default the package serializes every model with the base `JsonApiResource` class. You can substitute your own subclass — globally per model, or for a single response.
+
+### Global registry via `Apiable::modelResourceMap()`
+
+Register a map of model classes to custom `JsonApiResource` subclasses in a service provider. The registry applies everywhere: top-level resources, collection items, and **included (side-loaded) related models**.
+
+```php
+use App\Http\Resources\FilmJsonApiResource;
+use App\Http\Resources\UserJsonApiResource;
+use App\Models\Film;
+use App\Models\User;
+use OpenSoutheners\LaravelApiable\Support\Apiable;
+
+// In AppServiceProvider::boot()
+Apiable::modelResourceMap([
+    Film::class => FilmJsonApiResource::class,
+    User::class => UserJsonApiResource::class,
+]);
+```
+
+A custom resource class extends `JsonApiResource` and can override `withAttributes()` to add computed attributes:
+
+```php
+use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource;
+
+class FilmJsonApiResource extends JsonApiResource
+{
+    protected function withAttributes(): array
+    {
+        return [
+            'rating_label' => $this->resource->getRatingLabel(),
+        ];
+    }
+}
+```
+
+`withAttributes()` is merged on top of the model's regular attributes when serializing to JSON:API format.
+
+### Resolving the resource class for a model
+
+Use `Apiable::jsonApiResourceFor()` to retrieve the registered class for a model at runtime. Falls back to `JsonApiResource::class` when nothing is registered:
+
+```php
+$class = Apiable::jsonApiResourceFor($film); // e.g. FilmJsonApiResource::class
+```
+
+### Per-response override via `usingResource()`
+
+To use a custom resource class for a single `JsonApiResponse` without touching the global registry, call `usingResource()`:
+
+```php
+use App\Http\Resources\FilmJsonApiResource;
+
+JsonApiResponse::from(Film::class)
+    ->usingResource(FilmJsonApiResource::class);
+```
+
+See [JsonApiResponse](json-api-response.md#custom-resource-class) for full details.
+
+### Plain JSON serialization — `toApplicationJsonArray()`
+
+When a client requests `application/json` rather than `application/vnd.api+json`, `JsonApiResource` now provides a `toApplicationJsonArray()` helper that merges model attributes with the computed attributes declared in `withAttributes()`:
+
+```php
+$resource = new FilmJsonApiResource(Film::find(1));
+
+$array = $resource->toApplicationJsonArray();
+// ['id' => 1, 'title' => 'The Lost City', 'rating_label' => 'PG-13', ...]
+```
+
 ## Example JSON:API output
 
 A serialized `Film` model returns the following structure:

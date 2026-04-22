@@ -182,6 +182,21 @@ JsonApiResponse::from(Film::class)
 
 See [Pagination](pagination.md) for the built-in strategies and per-response convenience methods.
 
+## Custom resource class
+
+### usingResource()
+
+Override the `JsonApiResource` subclass used to serialize the response. This applies to the top-level resource as well as every item in a paginated collection. Pass the fully-qualified class name of any class that extends `JsonApiResource`:
+
+```php
+use App\Http\Resources\FilmJsonApiResource;
+
+JsonApiResponse::from(Film::class)
+    ->usingResource(FilmJsonApiResource::class);
+```
+
+This is a per-response override. To register a custom resource class globally for a model (including included relationships), use `Apiable::modelResourceMap()`. See [Serialization — Custom resource classes](serialization.md#custom-resource-classes) for details.
+
 ## Content negotiation
 
 ### forceFormatting()
