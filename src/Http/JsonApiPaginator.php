@@ -17,6 +17,7 @@ class JsonApiPaginator
      * Paginate the given Eloquent builder using JSON:API conventions.
      *
      * @param  array<string>  $columns
+     * @param  class-string<\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource>|null  $resourceClass
      */
     public static function paginate(
         Builder $builder,
@@ -24,6 +25,7 @@ class JsonApiPaginator
         array $columns = ['*'],
         string $pageName = 'page.number',
         ?int $page = null,
+        ?string $resourceClass = null,
     ): JsonApiCollection {
         $page ??= request($pageName, 1);
         $pageSize ??= $builder->getModel()->getPerPage();
@@ -52,6 +54,6 @@ class JsonApiPaginator
                 'path' => Paginator::resolveCurrentPath(),
                 'pageName' => $pageNumberParamName,
             ],
-        ]));
+        ]), $resourceClass);
     }
 }

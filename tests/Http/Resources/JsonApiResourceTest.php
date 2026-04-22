@@ -95,7 +95,7 @@ class JsonApiResourceTest extends TestCase
             'id' => 5,
             'title' => 'Test Title',
             'abstract' => 'Test abstract',
-        ]), true);
+        ]));
 
         $this->assertSame('{"id":"5","type":"post","attributes":{"title":"Test Title","abstract":"Test abstract"}}', $resource->toJson());
     }

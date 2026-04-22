@@ -25,6 +25,11 @@ class Apiable
     protected static $modelResourceTypeMap = [];
 
     /**
+     * @var array<class-string<\Illuminate\Database\Eloquent\Model>, class-string<\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource>>
+     */
+    protected static $modelResourceMap = [];
+
+    /**
      * Get package prefixed config by key.
      */
     public static function config(string $key): mixed
@@ -34,15 +39,28 @@ class Apiable
 
     /**
      * Format model or collection of models to JSON:API, false otherwise if not valid resource.
+     *
+     * @param  class-string<\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource>|null  $resourceClass
      */
-    public static function toJsonApi(mixed $resource): JsonApiResource|JsonApiCollection
+    public static function toJsonApi(mixed $resource, ?string $resourceClass = null): JsonApiResource|JsonApiCollection
     {
         return match (true) {
-            $resource instanceof Builder => JsonApiPaginator::paginate($resource),
-            $resource instanceof AbstractPaginator, $resource instanceof Collection => new JsonApiCollection($resource),
-            $resource instanceof Model, $resource instanceof MissingValue => new JsonApiResource($resource),
+            $resource instanceof Builder => JsonApiPaginator::paginate($resource, resourceClass: $resourceClass),
+            $resource instanceof AbstractPaginator, $resource instanceof Collection => new JsonApiCollection($resource, $resourceClass),
+            $resource instanceof Model, $resource instanceof MissingValue => new ($resourceClass ?? static::jsonApiResourceFor($resource))($resource),
             default => new JsonApiCollection(Collection::make([])),
         };
+    }
+
+    /**
+     * Get JSON:API resource class for a given model instance.
+     *
+     * @param  \Illuminate\Database\Eloquent\Model  $model
+     * @return class-string<\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource>
+     */
+    public static function jsonApiResourceFor(Model $model): string
+    {
+        return static::$modelResourceMap[get_class($model)] ?? JsonApiResource::class;
     }
 
     /**
@@ -91,6 +109,27 @@ class Apiable
         }
 
         return $response;
+    }
+
+    /**
+     * Add models to JSON:API resource class mapping.
+     *
+     * @param  array<class-string<\Illuminate\Database\Eloquent\Model>, class-string<\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource>>  $models
+     * @return void
+     */
+    public static function modelResourceMap(array $models = [])
+    {
+        static::$modelResourceMap = $models;
+    }
+
+    /**
+     * Get models to JSON:API resource class mapping.
+     *
+     * @return array<class-string<\Illuminate\Database\Eloquent\Model>, class-string<\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource>>
+     */
+    public static function getModelResourceMap(): array
+    {
+        return static::$modelResourceMap;
     }
 
     /**

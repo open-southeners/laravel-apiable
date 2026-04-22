@@ -102,6 +102,19 @@ class JsonApiResource extends JsonResource
     }
 
     /**
+     * Serialize resource as plain JSON merging model attributes with resource-declared computed attributes.
+     *
+     * @return array<string, mixed>
+     */
+    public function toApplicationJsonArray(): array
+    {
+        return array_merge(
+            $this->resource->toArray(),
+            $this->withAttributes()
+        );
+    }
+
+    /**
      * Customize the response for a request.
      *
      * @param  \Illuminate\Http\Request  $request

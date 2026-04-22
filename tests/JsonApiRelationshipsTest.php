@@ -74,6 +74,43 @@ class JsonApiRelationshipsTest extends TestCase
     }
 
     #[Group('requiresDatabase')]
+    public function testPivotMetaKeysArePrefixedWithRelationName()
+    {
+        $this->loadMigrationsFrom(__DIR__.'/database/migrations');
+
+        Route::get('/', function () {
+            $post = Post::create([
+                'status' => 'Published',
+                'title' => 'Test Title',
+            ]);
+
+            $tag = Tag::create([
+                'name' => 'News',
+                'slug' => 'news',
+            ]);
+
+            $post->tags()->attach($tag->id);
+
+            return Apiable::toJsonApi($post->refresh()->load('tags'));
+        });
+
+        $response = $this->get('/', ['Accept' => 'application/json']);
+
+        $response->assertSuccessful();
+
+        $tagRelationshipData = $response->json('data.relationships.tags.data.0');
+
+        $this->assertNotNull($tagRelationshipData);
+        $this->assertSame('label', $tagRelationshipData['type']);
+
+        if (isset($tagRelationshipData['meta'])) {
+            foreach (array_keys($tagRelationshipData['meta']) as $key) {
+                $this->assertStringStartsWith('pivot_', $key, "Meta key '{$key}' should be prefixed with 'pivot_'");
+            }
+        }
+    }
+
+    #[Group('requiresDatabase')]
     public function testResourceHasTagsRelationships()
     {
         // TODO: setRelation method doesn't work with hasMany relationships, so need migrations loaded

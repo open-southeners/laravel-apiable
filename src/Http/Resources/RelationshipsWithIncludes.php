@@ -53,6 +53,16 @@ trait RelationshipsWithIncludes
     }
 
     /**
+     * Create a JSON:API resource for a related model using the registry.
+     */
+    protected function makeRelatedResource(Model $model): JsonApiResource
+    {
+        $resourceClass = Apiable::jsonApiResourceFor($model);
+
+        return new $resourceClass($model);
+    }
+
+    /**
      * Process a model relation attaching to its model additional attributes.
      *
      * @param  \OpenSoutheners\LaravelApiable\Contracts\JsonApiable|\Illuminate\Database\Eloquent\Model  $model
@@ -60,7 +70,7 @@ trait RelationshipsWithIncludes
     protected function processModelRelation(string $relation, $model): void
     {
         /** @var \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource $modelResource */
-        $modelResource = new self($model);
+        $modelResource = $this->makeRelatedResource($model);
         $modelIdentifier = $modelResource->getResourceIdentifier();
 
         if (empty($modelIdentifier[$model->getKeyName()] ?? null)) {
@@ -76,9 +86,13 @@ trait RelationshipsWithIncludes
         foreach ($pivotRelations as $pivotRelation => $pivotRelationObj) {
             $resourceRelationshipDataMeta = static::filterAttributes($pivotRelationObj, $pivotRelationObj->getAttributes());
 
-            array_walk($resourceRelationshipDataMeta, fn ($value, $key) => ["{$pivotRelation}_{$key}" => $value]);
+            $prefixedMeta = [];
 
-            $resourceRelationshipData['meta'] = $resourceRelationshipDataMeta;
+            foreach ($resourceRelationshipDataMeta as $key => $value) {
+                $prefixedMeta["{$pivotRelation}_{$key}"] = $value;
+            }
+
+            $resourceRelationshipData['meta'] = $prefixedMeta;
         }
 
         if (is_array($this->relationships[$relation]['data'])) {

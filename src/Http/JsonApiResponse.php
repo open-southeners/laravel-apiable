@@ -51,6 +51,11 @@ class JsonApiResponse implements Arrayable, Responsable
     protected ?Closure $pagination = null;
 
     /**
+     * @var class-string<\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource>|null
+     */
+    protected ?string $resourceClass = null;
+
+    /**
      * Instantiate this class.
      *
      * @return void
@@ -161,6 +166,18 @@ class JsonApiResponse implements Arrayable, Responsable
     }
 
     /**
+     * Use the specified JSON:API resource class for serialization.
+     *
+     * @param  class-string<\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource>  $resourceClass
+     */
+    public function usingResource(string $resourceClass): self
+    {
+        $this->resourceClass = $resourceClass;
+
+        return $this;
+    }
+
+    /**
      * Return response using the following pagination method.
      */
     public function paginateUsing(Closure $closure): self
@@ -190,7 +207,7 @@ class JsonApiResponse implements Arrayable, Responsable
 
         return match ($requesterAccepts) {
             'application/json' => $response instanceof Builder ? $response->simplePaginate() : $response,
-            'application/vnd.api+json' => Apiable::toJsonApi($response),
+            'application/vnd.api+json' => Apiable::toJsonApi($response, $this->resourceClass),
             'raw' => $response instanceof Builder ? $response->simplePaginate() : $response,
             default => throw new HttpException(406, 'Not acceptable response formatting'),
         };
