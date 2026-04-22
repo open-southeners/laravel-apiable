@@ -2,56 +2,64 @@
 
 namespace OpenSoutheners\LaravelApiable\Testing\Concerns;
 
+use Closure;
+use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
 use PHPUnit\Framework\Assert as PHPUnit;
 
 /**
- * @mixin \OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi
+ * @mixin AssertableJsonApi
  */
 trait HasCollections
 {
     /**
-     * @var int
-     */
-    protected $atPosition;
-
-    /**
-     * Assert that actual response is a collection
+     * Assert that the response is a collection.
      *
      * @return $this
      */
-    public function isCollection()
+    public function isCollection(): static
     {
-        PHPUnit::assertNotEmpty($this->collection, 'Failed asserting that response is a collection');
+        PHPUnit::assertNotEmpty($this->collection(), 'Failed asserting that response is a collection');
 
         return $this;
     }
 
     /**
-     * Get resource based on its zero-based position in the collection.
+     * Scope into the collection item at the given zero-based position.
      *
-     * @return \OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi
+     * When $callback is provided the callback runs inside the item scope and
+     * $this is returned for continued chaining on the collection. When omitted
+     * a new scoped instance is returned (backward-compatible usage).
      */
-    public function at(int $position)
+    public function at(int $position, ?Closure $callback = null): static
     {
-        if (! array_key_exists($position, $this->collection)) {
+        $collection = $this->collection();
+
+        if (! array_key_exists($position, $collection)) {
             PHPUnit::fail(sprintf('There is no item at position "%d" on the collection response.', $position));
         }
 
-        $data = $this->collection[$position];
+        if ($callback !== null) {
+            return $this->scope('data.'.$position, $callback);
+        }
 
-        $this->atPosition = $position;
+        $scope = new static($collection[$position], 'data.'.$position);
+        $scope->rootProps = $this->rootProps ?? $this->prop();
 
-        return new self($data['id'], $data['type'], $data['attributes'], $data['relationships'] ?? [], $this->includeds, $this->collection);
+        return $scope;
     }
 
     /**
-     * Assert the number of resources that are at the collection (alias of count).
+     * Assert the number of resources in the collection.
      *
      * @return $this
      */
-    public function hasSize(int $value)
+    public function hasSize(int $value): static
     {
-        PHPUnit::assertCount($value, $this->collection, sprintf('The collection size is not same as "%d"', $value));
+        PHPUnit::assertCount(
+            $value,
+            $this->collection(),
+            sprintf('The collection size is not same as "%d"', $value)
+        );
 
         return $this;
     }

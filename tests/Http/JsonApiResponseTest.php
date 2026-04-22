@@ -562,7 +562,7 @@ class JsonApiResponseTest extends TestCase
 
             $assert->at(0)->hasAttribute('title', 'Hola mundo');
             $assert->at(1)->hasAttribute('title', 'My first test');
-            $assert->hasAttribute('tags_count');
+            $assert->at(0)->hasAttribute('tags_count');
         });
     }
 
@@ -582,7 +582,7 @@ class JsonApiResponseTest extends TestCase
 
             $assert->at(0)->hasAttribute('title', 'Hello world');
             $assert->at(1)->hasAttribute('title', 'Y esto en español');
-            $assert->hasAttribute('tags_count');
+            $assert->at(0)->hasAttribute('tags_count');
         });
     }
 
@@ -751,7 +751,7 @@ class JsonApiResponseTest extends TestCase
 
         $response->assertJsonApi(fn (AssertableJsonApi $assert) => $assert
             ->isCollection()
-            ->hasAttribute('tags_count')
+            ->at(0)->hasAttribute('tags_count')
         );
     }
 
@@ -970,7 +970,7 @@ class JsonApiResponseTest extends TestCase
         $response = $this->get('/?q=español', ['Accept' => 'application/vnd.api+json']);
 
         $response->assertJsonApi(function (AssertableJsonApi $assert) {
-            $assert->hasSize(1)->hasAttribute('title', 'Y esto en español');
+            $assert->hasSize(1)->at(0)->hasAttribute('title', 'Y esto en español');
         });
     }
 
@@ -1133,7 +1133,7 @@ class JsonApiResponseTest extends TestCase
 
         $response->assertJsonApi(fn (AssertableJsonApi $assert) => $assert
             ->isCollection()
-            ->hasAttribute('tags_count')
+            ->at(0)->hasAttribute('tags_count')
         );
     }
 
@@ -1149,7 +1149,7 @@ class JsonApiResponseTest extends TestCase
 
         $response->assertJsonApi(fn (AssertableJsonApi $assert) => $assert
             ->isCollection()
-            ->hasAttribute('tags_count')
+            ->at(0)->hasAttribute('tags_count')
         );
     }
 }

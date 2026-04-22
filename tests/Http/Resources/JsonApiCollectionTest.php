@@ -72,17 +72,17 @@ class JsonApiCollectionTest extends TestCase
         });
     }
 
-    public function testCollectionsTakeByDefaultFirstItem()
+    public function testCollectionsAtZeroHasFirstItemAttribute()
     {
-        $this->get('/', ['Accept' => 'application/json'])->assertJsonApi(function (AssertableJsonApi $jsonApi) {
-            $jsonApi->hasAttribute('title', 'Test Title');
+        $this->get('/', ['Accept' => 'application/json'])->assertJsonApi(function (AssertableJsonApi $assert) {
+            $assert->at(0)->hasAttribute('title', 'Test Title');
         });
     }
 
     public function testCollectionsHasSize()
     {
-        $this->get('/', ['Accept' => 'application/json'])->assertJsonApi(function (AssertableJsonApi $jsonApi) {
-            $jsonApi->hasSize(2);
+        $this->get('/', ['Accept' => 'application/json'])->assertJsonApi(function (AssertableJsonApi $assert) {
+            $assert->hasSize(2);
         });
     }
 

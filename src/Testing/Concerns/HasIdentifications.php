@@ -2,47 +2,45 @@
 
 namespace OpenSoutheners\LaravelApiable\Testing\Concerns;
 
+use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
 use PHPUnit\Framework\Assert as PHPUnit;
 
 /**
- * @mixin \OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi
+ * @mixin AssertableJsonApi
  */
 trait HasIdentifications
 {
     /**
-     * @var string
-     */
-    protected $id;
-
-    /**
-     * @var string
-     */
-    protected $type;
-
-    /**
-     * Assert that a resource has the specified ID.
+     * Assert that the resource has the specified ID (coerced to string).
      *
      * @param  mixed  $value
      * @return $this
      */
-    public function hasId($value)
+    public function hasId($value): static
     {
-        $value .= '';
+        $value = (string) $value;
 
-        PHPUnit::assertTrue($this->id === $value, sprintf('JSON:API response does not have id "%s"', $value));
+        PHPUnit::assertTrue(
+            $this->resourceId() === $value,
+            sprintf('JSON:API response does not have id "%s"', $value)
+        );
 
         return $this;
     }
 
     /**
-     * Check that a resource has the specified type.
+     * Assert that the resource has the specified type.
      *
      * @param  mixed  $value
      * @return $this
      */
-    public function hasType($value)
+    public function hasType($value): static
     {
-        PHPUnit::assertSame($this->type, $value, sprintf('JSON:API response does not have type "%s"', $value));
+        PHPUnit::assertSame(
+            $this->resourceType(),
+            $value,
+            sprintf('JSON:API response does not have type "%s"', $value)
+        );
 
         return $this;
     }
