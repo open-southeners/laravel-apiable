@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.2.0] - 2026-04-22
+
+### Added
+
+- `Apiable::modelResourceMap()` to register custom `JsonApiResource` classes per model globally
+- `Apiable::jsonApiResourceFor()` to resolve the registered resource class for a given model instance
+- `JsonApiResponse::usingResource()` to override the resource class used for serialization per-response
+- `JsonApiResource::toApplicationJsonArray()` for plain JSON serialization merging model attributes with computed ones
+
+### Fixed
+
+- Related models in included relationships now resolve through the resource registry instead of always using the base `JsonApiResource` class
+- Pivot relationship meta keys were not being prefixed correctly (`array_walk` callback was not returning the modified array); replaced with an explicit loop
+
 ## [4.1.0] - 2026-04-13
 
 ### Added
