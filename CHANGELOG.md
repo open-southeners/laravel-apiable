@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.3.0] - 2026-04-22
+
+### Added
+
+- `AssertableJsonApi::data(Closure)` — scope into the `data` member using the full `AssertableJson` fluent API (`where`, `has`, `missing`, `count`, `etc`, `dd`, `dump`, `when`, `tap`, …)
+- `AssertableJsonApi::meta(Closure)` — scope into `meta`
+- `AssertableJsonApi::links(Closure)` — scope into `links`
+- `AssertableJsonApi::errors(Closure)` — scope into `errors`
+- `AssertableJsonApi::included(Closure)` — scope into `included`
+- `AssertableJsonApi::relationship(string $name, Closure)` — scope into `relationships.{name}.data` of the current resource
+- `AssertableJsonApi::at(int $position, Closure $callback)` — optional closure variant; when a callback is supplied the method runs assertions inside that scope and returns `$this` (the collection) for further chaining
+- `AssertableJsonApi::atRelation(Model $model, Closure $callback)` — optional closure variant on `atRelation`
+- `AssertableJsonApi::assertIsJsonApiDocument()` — validates the top-level JSON:API document structure (requires at least one of `data`/`errors`/`meta`; `data` and `errors` must not coexist; `included` requires `data`)
+- Error documents (`errors`, no `data`) are now accepted by `fromTestResponse` and can be asserted via `errors()`
+
+### Changed
+
+- **`AssertableJsonApi` constructor is now aligned with the parent `AssertableJson(array $props, ?string $path = null)`.** All JSON:API state (id, type, attributes, relationships, included) is now derived from props via accessors instead of stored as separate fields. As a result, parent methods `scope()`, `first()`, `each()`, `where()`, `has()`, `missing()`, `count()`, `etc()`, `dd()`, `dump()`, `when()`, `tap()` are now fully functional on `AssertableJsonApi` instances.
+- **`fromTestResponse` no longer silently collapses a collection response to the first item.** Calling `hasAttribute()`, `hasId()`, `hasType()`, or relationship methods directly on a collection root now operates on the root document, not the first item. Use `->at(0)` to scope into a specific collection item before running those assertions.
+- **`hasAttribute($name, $value)` value comparison tightened.** The old implementation used `assertContains($value, $attributes)` which matched the value against any attribute — regardless of key. The new implementation uses `assertSame($value, $attributes[$name])` which correctly checks the exact key/value pair. **Action required:** any test that relied on the old loose matching (e.g. `hasAttribute('subtitle', 'Hello')` passing because a different key happened to hold `'Hello'`) needs to be corrected.
+- **`hasAttribute($name, $value)` skipping falsy values fixed.** The old guard was `if ($value)`, which skipped the value check when `$value` was `0`, `false`, or `''`. The guard is now `if ($value !== null)`, so values of `0` and `false` are correctly asserted.
+- **`toArray()` now returns the full document props** (delegating to `AssertableJson::toArray()`) instead of only the attributes of the current resource. Code that called `->toArray()` to obtain attributes should use `->toArray()['data']['attributes']` or `->prop('data.attributes')`.
+- **`hasNotAttribute($name, $value)` semantics clarified.** Without `$value`, asserts the attribute key is absent. With `$value`, asserts that either the key is absent or the key's value differs from `$value`. Previously the method always failed if the key existed, even when only checking that a specific value was not present.
+- `hasAttributes()` now accepts both list form (`['title', 'abstract']` — key existence only) and map form (`['title' => 'Hello']` — key + exact value).
+
+### Fixed
+
+- `scope()`, `first()`, `each()` from the parent now work correctly because the constructor matches the parent signature
+- `AssertableJsonApi::rootProps` is threaded into child scopes so `included`, `meta`, and `links` are reachable from any scope depth
+
 ## [4.2.0] - 2026-04-22
 
 ### Added
