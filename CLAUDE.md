@@ -153,6 +153,22 @@ vendor/bin/phpunit tests/Http/
 - Falls back to `config('apiable.responses.formatting.type')` for Inertia/forced mode
 - Throws 406 for unsupported Accept headers
 
+## Documentation (`docs/`)
+
+Every file inside `docs/` is synced to GitBook. **Whenever you edit any file inside `docs/`, you must follow GitBook formatting conventions.**
+
+The canonical reference for how to write GitBook-compatible markdown is available at:
+`https://gitbook.com/docs/skill.md`
+
+Fetch and apply that skill before making any docs changes. Key rules:
+
+- **Custom blocks** — use `{% hint style="info|warning|danger|success" %}`, `{% tabs %}`, `{% stepper %}`, `{% columns %}` (max 2), `<details>` for expandable content
+- **Frontmatter** — every page may include `description:`, `icon:`, `hidden:`, and `layout:` fields
+- **SUMMARY.md** — must stay in sync with the file structure; update it whenever pages are added, removed, or moved
+- **Internal links** — use relative paths to `.md` files (e.g. `[text](../responses/serialization.md)`)
+- **No raw HTML tables** for content layout — use `{% columns %}` instead; only use `<table data-view="cards">` for navigation cards
+- **Close all custom blocks** — every `{% tag %}` must have a matching `{% endtag %}`
+
 ## Contribution Workflow
 
 1. Check for existing issue or create one first
