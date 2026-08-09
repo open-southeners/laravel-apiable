@@ -4,6 +4,7 @@ namespace OpenSoutheners\LaravelApiable\Tests;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
+use OpenSoutheners\LaravelApiable\Http\JsonApiResponse;
 use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
 use OpenSoutheners\LaravelApiable\Tests\Fixtures\Post;
 use PHPUnit\Framework\Attributes\Group;
@@ -140,5 +141,161 @@ class JsonApiPaginationTest extends TestCase
         ]);
 
         $response->assertStatus(200);
+    }
+
+    public function test_json_api_response_defaults_to_length_aware_pagination()
+    {
+        $this->createPosts(4);
+
+        Route::get('/posts-response', fn () => JsonApiResponse::from(Post::class));
+
+        $response = $this->getJson('/posts-response?page[size]=2', ['Accept' => 'application/vnd.api+json']);
+
+        $response->assertSuccessful();
+        $response->assertJsonApi(fn (AssertableJsonApi $jsonApi) => $jsonApi->hasSize(2));
+        $response->assertJsonPath('meta.total', 4);
+        $response->assertJsonPath('meta.last_page', 2);
+        $response->assertJsonPath('links.last', url('/posts-response?page%5Bnumber%5D=2'));
+    }
+
+    public function test_json_api_response_pagination_type_config_selects_default_strategy()
+    {
+        $this->createPosts(4);
+
+        config(['apiable.responses.pagination.type' => 'simple']);
+
+        Route::get('/posts-response', fn () => JsonApiResponse::from(Post::class));
+
+        $response = $this->getJson('/posts-response?page[size]=2', ['Accept' => 'application/vnd.api+json']);
+
+        $response->assertSuccessful();
+        $response->assertJsonApi(fn (AssertableJsonApi $jsonApi) => $jsonApi->hasSize(2));
+        $response->assertJsonMissingPath('meta.total');
+        $response->assertJsonPath('links.last', null);
+    }
+
+    public function test_simple_paginating_has_no_total_or_last_page()
+    {
+        $this->createPosts(4);
+
+        Route::get('/posts-response', fn () => JsonApiResponse::from(Post::class)->simplePaginating(2));
+
+        $response = $this->getJson('/posts-response', ['Accept' => 'application/vnd.api+json']);
+
+        $response->assertSuccessful();
+        $response->assertJsonApi(fn (AssertableJsonApi $jsonApi) => $jsonApi->hasSize(2));
+        $response->assertJsonPath('links.last', null);
+        $response->assertJsonPath('links.next', url('/posts-response?page%5Bnumber%5D=2'));
+        $response->assertJsonMissingPath('meta.total');
+        $response->assertJsonMissingPath('meta.last_page');
+        $response->assertJsonPath('meta.per_page', 2);
+    }
+
+    public function test_cursor_paginating_returns_cursor_bearing_links()
+    {
+        $this->createPosts(4);
+
+        Route::get('/posts-response', fn () => JsonApiResponse::from(Post::class)->cursorPaginating(2));
+
+        $response = $this->getJson('/posts-response', ['Accept' => 'application/vnd.api+json']);
+
+        $response->assertSuccessful();
+        $response->assertJsonApi(fn (AssertableJsonApi $jsonApi) => $jsonApi->hasSize(2));
+        $response->assertJsonPath('links.first', null);
+        $response->assertJsonPath('links.last', null);
+        $response->assertJsonMissingPath('meta.total');
+        $response->assertJsonMissingPath('meta.current_page');
+        $response->assertJsonPath('meta.per_page', 2);
+
+        $nextLink = $response->json('links.next');
+
+        $this->assertNotNull($nextLink);
+        $this->assertStringContainsString('page%5Bcursor%5D=', $nextLink);
+
+        $nextLinkParts = parse_url($nextLink);
+
+        $followUpResponse = $this->getJson(
+            $nextLinkParts['path'].'?'.$nextLinkParts['query'],
+            ['Accept' => 'application/vnd.api+json']
+        );
+
+        $followUpResponse->assertSuccessful();
+        $followUpResponse->assertJsonApi(fn (AssertableJsonApi $jsonApi) => $jsonApi->hasSize(2));
+        $followUpResponse->assertJsonPath('links.next', null);
+
+        $prevLink = $followUpResponse->json('links.prev');
+
+        $this->assertNotNull($prevLink);
+        $this->assertStringContainsString('page%5Bcursor%5D=', $prevLink);
+    }
+
+    public function test_fluent_pagination_method_overrides_config_default()
+    {
+        $this->createPosts(4);
+
+        config(['apiable.responses.pagination.type' => 'cursor']);
+
+        Route::get('/posts-response', fn () => JsonApiResponse::from(Post::class)->simplePaginating(2));
+
+        $response = $this->getJson('/posts-response', ['Accept' => 'application/vnd.api+json']);
+
+        $response->assertSuccessful();
+        $response->assertJsonApi(fn (AssertableJsonApi $jsonApi) => $jsonApi->hasSize(2));
+        $response->assertJsonPath('meta.current_page', 1);
+        $response->assertJsonMissingPath('meta.total');
+    }
+
+    public function test_page_size_query_param_overrides_simple_paginating_default_size()
+    {
+        $this->createPosts(4);
+
+        Route::get('/posts-response', fn () => JsonApiResponse::from(Post::class)->simplePaginating());
+
+        $response = $this->getJson('/posts-response?page[size]=1', ['Accept' => 'application/vnd.api+json']);
+
+        $response->assertSuccessful();
+        $response->assertJsonApi(fn (AssertableJsonApi $jsonApi) => $jsonApi->hasSize(1));
+        $response->assertJsonPath('meta.per_page', 1);
+    }
+
+    public function test_paginate_using_closure_overrides_fluent_pagination_strategy()
+    {
+        $this->createPosts(4);
+
+        Route::get('/posts-response', fn () => JsonApiResponse::from(Post::class)
+            ->cursorPaginating()
+            ->paginateUsing(fn ($query) => $query->simplePaginate(2)));
+
+        $response = $this->getJson('/posts-response', ['Accept' => 'application/vnd.api+json']);
+
+        $response->assertSuccessful();
+        $response->assertJsonApi(fn (AssertableJsonApi $jsonApi) => $jsonApi->hasSize(2));
+        $response->assertJsonPath('meta.current_page', 1);
+    }
+
+    public function test_getting_one_unaffected_by_pagination_strategy()
+    {
+        $this->createPosts(4);
+
+        Route::get('/posts-response/{post}', fn (Post $post) => JsonApiResponse::from(Post::class)
+            ->gettingOne()
+            ->cursorPaginating());
+
+        $response = $this->getJson('/posts-response/1', ['Accept' => 'application/vnd.api+json']);
+
+        $response->assertSuccessful();
+        $response->assertJsonApi(fn (AssertableJsonApi $jsonApi) => $jsonApi->isResource());
+        $response->assertJsonMissingPath('meta');
+        $response->assertJsonMissingPath('links');
+    }
+
+    /**
+     * Create the given number of posts for pagination tests.
+     */
+    protected function createPosts(int $amount): void
+    {
+        for ($i = 1; $i <= $amount; $i++) {
+            Post::create(['status' => 'Published', 'title' => "Test Title {$i}"]);
+        }
     }
 }
