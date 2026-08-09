@@ -2,10 +2,10 @@
 
 namespace OpenSoutheners\LaravelApiable\Http\Concerns;
 
-use Exception;
 use OpenSoutheners\LaravelApiable\Http\AllowedSort;
 use OpenSoutheners\LaravelApiable\Http\DefaultSort;
 use OpenSoutheners\LaravelApiable\Http\RequestQueryObject;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * @mixin RequestQueryObject
@@ -95,7 +95,7 @@ trait AllowsSorts
                 }
 
                 return $values === $rules;
-            }, fn ($key) => new Exception(sprintf('"%s" is not sortable', $key)))
+            }, fn ($key) => throw new HttpException(400, sprintf('"%s" is not sortable', $key)))
             ->validate();
     }
 
