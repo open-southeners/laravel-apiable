@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Pagination strategies.** `JsonApiResponse::simplePaginating()` and `JsonApiResponse::cursorPaginating()` — previously documented but unimplemented — now work, alongside the `responses.pagination.type` config key (`length-aware` | `simple` | `cursor`) that sets the default strategy for every response. Cursor pagination reads/writes the `page[cursor]` query parameter.
+- **`responses.max_include_depth` config** (default `3`) caps how deeply nested an `include` path (e.g. `author.reviews.replies`) can go. Paths beyond the limit are dropped silently by default, or rejected with a `400` when `requests.validate_params` is enabled.
+- **Multi-operator filters.** An attribute can now be registered with more than one operator (e.g. `AllowedFilter::greaterOrEqualThan('due_at')` + `AllowedFilter::lowerOrEqualThan('due_at')`), letting clients send a proper range filter via `filter[attribute][gte]=X&filter[attribute][lte]=Y`. A plain `filter[attribute]=value` (no operator key) uses whichever operator was registered first.
+- `CURRENT_ISSUES.md` — a living ledger of known, non-blocking gaps and latent bugs found during this round, for future contributors to pick up.
+
+### Fixed
+
+- **`allowInclude()`/`allowing()` accumulation bug.** Passing multiple `AllowedInclude` instances (via repeated `allowInclude()` calls or all together in `allowing([...])`) used to silently keep only the last one registered, dropping every include before it. All of them now accumulate correctly.
+- **Filters: same-attribute multi-operator corruption.** Registering two operators on one attribute (e.g. `gte` + `lte` on `due_at`) used to corrupt the internal filter rules, and Eloquent would silently rewrite the resulting query into `WHERE attribute = 1` instead of applying either comparison — the worst of this round's fixes, since range filtering was effectively unusable. Both operators now apply correctly together.
+- **Filters: comma-separated values against a value-restricted filter.** `filter[status]=todo,done` against an attribute restricted to specific values used to compare the whole joined string and match nothing, silently dropping to the default filter (or no filter). Each comma-separated value is now validated individually and the valid ones are OR'd together — invalid values are dropped from the list rather than the whole filter. **Behaviour change**: a request that used to be entirely rejected/ignored because *one* of several comma-separated values was invalid will now partially apply with the valid subset.
+- **`AllowedFilter::scoped()` named-argument default.** Named-argument scope calls (`filter[scope][arg]=value`) used to validate against the truthy `'1'` default, which real argument values never matched, so the scope silently never ran. Named arguments now default to an unrestricted pattern; a plain boolean scope toggle (`filter[published]=1`) keeps the truthy default.
+- **Query parameter validation errors now return `400 Bad Request`.** Disallowed/invalid filters, includes, fields, appends, and search filters used to raise a plain `\Exception` when `requests.validate_params` was enabled, which surfaced as an uncaught `500` unless the consuming app added its own exception-handler wiring. They now throw `Symfony\Component\HttpKernel\Exception\HttpException` with a `400` status and are rendered automatically by `Apiable::jsonApiRenderable()`. **Type change**: code that specifically caught the previous plain `\Exception` around these calls should catch `HttpException` (or `\Throwable`) instead.
+- **Sort validation now actually enforces `requests.validate_params`.** A disallowed sort previously never raised anything (the validation exception was constructed but never thrown), so unsortable attributes were always silently dropped even with validation enabled; they now return `400 Bad Request` like every other query parameter type.
+- **Error titles preserved for 4xx responses with `APP_DEBUG=false`.** Every error used to have its title overwritten with the generic "Internal server error." text regardless of status when debug mode was off — a `403` lost its real "This action is unauthorized." message. Only `5xx` responses are masked now; `4xx` titles/details are always shown to the client (no stack trace either way when debug is off).
+- **`AssertableJsonApi` interaction marking.** Helper methods (`hasType`, `hasId`, `hasAttribute`, `hasRelationshipWith`, `data()`, `included()`, and friends) now mark the JSON:API document members they read as interacted with, so a scoped assertion closure built entirely out of package helpers no longer needs a trailing `->etc()` to satisfy the parent `AssertableJson` interaction check.
+- **Cursor-paginated responses.** `AbstractCursorPaginator` results (from `cursorPaginating()`) were not recognised alongside `AbstractPaginator`, so cursor-paginated collections skipped the paginator-preserving/collection-mapping logic used by every other pagination strategy.
+- **Docs generator: output path doubling.** A relative `--path` (e.g. `--path=./docs/api`) used to produce a doubled path such as `docs/api/docs/api/openapi.yaml`; relative paths now resolve correctly to a single location.
+- **Docs generator: duplicate `sort`/`include` parameters.** Multiple `#[SortQueryParam]`/`#[IncludeQueryParam]` attributes on the same endpoint used to each emit their own query parameter entry; they now merge into a single `sort`/`include` parameter listing every allowed value.
+- **Docs generator: cURL snippets.** Write endpoints (`POST`/`PATCH`/`PUT`/`DELETE`) now generate a cURL example using the endpoint's real HTTP method and a JSON body placeholder, instead of always using `-G` (a read-only flag).
+- **Docs generator: `appends`/`fields` documentation keys.** These now use the runtime JSON:API resource type slug (e.g. `appends[projects]`) instead of the raw model class name (e.g. `appends[App\Models\Project]`).
+
+### Changed
+
+- Docs and `CLAUDE.md` accuracy pass: removed references to APIs that don't exist (`Builder::buildLengthAwarePaginator()`, `JsonApiResponse::list()`, `AllowedSort::field()`, `Handler::render()`) in favour of the real ones, and aligned the stated requirements (PHP 8.2+, Laravel 12+) with `composer.json`.
+
 ## [4.3.0] - 2026-04-22
 
 ### Added
