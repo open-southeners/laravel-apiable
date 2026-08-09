@@ -93,8 +93,12 @@ class AssertableJsonApi extends AssertableJson
         $data = $this->prop('data');
 
         if (is_array($data) && ! static::responseContainsCollection($data)) {
+            $this->interactsWith('data');
+
             return $data['attributes'] ?? [];
         }
+
+        $this->interactsWith('attributes');
 
         return $this->prop('attributes') ?? [];
     }
@@ -104,8 +108,12 @@ class AssertableJsonApi extends AssertableJson
         $data = $this->prop('data');
 
         if (is_array($data) && ! static::responseContainsCollection($data)) {
+            $this->interactsWith('data');
+
             return $data['relationships'] ?? [];
         }
+
+        $this->interactsWith('relationships');
 
         return $this->prop('relationships') ?? [];
     }
@@ -115,8 +123,12 @@ class AssertableJsonApi extends AssertableJson
         $data = $this->prop('data');
 
         if (is_array($data) && array_key_exists('id', $data)) {
+            $this->interactsWith('data');
+
             return (string) $data['id'];
         }
+
+        $this->interactsWith('id');
 
         return (string) ($this->prop('id') ?? '');
     }
@@ -126,8 +138,12 @@ class AssertableJsonApi extends AssertableJson
         $data = $this->prop('data');
 
         if (is_array($data) && array_key_exists('type', $data)) {
+            $this->interactsWith('data');
+
             return (string) $data['type'];
         }
+
+        $this->interactsWith('type');
 
         return (string) ($this->prop('type') ?? '');
     }
@@ -137,6 +153,8 @@ class AssertableJsonApi extends AssertableJson
         $data = $this->prop('data');
 
         if (is_array($data) && static::responseContainsCollection($data)) {
+            $this->interactsWith('data');
+
             return $data;
         }
 
@@ -146,6 +164,10 @@ class AssertableJsonApi extends AssertableJson
     protected function includedFromRoot(): array
     {
         $root = $this->rootProps ?? $this->prop();
+
+        if ($this->rootProps === null) {
+            $this->interactsWith('included');
+        }
 
         return data_get($root, 'included', []);
     }

@@ -413,4 +413,59 @@ class AssertableJsonApiTest extends TestCase
             });
         });
     }
+
+    // -------------------------------------------------------------------------
+    // Interaction marking — scoped closures using only package helpers must
+    // satisfy the parent interaction guarantee without a trailing ->etc().
+    // -------------------------------------------------------------------------
+
+    public function test_data_scope_using_only_package_helpers_passes_without_etc()
+    {
+        Route::get('/', fn () => Apiable::toJsonApi(new Post(['id' => 9, 'title' => 'Package helpers only'])));
+
+        $this->get('/', ['Accept' => 'application/json'])->assertJsonApi(function (AssertableJsonApi $assert) {
+            $assert->data(function (AssertableJsonApi $d) {
+                $d->hasType('post')->hasId(9)->hasAttribute('title', 'Package helpers only');
+            });
+        });
+    }
+
+    public function test_at_with_closure_using_only_package_helpers_passes_without_etc()
+    {
+        Route::get('/', fn () => Apiable::toJsonApi(collect([
+            new Post(['id' => 1, 'title' => 'First']),
+            new Post(['id' => 2, 'title' => 'Second']),
+        ])));
+
+        $this->get('/', ['Accept' => 'application/json'])->assertJsonApi(function (AssertableJsonApi $assert) {
+            $assert->at(0, fn (AssertableJsonApi $item) => $item->hasType('post')->hasId(1)->hasAttribute('title', 'First'));
+        });
+    }
+
+    public function test_data_scope_still_fails_without_etc_when_relationships_key_is_unexamined()
+    {
+        // "relationships" is present on the resource (author relation is loaded) but never
+        // touched by the closure below, so the interaction guarantee must still trip without
+        // ->etc() — marking the keys package helpers *do* read must not silently disable it
+        // for keys nothing looked at.
+        $this->expectException(AssertionFailedError::class);
+
+        Route::get('/', function () {
+            $post = new Post(['id' => 1, 'title' => 'Hello']);
+            $post->setRelation('author', new User([
+                'id' => 3,
+                'name' => 'Alice',
+                'email' => 'alice@example.com',
+                'password' => 'secret',
+            ]));
+
+            return Apiable::toJsonApi($post);
+        });
+
+        $this->get('/', ['Accept' => 'application/json'])->assertJsonApi(function (AssertableJsonApi $assert) {
+            $assert->data(function (AssertableJsonApi $d) {
+                $d->hasType('post')->hasId(1)->hasAttribute('title', 'Hello');
+            });
+        });
+    }
 }
