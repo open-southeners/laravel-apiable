@@ -98,7 +98,7 @@ use Illuminate\Http\Request;
 public function index(Request $request)
 {
     if ($request->wantsJsonApi()) {
-        return Apiable::response(Post::query())->list();
+        return Apiable::response(Post::query());
     }
 
     return Post::paginate();
@@ -193,16 +193,16 @@ Wrap a `Throwable` in a `Handler` that renders JSON:API-compliant error response
 | `withTrace`  | `bool\|null`    | `null`   | Include stack trace in the response when `true`.   |
 
 ```php
-// In App\Exceptions\Handler (Laravel 10 and below)
+// Inside a renderable closure (see error-handling.md for the full registration example)
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
+use Throwable;
 
-public function render($request, Throwable $e)
-{
-    return Apiable::jsonApiRenderable($e)->render($request);
-}
+$exceptions->renderable(function (Throwable $e, $request) {
+    return Apiable::jsonApiRenderable($e);
+});
 
 // Helper form
-apiable()->jsonApiRenderable($e)->render($request);
+apiable()->jsonApiRenderable($e);
 ```
 
 ### response
@@ -219,14 +219,13 @@ Factory method for creating a `JsonApiResponse`. This is the primary way to buil
 return Apiable::response(Post::query())
     ->allowing([
         AllowedFilter::exact('status'),
-        AllowedSort::field('created_at'),
-    ])
-    ->list();
+        AllowedSort::make('created_at'),
+    ]);
 
 // Helper
 return apiable()->response(Post::query(), [
     AllowedFilter::exact('status'),
-])->list();
+]);
 ```
 
 ### modelResourceTypeMap

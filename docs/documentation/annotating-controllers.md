@@ -140,6 +140,10 @@ use OpenSoutheners\LaravelApiable\Attributes\IncludeQueryParam;
 | `$relationships` | `string\|array` | Relationship name(s) that can be included. |
 | `$description` | `string` | Human-readable description. |
 
+{% hint style="info" %}
+Stacking several `#[SortQueryParam]` or `#[IncludeQueryParam]` attributes on the same method (as above) produces a single `sort`/`include` query parameter in the generated documentation, listing every allowed attribute/relationship together — they are not documented as separate, duplicate parameters.
+{% endhint %}
+
 ### `#[FieldsQueryParam]`
 
 ```php

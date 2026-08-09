@@ -16,8 +16,9 @@ GET /api/films?page[number]=2&page[size]=25
 
 | Parameter | Description | Default |
 |---|---|---|
-| `page[number]` | Page number (1-based) | `1` |
+| `page[number]` | Page number (1-based). Used by the length-aware and simple strategies. | `1` |
 | `page[size]` | Items per page | `responses.pagination.default_size` (50) |
+| `page[cursor]` | Opaque cursor value. Used by the cursor strategy instead of `page[number]`; taken from the `links.next`/`links.prev` URLs of a previous response. | — |
 
 ## Pagination strategies
 
@@ -40,10 +41,13 @@ This is the default behavior — no extra configuration required.
 
 ### Simple
 
-No `COUNT` query. Only knows whether a next or previous page exists. Useful when counting all rows is expensive and the total is not needed by the client.
+No `COUNT` query. Only knows whether a next or previous page exists. Useful when counting all rows is expensive and the total is not needed by the client. `meta.total`, `meta.last_page`, and `links.last` are omitted from the response.
 
 ```php
 JsonApiResponse::from(Film::class)->simplePaginating();
+
+// With a custom page size, same as passing `page[size]`
+JsonApiResponse::from(Film::class)->simplePaginating(pageSize: 20);
 ```
 
 Or set it globally:
@@ -58,10 +62,23 @@ Or set it globally:
 
 ### Cursor
 
-Cursor-based pagination for large datasets. Avoids `OFFSET` queries entirely, making it efficient for deep pages. The client receives an opaque cursor instead of a page number.
+Cursor-based pagination for large datasets. Avoids `OFFSET` queries entirely, making it efficient for deep pages. The client receives an opaque cursor via the `page[cursor]` query parameter instead of a page number — read it off the `links.next`/`links.prev` URLs of the previous response rather than constructing it manually. `meta.total`, `meta.current_page`, `links.first`, and `links.last` are omitted, since a cursor has no concept of page position or total count.
 
 ```php
 JsonApiResponse::from(Film::class)->cursorPaginating();
+
+// With a custom page size
+JsonApiResponse::from(Film::class)->cursorPaginating(pageSize: 20);
+```
+
+Or set it globally:
+
+```php
+// config/apiable.php
+'pagination' => [
+    'type' => 'cursor',
+    'default_size' => 50,
+],
 ```
 
 {% hint style="warning" %}

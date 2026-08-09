@@ -6,8 +6,8 @@ description: Install and configure laravel-apiable in your Laravel application.
 
 ## Requirements
 
-- PHP 8.1 or higher
-- Laravel 10.x or higher
+- PHP 8.2 or higher
+- Laravel 12.x or higher
 
 ## Installing the package
 

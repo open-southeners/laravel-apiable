@@ -74,7 +74,7 @@ use Illuminate\Http\Request;
 public function index(Request $request)
 {
     if ($request->wantsJsonApi()) {
-        return Apiable::response(Post::query())->list();
+        return Apiable::response(Post::query());
     }
 
     return Post::paginate();

@@ -17,6 +17,10 @@ GET /posts?filter[status]=published,draft
 
 Multiple values separated by commas are treated as `OR` conditions. Multiple `filter[]` parameters for the same attribute are accumulated.
 
+{% hint style="info" %}
+When an attribute restricts its accepted values (see [Restricting allowed values](#restricting-allowed-values)), comma-separated values are validated individually: any value that doesn't match the allowed pattern is dropped from the `OR` list rather than invalidating the whole request. If none of the comma-separated values are valid, the filter falls back to any registered [default filter](#default-filters) for that attribute (or is dropped entirely).
+{% endhint %}
+
 ## Operators
 
 | Constant | String key | SQL behaviour |
@@ -55,6 +59,26 @@ AllowedFilter::lowerThan('price')       // < value
 AllowedFilter::lowerOrEqualThan('price')    // <= value
 AllowedFilter::scoped('published')      // calls scopePublished($query, $value)
 ```
+
+## Multiple operators on the same attribute (range filters)
+
+Registering more than one operator on the same attribute (across separate `allowFilter()` calls, or entries in the same `allowing()` array) lets consumers filter a range instead of a single comparison:
+
+```php
+return JsonApiResponse::from(Post::class)
+    ->allowing([
+        AllowedFilter::greaterOrEqualThan('due_at'),
+        AllowedFilter::lowerOrEqualThan('due_at'),
+    ]);
+```
+
+The consumer targets each operator with its bracket key, and both conditions apply together (`AND`ed):
+
+```
+GET /posts?filter[due_at][gte]=2024-01-01&filter[due_at][lte]=2024-01-31
+```
+
+A plain `filter[attribute]=value` (no operator key) uses whichever operator was registered **first** for that attribute — in the example above, that's `gte`. Sending an operator key that was never registered for the attribute (e.g. `filter[due_at][lt]=...` when only `gte`/`lte` were allowed) is silently dropped, the same way an unrecognised attribute is.
 
 ## Allowing filters
 
@@ -131,6 +155,8 @@ AllowedFilter::exact('status', ['published', 'draft'])
 AllowedFilter::similar('title', ['laravel', 'php'])
 ```
 
+By default a request outside the allowed list (or attribute/operator not registered at all) is silently dropped. See [Validation](validation.md) to make the package reject it with a `400 Bad Request` instead via `requests.validate_params`.
+
 Using the PHP attribute:
 
 ```php
@@ -172,6 +198,10 @@ public function scopeBetween(Builder $query, int $min, int $max): void
 
 AllowedFilter::scoped('between')
 ```
+
+{% hint style="info" %}
+Named-argument scope calls (`filter[scope][arg]=value`) validate against an unrestricted pattern (`*`) by default — the truthy `1` default only applies to a plain boolean toggle (`filter[published]=1`). Pass an explicit pattern as the second argument (e.g. `AllowedFilter::scoped('between', '[0-9]*')`) to restrict every argument value against it.
+{% endhint %}
 
 ### Enforcing `_scoped` suffix
 

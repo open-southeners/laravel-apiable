@@ -23,8 +23,8 @@ description: A Laravel package that integrates JSON:API resources into your API 
 
 ## Requirements
 
-- PHP 8.1+
-- Laravel 10+
+- PHP 8.2+
+- Laravel 12+
 
 ## Quick start
 
