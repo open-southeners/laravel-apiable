@@ -109,8 +109,16 @@ class Handler implements Responsable
         }
 
         if (! $this->includesTrace()) {
-            $message = 'Internal server error.';
             $trace = [];
+
+            /**
+             * Only hide the real message for server errors (5xx). Client errors (4xx) carry
+             * a title that's meant to be shown to the consumer (e.g. "This action is
+             * unauthorized.") and aren't a leak of internal details.
+             */
+            if ($statusCode >= Response::HTTP_INTERNAL_SERVER_ERROR) {
+                $message = 'Internal server error.';
+            }
         }
 
         if ($this->exception instanceof QueryException && $this->includesTrace()) {
