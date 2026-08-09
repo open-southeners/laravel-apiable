@@ -47,7 +47,17 @@ return [
 
         'pagination' => [
             'default_size' => 50,
+
+            /**
+             * Default pagination strategy: length-aware, simple or cursor.
+             */
+            'type' => 'length-aware',
         ],
+
+        /**
+         * Maximum nesting depth accepted for the include query param.
+         */
+        'max_include_depth' => 3,
 
         'viewable' => true,
 
