@@ -2,6 +2,7 @@
 
 namespace OpenSoutheners\LaravelApiable\Documentation;
 
+use Illuminate\Database\Eloquent\Model;
 use OpenSoutheners\LaravelApiable\Attributes\AppendsQueryParam;
 use OpenSoutheners\LaravelApiable\Attributes\FieldsQueryParam;
 use OpenSoutheners\LaravelApiable\Attributes\FilterQueryParam;
@@ -11,6 +12,7 @@ use OpenSoutheners\LaravelApiable\Attributes\SearchQueryParam;
 use OpenSoutheners\LaravelApiable\Attributes\SortQueryParam;
 use OpenSoutheners\LaravelApiable\Http\AllowedFilter;
 use OpenSoutheners\LaravelApiable\Http\AllowedSort;
+use OpenSoutheners\LaravelApiable\Support\Apiable;
 
 /**
  * Documentation-oriented representation of a single query parameter.
@@ -100,7 +102,7 @@ class QueryParam
     public static function fromFieldsAttribute(FieldsQueryParam $attr): self
     {
         return new self(
-            key: "fields[{$attr->type}]",
+            key: 'fields['.self::resolveResourceType($attr->type).']',
             kind: 'fields',
             description: $attr->description,
             values: implode(',', $attr->fields),
@@ -110,7 +112,7 @@ class QueryParam
     public static function fromAppendsAttribute(AppendsQueryParam $attr): self
     {
         return new self(
-            key: "appends[{$attr->type}]",
+            key: 'appends['.self::resolveResourceType($attr->type).']',
             kind: 'appends',
             description: $attr->description,
             values: implode(',', $attr->attributes),
@@ -136,5 +138,61 @@ class QueryParam
             description: $attr->description,
             values: $values,
         );
+    }
+
+    /**
+     * Merge two query params sharing the same key into a single entry that lists
+     * every allowed value, used to collapse repeated #[SortQueryParam]/
+     * #[IncludeQueryParam] (and other repeatable) attributes on one endpoint.
+     */
+    public static function merge(self $a, self $b): self
+    {
+        return new self(
+            key: $a->key,
+            kind: $a->kind,
+            description: self::mergeDescriptions($a->description, $b->description),
+            values: self::mergeValues($a->values, $b->values),
+            required: $a->required || $b->required,
+        );
+    }
+
+    private static function mergeValues(string $a, string $b): string
+    {
+        if ($a === '*' || $b === '*') {
+            return '*';
+        }
+
+        $values = array_unique(array_filter(array_merge(
+            explode(',', $a),
+            explode(',', $b),
+        ), static fn (string $value) => $value !== ''));
+
+        return $values !== [] ? implode(',', $values) : '*';
+    }
+
+    private static function mergeDescriptions(string $a, string $b): string
+    {
+        if ($a === '' || $a === $b) {
+            return $b;
+        }
+
+        if ($b === '') {
+            return $a;
+        }
+
+        return $a.'; '.$b;
+    }
+
+    /**
+     * Resolve a documented resource type down to the runtime JSON:API type slug,
+     * matching how AllowsAppends/AllowsFields resolve model class-strings at runtime.
+     */
+    private static function resolveResourceType(string $type): string
+    {
+        if (class_exists($type) && is_subclass_of($type, Model::class)) {
+            return Apiable::getResourceType($type);
+        }
+
+        return $type;
     }
 }

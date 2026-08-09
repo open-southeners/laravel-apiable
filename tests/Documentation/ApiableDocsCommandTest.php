@@ -3,8 +3,10 @@
 namespace OpenSoutheners\LaravelApiable\Tests\Documentation;
 
 use Illuminate\Support\Facades\File;
+use OpenSoutheners\LaravelApiable\Tests\Fixtures\Controllers\CommentsController;
 use OpenSoutheners\LaravelApiable\Tests\Fixtures\Controllers\PostsController;
 use OpenSoutheners\LaravelApiable\Tests\TestCase;
+use Symfony\Component\Yaml\Yaml;
 
 class ApiableDocsCommandTest extends TestCase
 {
@@ -31,6 +33,9 @@ class ApiableDocsCommandTest extends TestCase
             $router->get('posts', [PostsController::class, 'index']);
             $router->get('posts/{post}', [PostsController::class, 'show']);
         });
+
+        $router->get('comments', [CommentsController::class, 'index']);
+        $router->post('comments', [CommentsController::class, 'store']);
     }
 
     public function test_generates_markdown_documentation(): void
@@ -143,5 +148,85 @@ class ApiableDocsCommandTest extends TestCase
         $mdFiles = array_filter($files, static fn ($f) => str_ends_with($f->getFilename(), '.md'));
 
         $this->assertNotEmpty($mdFiles);
+    }
+
+    public function test_relative_path_writes_files_once_without_doubling(): void
+    {
+        $originalCwd = getcwd();
+        $scratchRoot = sys_get_temp_dir().'/apiable-docs-relative-'.uniqid();
+        File::ensureDirectoryExists($scratchRoot);
+        chdir($scratchRoot);
+
+        try {
+            $this->artisan('apiable:docs', [
+                '--format' => ['openapi'],
+                '--path' => 'docs/api',
+            ])->assertExitCode(0);
+
+            $this->assertFileExists($scratchRoot.'/docs/api/openapi.yaml');
+            // The path-doubling bug would have written this instead of the path above.
+            $this->assertFileDoesNotExist($scratchRoot.'/docs/api/docs/api/openapi.yaml');
+
+            $this->assertCount(1, File::allFiles($scratchRoot));
+        } finally {
+            chdir($originalCwd);
+            File::deleteDirectory($scratchRoot);
+        }
+    }
+
+    public function test_openapi_output_has_single_sort_and_include_param_for_repeated_attributes(): void
+    {
+        $this->artisan('apiable:docs', [
+            '--format' => ['openapi'],
+            '--only' => ['comments'],
+            '--path' => $this->tempPath,
+        ])->assertExitCode(0);
+
+        $parsed = Yaml::parse(File::get($this->tempPath.'/openapi.yaml'));
+        $names = array_column($parsed['paths']['/comments']['get']['parameters'], 'name');
+
+        $this->assertCount(1, array_filter($names, static fn ($n) => $n === 'sort'));
+        $this->assertCount(1, array_filter($names, static fn ($n) => $n === 'include'));
+    }
+
+    public function test_openapi_output_uses_resource_type_slug_for_appends_and_fields(): void
+    {
+        $this->artisan('apiable:docs', [
+            '--format' => ['openapi'],
+            '--only' => ['comments'],
+            '--path' => $this->tempPath,
+        ])->assertExitCode(0);
+
+        $parsed = Yaml::parse(File::get($this->tempPath.'/openapi.yaml'));
+        $names = array_column($parsed['paths']['/comments']['get']['parameters'], 'name');
+
+        // Tag::class is mapped to 'label' in tests/TestCase.php, not its FQCN.
+        $this->assertContains('appends[label]', $names);
+        $this->assertContains('fields[label]', $names);
+    }
+
+    public function test_markdown_output_uses_method_flag_for_write_endpoint(): void
+    {
+        $this->artisan('apiable:docs', [
+            '--format' => ['markdown'],
+            '--stub' => 'plain',
+            '--only' => ['comments'],
+            '--path' => $this->tempPath,
+        ])->assertExitCode(0);
+
+        $files = File::files($this->tempPath);
+        $commentsFile = null;
+
+        foreach ($files as $file) {
+            if (str_contains($file->getFilename(), 'comments')) {
+                $commentsFile = $file;
+                break;
+            }
+        }
+
+        $this->assertNotNull($commentsFile);
+
+        $content = File::get($commentsFile->getPathname());
+        $this->assertStringContainsString('-X POST', $content);
     }
 }

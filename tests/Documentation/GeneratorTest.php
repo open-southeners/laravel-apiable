@@ -3,6 +3,7 @@
 namespace OpenSoutheners\LaravelApiable\Tests\Documentation;
 
 use OpenSoutheners\LaravelApiable\Documentation\Generator;
+use OpenSoutheners\LaravelApiable\Tests\Fixtures\Controllers\CommentsController;
 use OpenSoutheners\LaravelApiable\Tests\Fixtures\Controllers\PostsController;
 use OpenSoutheners\LaravelApiable\Tests\TestCase;
 
@@ -15,6 +16,9 @@ class GeneratorTest extends TestCase
             $router->get('posts/{post}', [PostsController::class, 'show']);
         });
 
+        $router->get('comments', [CommentsController::class, 'index']);
+        $router->post('comments', [CommentsController::class, 'store']);
+
         // These should be filtered out by excluded_routes config
         $router->get('_debugbar/assets/javascript', fn () => '');
         $router->get('telescope/requests', fn () => '');
@@ -25,7 +29,7 @@ class GeneratorTest extends TestCase
         $generator = new Generator($this->app['router']);
         $resources = $generator->generate();
 
-        $this->assertCount(1, $resources);
+        $this->assertCount(2, $resources);
         $this->assertSame('Posts', $resources[0]->name);
         $this->assertSame('Manage blog posts', $resources[0]->description);
     }
@@ -130,10 +134,82 @@ class GeneratorTest extends TestCase
     public function test_controllers_without_documented_resource_attribute_are_skipped(): void
     {
         // The route we defined with closure has no controller, so it gets skipped.
-        // We just verify the total resource count is 1 (only PostsController).
+        // We just verify the total resource count matches the annotated controllers
+        // (PostsController and CommentsController).
         $generator = new Generator($this->app['router']);
         $resources = $generator->generate();
 
-        $this->assertCount(1, $resources);
+        $this->assertCount(2, $resources);
+    }
+
+    public function test_repeated_sort_and_include_attributes_merge_into_one_param_each(): void
+    {
+        $generator = new Generator($this->app['router']);
+        $resources = $generator->generate();
+
+        $commentsResource = null;
+        foreach ($resources as $resource) {
+            if ($resource->name === 'Comments') {
+                $commentsResource = $resource;
+                break;
+            }
+        }
+
+        $this->assertNotNull($commentsResource);
+
+        $indexEndpoint = null;
+        foreach ($commentsResource->endpoints as $endpoint) {
+            if ($endpoint->uri === 'comments' && $endpoint->method === 'GET') {
+                $indexEndpoint = $endpoint;
+                break;
+            }
+        }
+
+        $this->assertNotNull($indexEndpoint);
+
+        $sortParams = array_values(array_filter($indexEndpoint->queryParams, static fn ($p) => $p->key === 'sort'));
+        $includeParams = array_values(array_filter($indexEndpoint->queryParams, static fn ($p) => $p->key === 'include'));
+
+        $this->assertCount(1, $sortParams);
+        $this->assertCount(1, $includeParams);
+
+        $this->assertStringContainsString('created_at', $sortParams[0]->values);
+        $this->assertStringContainsString('likes', $sortParams[0]->values);
+
+        $this->assertStringContainsString('author', $includeParams[0]->values);
+        $this->assertStringContainsString('post', $includeParams[0]->values);
+    }
+
+    public function test_appends_and_fields_params_use_the_runtime_resource_type_slug(): void
+    {
+        $generator = new Generator($this->app['router']);
+        $resources = $generator->generate();
+
+        $commentsResource = null;
+        foreach ($resources as $resource) {
+            if ($resource->name === 'Comments') {
+                $commentsResource = $resource;
+                break;
+            }
+        }
+
+        $this->assertNotNull($commentsResource);
+
+        $indexEndpoint = null;
+        foreach ($commentsResource->endpoints as $endpoint) {
+            if ($endpoint->uri === 'comments' && $endpoint->method === 'GET') {
+                $indexEndpoint = $endpoint;
+                break;
+            }
+        }
+
+        $this->assertNotNull($indexEndpoint);
+
+        $keys = array_map(static fn ($p) => $p->key, $indexEndpoint->queryParams);
+
+        // Tag::class is mapped to 'label' in tests/TestCase.php, not its FQCN or default slug.
+        $this->assertContains('appends[label]', $keys);
+        $this->assertContains('fields[label]', $keys);
+        $this->assertNotContains('appends[OpenSoutheners\LaravelApiable\Tests\Fixtures\Tag]', $keys);
     }
 }

@@ -120,7 +120,7 @@ class Generator
                     : null;
 
                 $methodQueryParams = $this->collectQueryParams($methodReflection);
-                $queryParams = array_merge($classQueryParams, $methodQueryParams);
+                $queryParams = $this->mergeDuplicateParams(array_merge($classQueryParams, $methodQueryParams));
 
                 $sectionAttrs = $methodReflection->getAttributes(DocumentedEndpointSection::class);
                 $docSection = ! empty($sectionAttrs) ? $sectionAttrs[0]->newInstance() : null;
@@ -191,6 +191,27 @@ class Generator
         }
 
         return array_values(array_filter($queryParams));
+    }
+
+    /**
+     * Collapse query params that share the same key (e.g. repeated #[SortQueryParam]/
+     * #[IncludeQueryParam] attributes on the same class/method) into a single entry
+     * listing all of their allowed values, so exporters don't emit duplicate parameters.
+     *
+     * @param  QueryParam[]  $queryParams
+     * @return QueryParam[]
+     */
+    private function mergeDuplicateParams(array $queryParams): array
+    {
+        $merged = [];
+
+        foreach ($queryParams as $queryParam) {
+            $merged[$queryParam->key] = isset($merged[$queryParam->key])
+                ? QueryParam::merge($merged[$queryParam->key], $queryParam)
+                : $queryParam;
+        }
+
+        return array_values($merged);
     }
 
     /**

@@ -88,6 +88,56 @@ class MarkdownExporterTest extends TestCase
         $this->assertStringContainsString('Authentication required', $content);
     }
 
+    private function makePostResource(): Resource
+    {
+        return new Resource(
+            name: 'Posts',
+            description: 'Manage blog posts',
+            endpoints: [
+                new Endpoint(
+                    uri: 'posts',
+                    method: 'POST',
+                    title: 'Create Post',
+                    description: 'Create a new post',
+                    queryParams: [],
+                    auth: null,
+                ),
+            ],
+        );
+    }
+
+    public function test_plain_stub_write_endpoint_snippet_uses_method_flag(): void
+    {
+        $exporter = new MarkdownExporter(stub: 'plain', outputPath: '/tmp/apiable-test');
+        $outputs = $exporter->export([$this->makePostResource()]);
+        $content = array_values($outputs)[0];
+
+        $this->assertStringContainsString('-X POST', $content);
+        $this->assertStringNotContainsString('-G', $content);
+        $this->assertStringContainsString("-d '{\"data\"", $content);
+    }
+
+    public function test_protocol_stub_write_endpoint_snippet_uses_method_flag(): void
+    {
+        $exporter = new MarkdownExporter(stub: 'protocol', outputPath: '/tmp/apiable-test');
+        $outputs = $exporter->export([$this->makePostResource()]);
+        $content = array_values($outputs)[0];
+
+        $this->assertStringContainsString('-X POST', $content);
+        $this->assertStringNotContainsString('-G', $content);
+        $this->assertStringContainsString("-d '{\"data\"", $content);
+    }
+
+    public function test_get_endpoint_snippet_still_uses_dash_g(): void
+    {
+        $exporter = new MarkdownExporter(stub: 'plain', outputPath: '/tmp/apiable-test');
+        $outputs = $exporter->export([$this->makeResource()]);
+        $content = array_values($outputs)[0];
+
+        $this->assertStringContainsString('curl -G', $content);
+        $this->assertStringNotContainsString('-X GET', $content);
+    }
+
     public function test_user_published_stub_takes_priority_over_package_stub(): void
     {
         $userStubPath = base_path('stubs/apiable/docs/plain.md');
