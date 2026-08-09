@@ -8,9 +8,7 @@ Laravel Apiable provides a `Handler` class that converts any PHP exception into 
 
 ## Registering the error handler
 
-### Laravel 11+ (bootstrap/app.php)
-
-In Laravel 11 and later, register the renderable inside `bootstrap/app.php`:
+Register the renderable inside `bootstrap/app.php`:
 
 ```php
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
@@ -24,24 +22,6 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
     })->create();
-```
-
-### Laravel 10 and below (app/Exceptions/Handler.php)
-
-For older applications, add the renderable inside the `register()` method of your exception handler:
-
-```php
-use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
-use Throwable;
-
-public function register(): void
-{
-    $this->renderable(function (Throwable $e, $request) {
-        if ($request->is('api/*') && app()->bound('apiable')) {
-            return Apiable::jsonApiRenderable($e);
-        }
-    });
-}
 ```
 
 ## `Apiable::jsonApiRenderable()`
@@ -92,7 +72,7 @@ Any exception implementing `Symfony\Component\HttpKernel\Exception\HttpException
 
 ### All other exceptions
 
-Generic exceptions produce an HTTP `500 Internal Server Error`. When `app.debug` is `false` (or `$withTrace` is `false`), the message is replaced with the generic text `"Internal server error."` and the trace is omitted. In debug mode the real message and stack trace are included.
+Generic exceptions produce an HTTP `500 Internal Server Error`. In debug mode the real message and stack trace are included. When `app.debug` is `false` (or `$withTrace` is `false`), the stack trace is always omitted, but the message is only replaced with the generic text `"Internal server error."` for **5xx** status codes. A **4xx** error (e.g. a `403` from an `HttpExceptionInterface` exception, or `401` from an `AuthenticationException`) always keeps its real title — those messages are meant to be shown to the API consumer and aren't a leak of internal details.
 
 `Illuminate\Database\QueryException` also includes the database error code in the `code` field when trace is enabled.
 

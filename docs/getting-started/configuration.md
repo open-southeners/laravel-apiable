@@ -217,6 +217,36 @@ The number of items returned per page when the client does not specify a `page[s
 ],
 ```
 
+### `responses.pagination.type`
+
+| Type | Default |
+|------|---------|
+| `string` | `length-aware` |
+
+The default pagination strategy used by `jsonApiPaginate()` / `JsonApiResponse` list responses: `length-aware` (executes a `COUNT` query, returns total + last page), `simple` (no `COUNT` query, only knows whether a next/previous page exists), or `cursor` (opaque `page[cursor]`-based pagination, no `OFFSET` queries). Override per response with `simplePaginating()` / `cursorPaginating()` on `JsonApiResponse`. See [Pagination](../responses/pagination.md) for the full breakdown of each strategy.
+
+```php
+'responses' => [
+    'pagination' => [
+        'type' => 'simple',
+    ],
+],
+```
+
+### `responses.max_include_depth`
+
+| Type | Default |
+|------|---------|
+| `int` | `3` |
+
+The maximum nesting depth accepted for the `include` query param (dot-separated segments count as depth, e.g. `author.reviews` is depth `2`). Paths beyond the limit are silently dropped, or rejected with a `400 Bad Request` when `requests.validate_params` is enabled. See [Includes](../requests/includes.md#nested-includes).
+
+```php
+'responses' => [
+    'max_include_depth' => 5,
+],
+```
+
 ### `responses.viewable`
 
 | Type | Default |

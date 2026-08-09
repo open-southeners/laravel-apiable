@@ -36,31 +36,26 @@ The `QueryParamsValidator` class is used internally for every request feature. W
 
 ## Error response
 
-When a parameter fails validation, the package throws a PHP `Exception` with a message describing the rejected parameter, for example:
+When a filter, include, field, append, or search filter parameter fails validation, the package throws a `Symfony\Component\HttpKernel\Exception\HttpException` with a `400` status code and a message describing the rejected parameter, for example:
 
 ```
 "title" is not filterable or contains invalid values
-"price" is not sortable
 "comments" cannot be included
+"nonexistent" fields for resource type "post" cannot be sparsed
 ```
 
-Your application's exception handler is responsible for converting this into an HTTP response. If you are using Laravel's default handler with JSON requests, it will return a `500` response by default. To return a proper `400 Bad Request` or `422 Unprocessable Content` response, catch these exceptions in your `bootstrap/app.php` exception handler:
+Because it's an `HttpException`, no extra exception-handler wiring is required — register [`Apiable::jsonApiRenderable()`](../error-handling.md) as usual and the `400` status and message are forwarded to the client automatically as a JSON:API error object.
 
 ```php
+// bootstrap/app.php
 use Illuminate\Foundation\Configuration\Exceptions;
+use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
+use Throwable;
 
 ->withExceptions(function (Exceptions $exceptions) {
-    $exceptions->render(function (\Exception $e, \Illuminate\Http\Request $request) {
-        if ($request->expectsJson()) {
-            return response()->json([
-                'errors' => [
-                    [
-                        'status' => '400',
-                        'title'  => 'Invalid query parameter',
-                        'detail' => $e->getMessage(),
-                    ],
-                ],
-            ], 400);
+    $exceptions->renderable(function (Throwable $e, $request) {
+        if ($request->is('api/*') && app()->bound('apiable')) {
+            return Apiable::jsonApiRenderable($e);
         }
     });
 })

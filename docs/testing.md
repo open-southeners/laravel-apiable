@@ -85,7 +85,7 @@ $response->assertJsonApi(function (AssertableJsonApi $assert) {
 });
 ```
 
-> **Note:** When using the closure form, call `etc()` at the end of the closure if you do not want PHPUnit to fail for properties you have not explicitly asserted. This is the standard `AssertableJson` behaviour.
+> **Note:** `AssertableJsonApi`'s own helpers (`hasType`, `hasId`, `hasAttribute`, `hasRelationshipWith`, `data`, `included`, …) mark the JSON:API members they read (`data`, `type`, `id`, `attributes`, `relationships`, `included`) as interacted with, so a scoped closure that only uses them is not required to end with `etc()` — see [Interaction marking](#interaction-marking) below. You still need `etc()` if you deliberately don't assert every member present in that scope, or when mixing in raw parent `AssertableJson` methods (`where`, `has`, `missing`, …) that only mark the exact keys you pass them.
 
 ### hasSize
 
@@ -370,6 +370,40 @@ $response->assertJsonApi(function (AssertableJsonApi $assert) {
 ```
 
 ---
+
+## Interaction marking
+
+Laravel's `AssertableJson` fails a scoped assertion with a `PHPUnit\Framework\AssertionFailedError` when the scope contains a top-level key that the closure never inspected — unless the closure ends with `etc()`.
+
+`AssertableJsonApi`'s own helper methods mark the JSON:API member(s) they read as interacted with automatically, so a closure built entirely out of package helpers no longer needs a trailing `etc()` as long as it touches every member actually present in that scope:
+
+```php
+$response->assertJsonApi(function (AssertableJsonApi $assert) {
+    // No ->etc() needed: hasType()/hasId()/hasAttribute() mark "type", "id",
+    // and "attributes" as interacted with, and this resource has no
+    // "relationships" or "included" members to worry about.
+    $assert->at(0, fn (AssertableJsonApi $item) => $item
+        ->hasType('post')
+        ->hasId(1)
+        ->hasAttribute('title', 'Hello world')
+    );
+});
+```
+
+`etc()` is still required when:
+
+- You intentionally skip asserting a member that **is** present in the response (e.g. the resource has `relationships` but your closure never calls `hasRelationshipWith()` or similar).
+- You mix in raw parent `AssertableJson` methods (`where`, `has`, `missing`, `count`, …), since those only mark the exact keys you pass them, not the whole JSON:API member.
+
+```php
+$response->assertJsonApi(function (AssertableJsonApi $assert) {
+    $assert->at(0, function (AssertableJsonApi $item) {
+        // Only checking the title — relationships/attributes as a whole
+        // are left unexamined, so etc() is required here.
+        $item->hasAttribute('title', 'Hello world')->etc();
+    });
+});
+```
 
 ## Migrating from v4.2
 

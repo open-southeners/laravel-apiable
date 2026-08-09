@@ -92,6 +92,10 @@ You can also pass multiple relationships in a single attribute:
 {% endtab %}
 {% endtabs %}
 
+{% hint style="info" %}
+Passing multiple `AllowedInclude` instances — whether through several `allowInclude()` calls or all together in one `allowing()` array — accumulates every one of them. None are dropped or overwritten by later calls.
+{% endhint %}
+
 ## Nested includes
 
 To allow consumers to request a relationship of a relationship, use dot notation:
@@ -103,7 +107,7 @@ AllowedInclude::make('author.reviews')
 This both allows the nested path and eager-loads `author.reviews` via a single `with('author.reviews')` call.
 
 {% hint style="info" %}
-The package enforces a `max_include_depth` limit (default: `3`) to prevent exponential relationship tree fan-out. You can adjust this in `config/apiable.php` under `responses.max_include_depth`.
+The package enforces a `max_include_depth` limit (default: `3`, dot-separated segments count as depth — `tags_count` is depth `1`, `author.reviews` is depth `2`) to prevent exponential relationship tree fan-out. You can adjust this in `config/apiable.php` under `responses.max_include_depth`. An include path beyond the limit is silently dropped by default, or rejected with a `400 Bad Request` when `requests.validate_params` is enabled — see [Validation](validation.md).
 {% endhint %}
 
 ## Count includes
