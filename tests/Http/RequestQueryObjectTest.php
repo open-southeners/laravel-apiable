@@ -12,6 +12,7 @@ use OpenSoutheners\LaravelApiable\Http\RequestQueryObject;
 use OpenSoutheners\LaravelApiable\Tests\Fixtures\Post;
 use OpenSoutheners\LaravelApiable\Tests\Fixtures\User;
 use OpenSoutheners\LaravelApiable\Tests\TestCase;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class RequestQueryObjectTest extends TestCase
 {
@@ -235,5 +236,69 @@ class RequestQueryObjectTest extends TestCase
         $this->assertIsArray($allowedIncludes);
         $this->assertNotEmpty($allowedIncludes);
         $this->assertTrue(empty(array_diff(['parent'], $allowedIncludes)));
+    }
+
+    // ---------------------------------------------------------------
+    // validate_params: HttpException instead of a plain 500
+    // ---------------------------------------------------------------
+
+    public function test_disallowed_append_throws_http_exception_with_400_status_when_validate_params_is_enabled()
+    {
+        config(['apiable.requests.validate_params' => true]);
+
+        $request = Request::create('/', 'GET', ['appends' => ['post' => 'is_published']]);
+        $requestQueryObject = (new RequestQueryObject($request))->setQuery(Post::query());
+
+        try {
+            $requestQueryObject->userAllowedAppends();
+            $this->fail('Expected an HttpException to be thrown.');
+        } catch (HttpException $exception) {
+            $this->assertSame(400, $exception->getStatusCode());
+        }
+    }
+
+    public function test_disallowed_field_throws_http_exception_with_400_status_when_validate_params_is_enabled()
+    {
+        config(['apiable.requests.validate_params' => true]);
+
+        $request = Request::create('/', 'GET', ['fields' => ['post' => 'title']]);
+        $requestQueryObject = (new RequestQueryObject($request))->setQuery(Post::query());
+
+        try {
+            $requestQueryObject->userAllowedFields();
+            $this->fail('Expected an HttpException to be thrown.');
+        } catch (HttpException $exception) {
+            $this->assertSame(400, $exception->getStatusCode());
+        }
+    }
+
+    public function test_disallowed_sort_throws_http_exception_with_400_status_when_validate_params_is_enabled()
+    {
+        config(['apiable.requests.validate_params' => true]);
+
+        $request = Request::create('/', 'GET', ['sort' => '-created_at']);
+        $requestQueryObject = (new RequestQueryObject($request))->setQuery(Post::query());
+
+        try {
+            $requestQueryObject->userAllowedSorts();
+            $this->fail('Expected an HttpException to be thrown.');
+        } catch (HttpException $exception) {
+            $this->assertSame(400, $exception->getStatusCode());
+        }
+    }
+
+    public function test_disallowed_search_filter_throws_http_exception_with_400_status_when_validate_params_is_enabled()
+    {
+        config(['apiable.requests.validate_params' => true]);
+
+        $request = Request::create('/?q=laravel&q%5Bfilter%5D%5Bstatus%5D=published', 'GET');
+        $requestQueryObject = (new RequestQueryObject($request))->setQuery(Post::query());
+
+        try {
+            $requestQueryObject->userAllowedSearchFilters();
+            $this->fail('Expected an HttpException to be thrown.');
+        } catch (HttpException $exception) {
+            $this->assertSame(400, $exception->getStatusCode());
+        }
     }
 }

@@ -2,9 +2,9 @@
 
 namespace OpenSoutheners\LaravelApiable\Http\Concerns;
 
-use Exception;
 use OpenSoutheners\LaravelApiable\Http\AllowedSearchFilter;
 use OpenSoutheners\LaravelApiable\Http\RequestQueryObject;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * @mixin RequestQueryObject
@@ -111,7 +111,7 @@ trait AllowsSearch
 
         return $this->validator($this->searchFilters())
             ->givingRules($this->allowedSearchFilters)
-            ->whenPatternMatches(fn ($key) => throw new Exception(sprintf('"%s" is not filterable on search or contains invalid values', $key)))
+            ->whenPatternMatches(fn ($key) => throw new HttpException(400, sprintf('"%s" is not filterable on search or contains invalid values', $key)))
             ->validate();
     }
 

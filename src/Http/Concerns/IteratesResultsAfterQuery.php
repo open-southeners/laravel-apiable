@@ -2,7 +2,6 @@
 
 namespace OpenSoutheners\LaravelApiable\Http\Concerns;
 
-use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\AbstractPaginator;
 use Illuminate\Support\Arr;
@@ -11,6 +10,7 @@ use OpenSoutheners\LaravelApiable\Http\QueryParamsValidator;
 use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection;
 use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource;
 use OpenSoutheners\LaravelApiable\Support\Apiable;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * @mixin JsonApiResponse
@@ -68,7 +68,7 @@ trait IteratesResultsAfterQuery
 
                 return empty(array_diff($values, $rules));
             },
-            fn ($key, $values) => throw new Exception(sprintf('"%s" fields for resource type "%s" cannot be appended', implode(', ', $values), $key))
+            fn ($key, $values) => throw new HttpException(400, sprintf('"%s" fields for resource type "%s" cannot be appended', implode(', ', $values), $key))
         )->validate();
 
         // This are forced by the application owner / developer...

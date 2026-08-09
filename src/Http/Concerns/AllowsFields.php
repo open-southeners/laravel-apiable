@@ -2,11 +2,11 @@
 
 namespace OpenSoutheners\LaravelApiable\Http\Concerns;
 
-use Exception;
 use Illuminate\Database\Eloquent\Model;
 use OpenSoutheners\LaravelApiable\Http\AllowedFields;
 use OpenSoutheners\LaravelApiable\Http\RequestQueryObject;
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * @mixin RequestQueryObject
@@ -68,7 +68,7 @@ trait AllowsFields
 
                     return empty(array_diff($values, $rules));
                 },
-                fn ($key, $values) => throw new Exception(sprintf('"%s" fields for resource type "%s" cannot be sparsed', implode(', ', $values), $key))
+                fn ($key, $values) => throw new HttpException(400, sprintf('"%s" fields for resource type "%s" cannot be sparsed', implode(', ', $values), $key))
             )
             ->validate();
     }
