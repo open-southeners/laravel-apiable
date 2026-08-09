@@ -13,7 +13,7 @@ interface ViewQueryable
     /**
      * Scope applied to the query for show/hide items.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder<T>  $query
+     * @param  Builder<T>  $query
      * @return void
      */
     public function scopeViewable(Builder $query, ?Authenticatable $user = null);

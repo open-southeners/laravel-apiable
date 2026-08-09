@@ -5,10 +5,11 @@ namespace OpenSoutheners\LaravelApiable\Http\Concerns;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use OpenSoutheners\LaravelApiable\Http\AllowedFields;
+use OpenSoutheners\LaravelApiable\Http\RequestQueryObject;
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
 
 /**
- * @mixin \OpenSoutheners\LaravelApiable\Http\RequestQueryObject
+ * @mixin RequestQueryObject
  */
 trait AllowsFields
 {
@@ -36,7 +37,7 @@ trait AllowsFields
     /**
      * Allow sparse fields (columns or accessors) for a specific resource type.
      *
-     * @param  \OpenSoutheners\LaravelApiable\Http\AllowedFields|class-string<\Illuminate\Database\Eloquent\Model>|string  $type
+     * @param  AllowedFields|class-string<Model>|string  $type
      * @param  array<string>|string|null  $attributes
      * @return $this
      */

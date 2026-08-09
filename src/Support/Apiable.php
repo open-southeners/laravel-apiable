@@ -9,7 +9,6 @@ use Illuminate\Pagination\AbstractPaginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use OpenSoutheners\LaravelApiable\Contracts\JsonApiable;
 use OpenSoutheners\LaravelApiable\Handler;
 use OpenSoutheners\LaravelApiable\Http\JsonApiPaginator;
 use OpenSoutheners\LaravelApiable\Http\JsonApiResponse;
@@ -20,12 +19,12 @@ use Throwable;
 class Apiable
 {
     /**
-     * @var array<class-string<\Illuminate\Database\Eloquent\Model>, string>
+     * @var array<class-string<Model>, string>
      */
     protected static $modelResourceTypeMap = [];
 
     /**
-     * @var array<class-string<\Illuminate\Database\Eloquent\Model>, class-string<\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource>>
+     * @var array<class-string<Model>, class-string<JsonApiResource>>
      */
     protected static $modelResourceMap = [];
 
@@ -40,7 +39,7 @@ class Apiable
     /**
      * Format model or collection of models to JSON:API, false otherwise if not valid resource.
      *
-     * @param  class-string<\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource>|null  $resourceClass
+     * @param  class-string<JsonApiResource>|null  $resourceClass
      */
     public static function toJsonApi(mixed $resource, ?string $resourceClass = null): JsonApiResource|JsonApiCollection
     {
@@ -55,8 +54,7 @@ class Apiable
     /**
      * Get JSON:API resource class for a given model instance.
      *
-     * @param  \Illuminate\Database\Eloquent\Model  $model
-     * @return class-string<\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource>
+     * @return class-string<JsonApiResource>
      */
     public static function jsonApiResourceFor(Model $model): string
     {
@@ -66,7 +64,7 @@ class Apiable
     /**
      * Determine default resource type from giving model.
      *
-     * @param  \Illuminate\Database\Eloquent\Model|class-string<\Illuminate\Database\Eloquent\Model>  $model
+     * @param  Model|class-string<Model>  $model
      */
     public static function resourceTypeForModel(Model|string $model): string
     {
@@ -76,7 +74,7 @@ class Apiable
     /**
      * Get resource type from a model.
      *
-     * @param  \Illuminate\Database\Eloquent\Model|class-string<\Illuminate\Database\Eloquent\Model>  $model
+     * @param  Model|class-string<Model>  $model
      */
     public static function getResourceType(Model|string $model): string
     {
@@ -97,8 +95,8 @@ class Apiable
      *
      * @template T of \Illuminate\Database\Eloquent\Model
      *
-     * @param  \Illuminate\Database\Eloquent\Builder<T>|T|class-string<T>  $query
-     * @return \OpenSoutheners\LaravelApiable\Http\JsonApiResponse<T>
+     * @param  Builder<T>|T|class-string<T>  $query
+     * @return JsonApiResponse<T>
      */
     public static function response($query, array $alloweds = []): JsonApiResponse
     {
@@ -114,7 +112,7 @@ class Apiable
     /**
      * Add models to JSON:API resource class mapping.
      *
-     * @param  array<class-string<\Illuminate\Database\Eloquent\Model>, class-string<\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource>>  $models
+     * @param  array<class-string<Model>, class-string<JsonApiResource>>  $models
      * @return void
      */
     public static function modelResourceMap(array $models = [])
@@ -125,7 +123,7 @@ class Apiable
     /**
      * Get models to JSON:API resource class mapping.
      *
-     * @return array<class-string<\Illuminate\Database\Eloquent\Model>, class-string<\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource>>
+     * @return array<class-string<Model>, class-string<JsonApiResource>>
      */
     public static function getModelResourceMap(): array
     {
@@ -135,7 +133,7 @@ class Apiable
     /**
      * Add models to JSON:API types mapping to the application.
      *
-     * @param  array<class-string<\Illuminate\Database\Eloquent\Model>>|array<class-string<\Illuminate\Database\Eloquent\Model>, string>  $models
+     * @param  array<class-string<Model>>|array<class-string<Model>, string>  $models
      * @return void
      */
     public static function modelResourceTypeMap(array $models = [])
@@ -150,7 +148,7 @@ class Apiable
     /**
      * Get models to JSON:API types mapping.
      *
-     * @return array<class-string<\Illuminate\Database\Eloquent\Model>, string>
+     * @return array<class-string<Model>, string>
      */
     public static function getModelResourceTypeMap()
     {
@@ -160,7 +158,7 @@ class Apiable
     /**
      * Get model class from given resource type.
      *
-     * @return \Illuminate\Database\Eloquent\Model|false
+     * @return Model|false
      */
     public static function getModelFromResourceType(string $type)
     {

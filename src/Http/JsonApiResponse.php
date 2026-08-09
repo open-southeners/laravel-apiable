@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Traits\ForwardsCalls;
 use OpenSoutheners\LaravelApiable\Contracts\ViewableBuilder;
 use OpenSoutheners\LaravelApiable\Contracts\ViewQueryable;
+use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource;
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -22,7 +23,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 /**
  * @template T of \Illuminate\Database\Eloquent\Model
  *
- * @mixin \OpenSoutheners\LaravelApiable\Http\RequestQueryObject<T>
+ * @mixin RequestQueryObject<T>
  */
 class JsonApiResponse implements Arrayable, Responsable
 {
@@ -35,7 +36,7 @@ class JsonApiResponse implements Arrayable, Responsable
     protected ?RequestQueryObject $request;
 
     /**
-     * @var class-string<T>|class-string<\OpenSoutheners\LaravelApiable\Contracts\ViewQueryable<T>>
+     * @var class-string<T>|class-string<ViewQueryable<T>>
      */
     protected string $model;
 
@@ -51,7 +52,7 @@ class JsonApiResponse implements Arrayable, Responsable
     protected ?Closure $pagination = null;
 
     /**
-     * @var class-string<\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource>|null
+     * @var class-string<JsonApiResource>|null
      */
     protected ?string $resourceClass = null;
 
@@ -72,7 +73,7 @@ class JsonApiResponse implements Arrayable, Responsable
     /**
      * Create new instance of repository from query.
      *
-     * @param  class-string<T>|\Illuminate\Database\Eloquent\Builder<T>  $modelOrQuery
+     * @param  class-string<T>|Builder<T>  $modelOrQuery
      */
     public static function from($modelOrQuery): self
     {
@@ -82,13 +83,13 @@ class JsonApiResponse implements Arrayable, Responsable
     /**
      * Use the specified model for this JSON:API response.
      *
-     * @param  class-string<T>|\Illuminate\Database\Eloquent\Builder<T>  $modelOrQuery
+     * @param  class-string<T>|Builder<T>  $modelOrQuery
      */
     public function using($modelOrQuery): self
     {
         $this->model = is_string($modelOrQuery) ? $modelOrQuery : get_class($modelOrQuery->getModel());
 
-        /** @var \Illuminate\Database\Eloquent\Builder<T>|\OpenSoutheners\LaravelApiable\Contracts\ViewableBuilder<T> $query */
+        /** @var Builder<T>|ViewableBuilder<T> $query */
         $query = is_string($modelOrQuery) ? $modelOrQuery::query() : clone $modelOrQuery;
 
         $this->request->setQuery($query);
@@ -99,9 +100,9 @@ class JsonApiResponse implements Arrayable, Responsable
     /**
      * Build pipeline and return resulting request query object instance.
      *
-     * @return \OpenSoutheners\LaravelApiable\Http\RequestQueryObject
+     * @return RequestQueryObject
      *
-     * @throws \Exception
+     * @throws Exception
      */
     protected function buildPipeline()
     {
@@ -152,7 +153,7 @@ class JsonApiResponse implements Arrayable, Responsable
             && (is_a($this->model, ViewQueryable::class, true)
                 || is_a($query, ViewableBuilder::class))
         ) {
-            /** @var \OpenSoutheners\LaravelApiable\Contracts\ViewableBuilder<T> $query */
+            /** @var ViewableBuilder<T> $query */
             $query->viewable($guard->user());
         }
 
@@ -168,7 +169,7 @@ class JsonApiResponse implements Arrayable, Responsable
     /**
      * Use the specified JSON:API resource class for serialization.
      *
-     * @param  class-string<\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource>  $resourceClass
+     * @param  class-string<JsonApiResource>  $resourceClass
      */
     public function usingResource(string $resourceClass): self
     {
@@ -190,7 +191,7 @@ class JsonApiResponse implements Arrayable, Responsable
     /**
      * Serialize response with pagination using a custom function that user provides or the default one.
      *
-     * @param  T|\Illuminate\Database\Eloquent\Builder<T>  $response
+     * @param  T|Builder<T>  $response
      */
     protected function serializeResponse(mixed $response): mixed
     {
@@ -216,7 +217,7 @@ class JsonApiResponse implements Arrayable, Responsable
     /**
      * Get whether request is made within InertiaJS context.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      */
     protected function withinInertia($request): bool
     {
@@ -228,11 +229,11 @@ class JsonApiResponse implements Arrayable, Responsable
     /**
      * Create an HTTP response that represents the object.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      */
     public function toResponse($request): mixed
     {
-        /** @var \Illuminate\Contracts\Support\Responsable|mixed $results */
+        /** @var Responsable|mixed $results */
         $results = App::call([$this, 'getResults']);
 
         $response = $results instanceof Responsable

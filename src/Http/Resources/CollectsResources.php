@@ -2,20 +2,23 @@
 
 namespace OpenSoutheners\LaravelApiable\Http\Resources;
 
+use Illuminate\Http\Resources\MissingValue;
 use Illuminate\Pagination\AbstractPaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use OpenSoutheners\LaravelApiable\Contracts\JsonApiable;
 use ReflectionClass;
 use Traversable;
 
 /**
- * @mixin \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection
+ * @mixin JsonApiCollection
  */
 trait CollectsResources
 {
     /**
      * Map the given collection resource into its individual resources.
      *
-     * @param  \Illuminate\Http\Resources\MissingValue|\Illuminate\Pagination\AbstractPaginator|\Illuminate\Support\Collection<\OpenSoutheners\LaravelApiable\Contracts\JsonApiable>  $resource
+     * @param  MissingValue|AbstractPaginator|Collection<JsonApiable>  $resource
      * @return mixed
      */
     protected function collectResource($resource)
@@ -34,9 +37,9 @@ trait CollectsResources
     /**
      * Get resource collection filtered by authorisation.
      *
-     * @param  \Illuminate\Pagination\AbstractPaginator<int, \OpenSoutheners\LaravelApiable\Contracts\JsonApiable>|\Illuminate\Support\Collection<\OpenSoutheners\LaravelApiable\Contracts\JsonApiable>  $resource
-     * @param  class-string<\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource>  $collects
-     * @return \Illuminate\Support\Collection
+     * @param  AbstractPaginator<int, JsonApiable>|Collection<JsonApiable>  $resource
+     * @param  class-string<JsonApiResource>  $collects
+     * @return Collection
      */
     protected function getFiltered($resource, $collects)
     {

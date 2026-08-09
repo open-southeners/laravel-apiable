@@ -4,6 +4,8 @@ namespace OpenSoutheners\LaravelApiable\Tests\Fixtures;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Laravel\Scout\Searchable;
 use OpenSoutheners\LaravelApiable\Concerns\HasJsonApi;
 use OpenSoutheners\LaravelApiable\Contracts\JsonApiable;
@@ -44,7 +46,7 @@ class Post extends Model implements JsonApiable
     /**
      * Get its parent post.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function parent()
     {
@@ -54,7 +56,7 @@ class Post extends Model implements JsonApiable
     /**
      * Get its author user.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function author()
     {
@@ -64,7 +66,7 @@ class Post extends Model implements JsonApiable
     /**
      * Get its tags.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * @return BelongsToMany
      */
     public function tags()
     {

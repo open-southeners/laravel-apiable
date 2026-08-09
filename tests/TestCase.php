@@ -2,6 +2,7 @@
 
 namespace OpenSoutheners\LaravelApiable\Tests;
 
+use Illuminate\Foundation\Application;
 use Laravel\Scout\ScoutServiceProvider;
 use OpenSoutheners\LaravelApiable\ServiceProvider;
 use OpenSoutheners\LaravelApiable\Tests\Fixtures\Plan;
@@ -25,7 +26,7 @@ abstract class TestCase extends Orchestra
     /**
      * Get package providers.
      *
-     * @param  \Illuminate\Foundation\Application  $app
+     * @param  Application  $app
      * @return array<int, class-string>
      */
     protected function getPackageProviders($app)
@@ -39,7 +40,7 @@ abstract class TestCase extends Orchestra
     /**
      * Define environment setup.
      *
-     * @param  \Illuminate\Foundation\Application  $app
+     * @param  Application  $app
      * @return void
      */
     protected function defineEnvironment($app)

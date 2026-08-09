@@ -20,7 +20,7 @@ class RequestQueryObjectTest extends TestCase
         return new RequestQueryObject(app(Request::class), Post::query());
     }
 
-    public function testRequestQueryObjectAllowsAppendsSendingRaw()
+    public function test_request_query_object_allows_appends_sending_raw()
     {
         $allowedAttributes = $this->newRequestQueryObject()
             ->allowAppends('post', ['is_published'])
@@ -31,7 +31,7 @@ class RequestQueryObjectTest extends TestCase
         $this->assertEquals(json_encode(['post' => ['is_published']]), json_encode($allowedAttributes));
     }
 
-    public function testRequestQueryObjectAllowsAppendsSendingRawWithModelClassAsType()
+    public function test_request_query_object_allows_appends_sending_raw_with_model_class_as_type()
     {
         $allowedAttributes = $this->newRequestQueryObject()
             ->allowAppends(Post::class, ['is_published'])
@@ -42,7 +42,7 @@ class RequestQueryObjectTest extends TestCase
         $this->assertEquals(json_encode(['post' => ['is_published']]), json_encode($allowedAttributes));
     }
 
-    public function testRequestQueryObjectAllowsAppendsSendingObject()
+    public function test_request_query_object_allows_appends_sending_object()
     {
         $allowedAttributes = $this->newRequestQueryObject()
             ->allowAppends(AllowedAppends::make('post', ['is_published']))
@@ -53,7 +53,7 @@ class RequestQueryObjectTest extends TestCase
         $this->assertEquals(json_encode(['post' => ['is_published']]), json_encode($allowedAttributes));
     }
 
-    public function testRequestQueryObjectAllowsAppendsSendingObjectWithModelClassAsType()
+    public function test_request_query_object_allows_appends_sending_object_with_model_class_as_type()
     {
         $allowedAttributes = $this->newRequestQueryObject()
             ->allowAppends(AllowedAppends::make(Post::class, ['is_published']))
@@ -64,7 +64,7 @@ class RequestQueryObjectTest extends TestCase
         $this->assertEquals(json_encode(['post' => ['is_published']]), json_encode($allowedAttributes));
     }
 
-    public function testRequestQueryObjectAllowsSparseFieldsetSendingRaw()
+    public function test_request_query_object_allows_sparse_fieldset_sending_raw()
     {
         $allowedAttributes = $this->newRequestQueryObject()
             ->allowFields('post', ['created_at'])
@@ -75,7 +75,7 @@ class RequestQueryObjectTest extends TestCase
         $this->assertEquals(json_encode(['post' => ['created_at']]), json_encode($allowedAttributes));
     }
 
-    public function testRequestQueryObjectAllowsSparseFieldsetSendingRawWithModelClassAsType()
+    public function test_request_query_object_allows_sparse_fieldset_sending_raw_with_model_class_as_type()
     {
         $allowedAttributes = $this->newRequestQueryObject()
             ->allowFields(Post::class, ['created_at'])
@@ -86,7 +86,7 @@ class RequestQueryObjectTest extends TestCase
         $this->assertEquals(json_encode(['post' => ['created_at']]), json_encode($allowedAttributes));
     }
 
-    public function testRequestQueryObjectAllowsSparseFieldsetSendingObject()
+    public function test_request_query_object_allows_sparse_fieldset_sending_object()
     {
         $allowedAttributes = $this->newRequestQueryObject()
             ->allowFields(AllowedFields::make('post', ['created_at']))
@@ -97,7 +97,7 @@ class RequestQueryObjectTest extends TestCase
         $this->assertEquals(json_encode(['post' => ['created_at']]), json_encode($allowedAttributes));
     }
 
-    public function testRequestQueryObjectAllowsSparseFieldsetSendingObjectWithModelClassAsType()
+    public function test_request_query_object_allows_sparse_fieldset_sending_object_with_model_class_as_type()
     {
         $allowedAttributes = $this->newRequestQueryObject()
             ->allowFields(AllowedFields::make(Post::class, ['created_at']))
@@ -108,7 +108,7 @@ class RequestQueryObjectTest extends TestCase
         $this->assertEquals(json_encode(['post' => ['created_at']]), json_encode($allowedAttributes));
     }
 
-    public function testRequestQueryObjectAllowsSortsSendingRaw()
+    public function test_request_query_object_allows_sorts_sending_raw()
     {
         $allowedAttributes = $this->newRequestQueryObject()
             ->allowSort('created_at')
@@ -122,7 +122,7 @@ class RequestQueryObjectTest extends TestCase
         );
     }
 
-    public function testRequestQueryObjectAllowsSortsSendingObject()
+    public function test_request_query_object_allows_sorts_sending_object()
     {
         $allowedAttributes = $this->newRequestQueryObject()
             ->allowSort(AllowedSort::descendant('created_at'))
@@ -133,7 +133,7 @@ class RequestQueryObjectTest extends TestCase
         $this->assertEquals(json_encode(['created_at' => 'desc']), json_encode($allowedAttributes));
     }
 
-    public function testRequestQueryObjectAllowsFiltersSendingRawWithStringValue()
+    public function test_request_query_object_allows_filters_sending_raw_with_string_value()
     {
         $allowedAttributes = $this->newRequestQueryObject()
             ->allowFilter('status', 'Active')
@@ -147,7 +147,7 @@ class RequestQueryObjectTest extends TestCase
         );
     }
 
-    public function testRequestQueryObjectAllowsFiltersSendingRawWithArrayOfValues()
+    public function test_request_query_object_allows_filters_sending_raw_with_array_of_values()
     {
         $allowedAttributes = $this->newRequestQueryObject()
             ->allowFilter('status', ['Active', 'Inactive'])
@@ -161,7 +161,7 @@ class RequestQueryObjectTest extends TestCase
         );
     }
 
-    public function testRequestQueryObjectAllowsFiltersSendingObject()
+    public function test_request_query_object_allows_filters_sending_object()
     {
         $allowedAttributes = $this->newRequestQueryObject()
             ->allowFilter(AllowedFilter::exact('status'))
@@ -175,7 +175,7 @@ class RequestQueryObjectTest extends TestCase
         );
     }
 
-    public function testRequestQueryObjectAllowsIncludesSendingRaw()
+    public function test_request_query_object_allows_includes_sending_raw()
     {
         $allowedAttributes = $this->newRequestQueryObject()
             ->allowInclude('parent')
@@ -186,7 +186,7 @@ class RequestQueryObjectTest extends TestCase
         $this->assertTrue(empty(array_diff(['parent'], $allowedAttributes)));
     }
 
-    public function testRequestQueryObjectAllowsIncludesSendingObject()
+    public function test_request_query_object_allows_includes_sending_object()
     {
         $allowedAttributes = $this->newRequestQueryObject()
             ->allowInclude(AllowedInclude::make('parent'))
@@ -197,7 +197,7 @@ class RequestQueryObjectTest extends TestCase
         $this->assertTrue(empty(array_diff(['parent'], $allowedAttributes)));
     }
 
-    public function testRequestQueryObjectAllowsSendingMixedArgs()
+    public function test_request_query_object_allows_sending_mixed_args()
     {
         $requestQueryObject = $this->newRequestQueryObject()
             ->allows(

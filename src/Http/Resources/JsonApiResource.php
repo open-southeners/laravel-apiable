@@ -2,6 +2,8 @@
 
 namespace OpenSoutheners\LaravelApiable\Http\Resources;
 
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\MissingValue;
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
@@ -36,7 +38,7 @@ class JsonApiResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      * @return array
      */
     public function toArray($request)
@@ -117,8 +119,8 @@ class JsonApiResource extends JsonResource
     /**
      * Customize the response for a request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Illuminate\Http\JsonResponse  $response
+     * @param  Request  $request
+     * @param  JsonResponse  $response
      * @return void
      */
     public function withResponse($request, $response)

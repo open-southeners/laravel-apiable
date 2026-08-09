@@ -6,6 +6,7 @@ use Illuminate\Auth\AuthenticationException;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
@@ -18,13 +19,13 @@ class Handler implements Responsable
     protected array $headers = [];
 
     /**
-     * @param  \Throwable|\Illuminate\Validation\ValidationException  $exception
+     * @param  Throwable|ValidationException  $exception
      */
     public function __construct(
         protected Throwable $exception,
         protected ?bool $withTrace = null
     ) {
-        $this->jsonApiException = new JsonApiException();
+        $this->jsonApiException = new JsonApiException;
     }
 
     /**
@@ -38,7 +39,7 @@ class Handler implements Responsable
     /**
      * Create an HTTP response that represents the object.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      */
     public function toResponse($request): JsonResponse
     {
@@ -83,7 +84,7 @@ class Handler implements Responsable
     /**
      * Handle any other type of exception.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      */
     protected function handleException($request): void
     {
@@ -122,7 +123,7 @@ class Handler implements Responsable
     /**
      * Handle validation exception.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      */
     protected function handleValidation($request): void
     {

@@ -5,9 +5,10 @@ namespace OpenSoutheners\LaravelApiable\Http\Concerns;
 use Exception;
 use OpenSoutheners\LaravelApiable\Http\AllowedSort;
 use OpenSoutheners\LaravelApiable\Http\DefaultSort;
+use OpenSoutheners\LaravelApiable\Http\RequestQueryObject;
 
 /**
- * @mixin \OpenSoutheners\LaravelApiable\Http\RequestQueryObject
+ * @mixin RequestQueryObject
  */
 trait AllowsSorts
 {
@@ -46,7 +47,7 @@ trait AllowsSorts
     /**
      * Allow sorting by the following attribute and direction.
      *
-     * @param  \OpenSoutheners\LaravelApiable\Http\AllowedSort|array<string>|string  $attribute
+     * @param  AllowedSort|array<string>|string  $attribute
      * @param  int|null  $direction
      */
     public function allowSort($attribute, $direction = null): static
@@ -65,7 +66,7 @@ trait AllowsSorts
     /**
      * Default sort by the following attribute and direction when no user sorts are being applied.
      *
-     * @param  \OpenSoutheners\LaravelApiable\Http\DefaultSort|array<string>|string  $attribute
+     * @param  DefaultSort|array<string>|string  $attribute
      * @param  int|null  $direction
      */
     public function applyDefaultSort($attribute, $direction = null): static

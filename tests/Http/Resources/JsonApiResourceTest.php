@@ -11,7 +11,7 @@ use OpenSoutheners\LaravelApiable\Tests\TestCase;
 
 class JsonApiResourceTest extends TestCase
 {
-    public function testResourcesMayBeConvertedToJsonApi()
+    public function test_resources_may_be_converted_to_json_api()
     {
         Route::get('/', function () {
             return (new Post([
@@ -38,7 +38,7 @@ class JsonApiResourceTest extends TestCase
         ], true);
     }
 
-    public function testResourcesHasIdentifier()
+    public function test_resources_has_identifier()
     {
         Route::get('/', function () {
             return Apiable::toJsonApi(new Post([
@@ -54,7 +54,7 @@ class JsonApiResourceTest extends TestCase
         });
     }
 
-    public function testResourcesHasAttribute()
+    public function test_resources_has_attribute()
     {
         Route::get('/', function () {
             return Apiable::toJsonApi(new Post([
@@ -70,7 +70,7 @@ class JsonApiResourceTest extends TestCase
         });
     }
 
-    public function testResourcesHasAttributes()
+    public function test_resources_has_attributes()
     {
         Route::get('/', function () {
             return Apiable::toJsonApi(new Post([
@@ -89,7 +89,7 @@ class JsonApiResourceTest extends TestCase
         });
     }
 
-    public function testResourcesMayBeConvertedToJsonApiWithToJsonMethod()
+    public function test_resources_may_be_converted_to_json_api_with_to_json_method()
     {
         $resource = Apiable::toJsonApi(new Post([
             'id' => 5,
@@ -100,7 +100,7 @@ class JsonApiResourceTest extends TestCase
         $this->assertSame('{"id":"5","type":"post","attributes":{"title":"Test Title","abstract":"Test abstract"}}', $resource->toJson());
     }
 
-    public function testResourcesWithRelationshipsMayBeConvertedToJsonApi()
+    public function test_resources_with_relationships_may_be_converted_to_json_api()
     {
         Route::get('/', function () {
             $post = new Post([
@@ -151,7 +151,7 @@ class JsonApiResourceTest extends TestCase
         ], true);
     }
 
-    public function testResourcesHasRelationshipWith()
+    public function test_resources_has_relationship_with()
     {
         Route::get('/', function () {
             $post = new Post([
@@ -178,7 +178,7 @@ class JsonApiResourceTest extends TestCase
         });
     }
 
-    public function testResourcesAtRelationHasAttribute()
+    public function test_resources_at_relation_has_attribute()
     {
         Route::get('/', function () {
             $post = new Post([
@@ -206,7 +206,7 @@ class JsonApiResourceTest extends TestCase
         });
     }
 
-    public function testSameResourceThroughMultipleRelationshipPathsPreservesNestedIncludes()
+    public function test_same_resource_through_multiple_relationship_paths_preserves_nested_includes()
     {
         Route::get('/', function () {
             // User ID=2 appearing as 'editor' without any nested includes

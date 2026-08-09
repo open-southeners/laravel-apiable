@@ -13,12 +13,13 @@ use OpenSoutheners\LaravelApiable\Attributes\QueryParam;
 use OpenSoutheners\LaravelApiable\Attributes\SearchFilterQueryParam;
 use OpenSoutheners\LaravelApiable\Attributes\SearchQueryParam;
 use OpenSoutheners\LaravelApiable\Attributes\SortQueryParam;
+use OpenSoutheners\LaravelApiable\Http\JsonApiResponse;
 use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionMethod;
 
 /**
- * @mixin \OpenSoutheners\LaravelApiable\Http\JsonApiResponse
+ * @mixin JsonApiResponse
  */
 trait ResolvesFromRouteAction
 {
@@ -49,7 +50,7 @@ trait ResolvesFromRouteAction
     /**
      * Get PHP query param attributes from reflected class or method.
      *
-     * @param  \ReflectionClass|\ReflectionMethod  $reflected
+     * @param  ReflectionClass|ReflectionMethod  $reflected
      * @return void
      */
     protected function resolveAttributesFrom($reflected)

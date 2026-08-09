@@ -17,7 +17,7 @@ class JsonApiCollection extends ResourceCollection
      * Create a new resource instance.
      *
      * @param  TCollectedResource  $resource
-     * @param  class-string<\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource>|null  $collects
+     * @param  class-string<JsonApiResource>|null  $collects
      * @return void
      */
     public function __construct($resource, $collects = null)

@@ -9,7 +9,6 @@ use OpenSoutheners\LaravelApiable\Http\AllowedFields;
 use OpenSoutheners\LaravelApiable\Http\AllowedFilter;
 use OpenSoutheners\LaravelApiable\Http\AllowedInclude;
 use OpenSoutheners\LaravelApiable\Http\AllowedSort;
-use OpenSoutheners\LaravelApiable\Http\DefaultFilter;
 use OpenSoutheners\LaravelApiable\Http\DefaultSort;
 use OpenSoutheners\LaravelApiable\Http\JsonApiResponse;
 use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
@@ -26,7 +25,7 @@ class JsonApiResponseTest extends TestCase
     /**
      * Setup the test environment.
      */
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -37,7 +36,7 @@ class JsonApiResponseTest extends TestCase
     // Filters – Similar (LIKE)
     // ---------------------------------------------------------------
 
-    public function testFilteringByNonAllowedAttributeWillGetEverything()
+    public function test_filtering_by_non_allowed_attribute_will_get_everything()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Tag::class);
@@ -50,7 +49,7 @@ class JsonApiResponseTest extends TestCase
         $response->assertJsonCount(10, 'data');
     }
 
-    public function testFilteringByAllowedAttributeWillGetFilteredResults()
+    public function test_filtering_by_allowed_attribute_will_get_filtered_results()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Tag::class)->allowFilter('name');
@@ -63,7 +62,7 @@ class JsonApiResponseTest extends TestCase
         $response->assertJsonCount(4, 'data');
     }
 
-    public function testFilteringSimilarByTitle()
+    public function test_filtering_similar_by_title()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -82,7 +81,7 @@ class JsonApiResponseTest extends TestCase
         );
     }
 
-    public function testFilteringSimilarMatchesMultipleResults()
+    public function test_filtering_similar_matches_multiple_results()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -98,7 +97,7 @@ class JsonApiResponseTest extends TestCase
         $response->assertJsonCount(2, 'data');
     }
 
-    public function testFilteringSimilarWithNoMatchReturnsEmpty()
+    public function test_filtering_similar_with_no_match_returns_empty()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -117,7 +116,7 @@ class JsonApiResponseTest extends TestCase
     // Filters – Exact (=)
     // ---------------------------------------------------------------
 
-    public function testFilteringExactByStatus()
+    public function test_filtering_exact_by_status()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -132,7 +131,7 @@ class JsonApiResponseTest extends TestCase
         $response->assertJsonCount(2, 'data');
     }
 
-    public function testFilteringExactDoesNotMatchPartialValues()
+    public function test_filtering_exact_does_not_match_partial_values()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -148,7 +147,7 @@ class JsonApiResponseTest extends TestCase
         $response->assertJsonCount(0, 'data');
     }
 
-    public function testFilteringExactWithRestrictedValues()
+    public function test_filtering_exact_with_restricted_values()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -163,7 +162,7 @@ class JsonApiResponseTest extends TestCase
         $response->assertJsonCount(2, 'data');
     }
 
-    public function testFilteringOrValuesByAllowedAttributeValueInvalidatesWholeFilter()
+    public function test_filtering_or_values_by_allowed_attribute_value_invalidates_whole_filter()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -177,7 +176,7 @@ class JsonApiResponseTest extends TestCase
         $response->assertJsonCount(4, 'data');
     }
 
-    public function testFilteringExactWithOrValues()
+    public function test_filtering_exact_with_or_values()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -197,7 +196,7 @@ class JsonApiResponseTest extends TestCase
     // Filters – Scope
     // ---------------------------------------------------------------
 
-    public function testFilteringByAllowedScope()
+    public function test_filtering_by_allowed_scope()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -211,7 +210,7 @@ class JsonApiResponseTest extends TestCase
         $response->assertJsonCount(2, 'data');
     }
 
-    public function testFilteringByAllowedScopeUsingEnforcedNames()
+    public function test_filtering_by_allowed_scope_using_enforced_names()
     {
         config(['apiable.requests.filters.enforce_scoped_names' => true]);
 
@@ -227,7 +226,7 @@ class JsonApiResponseTest extends TestCase
         $response->assertJsonCount(2, 'data');
     }
 
-    public function testFilteringByScopeWithEnforcedNamesAndParameterValue()
+    public function test_filtering_by_scope_with_enforced_names_and_parameter_value()
     {
         config(['apiable.requests.filters.enforce_scoped_names' => true]);
 
@@ -248,7 +247,7 @@ class JsonApiResponseTest extends TestCase
         );
     }
 
-    public function testFilteringByScopeWithMultipleNamedArguments()
+    public function test_filtering_by_scope_with_multiple_named_arguments()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -267,7 +266,7 @@ class JsonApiResponseTest extends TestCase
     // Filters – Lower than / Lower or equal than
     // ---------------------------------------------------------------
 
-    public function testFilteringLowerThan()
+    public function test_filtering_lower_than()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -287,7 +286,7 @@ class JsonApiResponseTest extends TestCase
         );
     }
 
-    public function testFilteringLowerOrEqualThan()
+    public function test_filtering_lower_or_equal_than()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -307,7 +306,7 @@ class JsonApiResponseTest extends TestCase
     // Filters – Greater than / Greater or equal than
     // ---------------------------------------------------------------
 
-    public function testFilteringGreaterThan()
+    public function test_filtering_greater_than()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -323,7 +322,7 @@ class JsonApiResponseTest extends TestCase
         $response->assertJsonCount(2, 'data');
     }
 
-    public function testFilteringGreaterOrEqualThan()
+    public function test_filtering_greater_or_equal_than()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -343,7 +342,7 @@ class JsonApiResponseTest extends TestCase
     // Filters – Relationship
     // ---------------------------------------------------------------
 
-    public function testFilteringByRelationship()
+    public function test_filtering_by_relationship()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -358,7 +357,7 @@ class JsonApiResponseTest extends TestCase
         $response->assertJsonCount(1, 'data');
     }
 
-    public function testFilteringByTwoDifferentAttributesOfSameRelationship()
+    public function test_filtering_by_two_different_attributes_of_same_relationship()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -374,7 +373,7 @@ class JsonApiResponseTest extends TestCase
         $response->assertJsonCount(1, 'data');
     }
 
-    public function testFilteringSimilarByRelationshipAttribute()
+    public function test_filtering_similar_by_relationship_attribute()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -396,7 +395,7 @@ class JsonApiResponseTest extends TestCase
     // Filters – Default filter
     // ---------------------------------------------------------------
 
-    public function testDefaultFilterAppliedWhenNoUserFilterSent()
+    public function test_default_filter_applied_when_no_user_filter_sent()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -413,7 +412,7 @@ class JsonApiResponseTest extends TestCase
         $response->assertJsonCount(2, 'data');
     }
 
-    public function testDefaultFilterNotAppliedWhenUserFilterSent()
+    public function test_default_filter_not_applied_when_user_filter_sent()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -434,7 +433,7 @@ class JsonApiResponseTest extends TestCase
     // Filters – Allowed to response meta
     // ---------------------------------------------------------------
 
-    public function testAllowedFiltersAddedToResponseMeta()
+    public function test_allowed_filters_added_to_response_meta()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -456,7 +455,7 @@ class JsonApiResponseTest extends TestCase
         ]);
     }
 
-    public function testAllowedFiltersAddedToResponseMetaThroughConfig()
+    public function test_allowed_filters_added_to_response_meta_through_config()
     {
         config(['apiable.responses.include_allowed' => true]);
 
@@ -484,7 +483,7 @@ class JsonApiResponseTest extends TestCase
     // Sorts – Ascendant / Descendant
     // ---------------------------------------------------------------
 
-    public function testSortingFieldsAsDescendant()
+    public function test_sorting_fields_as_descendant()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(User::class)
@@ -500,7 +499,7 @@ class JsonApiResponseTest extends TestCase
         });
     }
 
-    public function testSortingFieldsAsAscendant()
+    public function test_sorting_fields_as_ascendant()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(User::class)
@@ -516,7 +515,7 @@ class JsonApiResponseTest extends TestCase
         });
     }
 
-    public function testSortingBothDirectionsAllowed()
+    public function test_sorting_both_directions_allowed()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(User::class)
@@ -546,7 +545,7 @@ class JsonApiResponseTest extends TestCase
     // Sorts – Relationship (BelongsToMany)
     // ---------------------------------------------------------------
 
-    public function testSortingBelongsToManyRelationshipFieldAsAscendant()
+    public function test_sorting_belongs_to_many_relationship_field_as_ascendant()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::query()->withCount('tags'))
@@ -566,7 +565,7 @@ class JsonApiResponseTest extends TestCase
         });
     }
 
-    public function testSortingBelongsToManyRelationshipFieldAsDescendant()
+    public function test_sorting_belongs_to_many_relationship_field_as_descendant()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::query()->withCount('tags'))
@@ -590,7 +589,7 @@ class JsonApiResponseTest extends TestCase
     // Sorts – Relationship (BelongsTo)
     // ---------------------------------------------------------------
 
-    public function testSortingBelongsToRelationshipFieldAsAscendant()
+    public function test_sorting_belongs_to_relationship_field_as_ascendant()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -609,7 +608,7 @@ class JsonApiResponseTest extends TestCase
         });
     }
 
-    public function testSortingBelongsToRelationshipFieldAsDescendant()
+    public function test_sorting_belongs_to_relationship_field_as_descendant()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -632,7 +631,7 @@ class JsonApiResponseTest extends TestCase
     // Sorts – Default sort
     // ---------------------------------------------------------------
 
-    public function testDefaultSortAppliedWhenNoUserSortSent()
+    public function test_default_sort_applied_when_no_user_sort_sent()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(User::class)
@@ -651,7 +650,7 @@ class JsonApiResponseTest extends TestCase
         );
     }
 
-    public function testDefaultSortNotAppliedWhenUserSortSent()
+    public function test_default_sort_not_applied_when_user_sort_sent()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(User::class)
@@ -670,7 +669,7 @@ class JsonApiResponseTest extends TestCase
         );
     }
 
-    public function testAllowedSortsAddedToResponseMeta()
+    public function test_allowed_sorts_added_to_response_meta()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -692,7 +691,7 @@ class JsonApiResponseTest extends TestCase
     // Includes
     // ---------------------------------------------------------------
 
-    public function testIncludeRelationship()
+    public function test_include_relationship()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -712,7 +711,7 @@ class JsonApiResponseTest extends TestCase
         ]);
     }
 
-    public function testIncludeMultipleRelationships()
+    public function test_include_multiple_relationships()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -739,7 +738,7 @@ class JsonApiResponseTest extends TestCase
         $this->assertContains('label', $types);
     }
 
-    public function testIncludeCountAsAttribute()
+    public function test_include_count_as_attribute()
     {
         Route::get('/', function () {
             return response()->json(
@@ -755,7 +754,7 @@ class JsonApiResponseTest extends TestCase
         );
     }
 
-    public function testNonAllowedIncludeIsIgnored()
+    public function test_non_allowed_include_is_ignored()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -771,7 +770,7 @@ class JsonApiResponseTest extends TestCase
         $response->assertJsonMissing(['type' => 'client']);
     }
 
-    public function testIncludeWithArraySyntax()
+    public function test_include_with_array_syntax()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -794,7 +793,7 @@ class JsonApiResponseTest extends TestCase
     // Appends
     // ---------------------------------------------------------------
 
-    public function testAddingFieldsAsModelAppendedAttributes()
+    public function test_adding_fields_as_model_appended_attributes()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -810,7 +809,7 @@ class JsonApiResponseTest extends TestCase
         });
     }
 
-    public function testAppendsNotAddedWithoutQueryParam()
+    public function test_appends_not_added_without_query_param()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -827,7 +826,7 @@ class JsonApiResponseTest extends TestCase
         });
     }
 
-    public function testNonAllowedAppendIsIgnored()
+    public function test_non_allowed_append_is_ignored()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -846,7 +845,7 @@ class JsonApiResponseTest extends TestCase
         );
     }
 
-    public function testAppendsOnSingleResource()
+    public function test_appends_on_single_resource()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::whereKey(1))
@@ -862,7 +861,7 @@ class JsonApiResponseTest extends TestCase
         });
     }
 
-    public function testAppendsWithMultipleAttributes()
+    public function test_appends_with_multiple_attributes()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -883,7 +882,7 @@ class JsonApiResponseTest extends TestCase
     // Fields (Sparse fieldsets)
     // ---------------------------------------------------------------
 
-    public function testSparseFieldset()
+    public function test_sparse_fieldset()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(User::class)
@@ -899,7 +898,7 @@ class JsonApiResponseTest extends TestCase
         });
     }
 
-    public function testSparseFieldsetReturningOnlyAllowedColumns()
+    public function test_sparse_fieldset_returning_only_allowed_columns()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(User::class)
@@ -917,7 +916,7 @@ class JsonApiResponseTest extends TestCase
         });
     }
 
-    public function testSparseFieldsetWithMultipleAllowedFields()
+    public function test_sparse_fieldset_with_multiple_allowed_fields()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(User::class)
@@ -936,7 +935,7 @@ class JsonApiResponseTest extends TestCase
         );
     }
 
-    public function testSparseFieldsetWithNoFieldsQueryReturnsAll()
+    public function test_sparse_fieldset_with_no_fields_query_returns_all()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(User::class)
@@ -960,7 +959,7 @@ class JsonApiResponseTest extends TestCase
     // Search
     // ---------------------------------------------------------------
 
-    public function testListPerformingFulltextSearch()
+    public function test_list_performing_fulltext_search()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -978,7 +977,7 @@ class JsonApiResponseTest extends TestCase
     // Getting one result
     // ---------------------------------------------------------------
 
-    public function testGetOneReturnsJsonApiResourceAsResponse()
+    public function test_get_one_returns_json_api_resource_as_response()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::whereKey(1))
@@ -998,7 +997,7 @@ class JsonApiResponseTest extends TestCase
     // Combined: filters + sorts + includes + fields + appends
     // ---------------------------------------------------------------
 
-    public function testCombinedFiltersAndSorts()
+    public function test_combined_filters_and_sorts()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -1018,7 +1017,7 @@ class JsonApiResponseTest extends TestCase
         );
     }
 
-    public function testCombinedFiltersAndIncludes()
+    public function test_combined_filters_and_includes()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -1035,7 +1034,7 @@ class JsonApiResponseTest extends TestCase
         $response->assertJsonStructure(['included']);
     }
 
-    public function testCombinedAllQueryFeatures()
+    public function test_combined_all_query_features()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -1064,7 +1063,7 @@ class JsonApiResponseTest extends TestCase
     // Response as array (Inertia-like)
     // ---------------------------------------------------------------
 
-    public function testResponseAsArrayGetsAllContent()
+    public function test_response_as_array_gets_all_content()
     {
         // Yeah, we need to enforce this macro to "fake" Inertia so force toArray response behaviour
         Request::macro('inertia', fn () => true);
@@ -1121,7 +1120,7 @@ class JsonApiResponseTest extends TestCase
     // withCount via modified query
     // ---------------------------------------------------------------
 
-    public function testResponseWithModifiedQueryWithCountMethodGetsRelationshipsCountsAsAttribute()
+    public function test_response_with_modified_query_with_count_method_gets_relationships_counts_as_attribute()
     {
         Route::get('/', function () {
             return response()->json(
@@ -1137,7 +1136,7 @@ class JsonApiResponseTest extends TestCase
         );
     }
 
-    public function testResponseWithAllowedIncludedEndsWithCountGetsRelationshipCountAsAttribute()
+    public function test_response_with_allowed_included_ends_with_count_gets_relationship_count_as_attribute()
     {
         Route::get('/', function () {
             return response()->json(

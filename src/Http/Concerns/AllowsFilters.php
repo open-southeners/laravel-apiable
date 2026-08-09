@@ -5,11 +5,12 @@ namespace OpenSoutheners\LaravelApiable\Http\Concerns;
 use Exception;
 use OpenSoutheners\LaravelApiable\Http\AllowedFilter;
 use OpenSoutheners\LaravelApiable\Http\DefaultFilter;
+use OpenSoutheners\LaravelApiable\Http\RequestQueryObject;
 use OpenSoutheners\LaravelApiable\Support\Apiable;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 
 /**
- * @mixin \OpenSoutheners\LaravelApiable\Http\RequestQueryObject
+ * @mixin RequestQueryObject
  */
 trait AllowsFilters
 {
@@ -63,7 +64,7 @@ trait AllowsFilters
     /**
      * Allow filter by attribute and pattern of value(s).
      *
-     * @param  \OpenSoutheners\LaravelApiable\Http\AllowedFilter|string  $attribute
+     * @param  AllowedFilter|string  $attribute
      * @param  array<string>|string|int  $operator
      * @param  array<string>|string  $values
      */
@@ -88,7 +89,7 @@ trait AllowsFilters
     /**
      * Default filter by the following attribute and direction when no user filters are being applied.
      *
-     * @param  \OpenSoutheners\LaravelApiable\Http\DefaultFilter|string  $attribute
+     * @param  DefaultFilter|string  $attribute
      * @param  array<string>|string|int  $operator
      * @param  array<string>|string  $values
      */

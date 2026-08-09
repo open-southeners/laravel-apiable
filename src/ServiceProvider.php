@@ -2,9 +2,13 @@
 
 namespace OpenSoutheners\LaravelApiable;
 
+use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
+use Illuminate\Testing\TestResponse;
 use OpenSoutheners\LaravelApiable\Console\ApiableDocsCommand;
 use OpenSoutheners\LaravelApiable\Support\Apiable;
+use OpenSoutheners\LaravelApiable\Testing\TestResponseMacros;
 
 class ServiceProvider extends BaseServiceProvider
 {
@@ -40,7 +44,7 @@ class ServiceProvider extends BaseServiceProvider
     public function register()
     {
         $this->app->singleton('apiable', function () {
-            return new Apiable();
+            return new Apiable;
         });
 
         $this->registerMacros();
@@ -53,9 +57,9 @@ class ServiceProvider extends BaseServiceProvider
      */
     public function registerMacros()
     {
-        \Illuminate\Testing\TestResponse::mixin(new \OpenSoutheners\LaravelApiable\Testing\TestResponseMacros());
-        \Illuminate\Http\Request::mixin(new \OpenSoutheners\LaravelApiable\Http\Request());
-        \Illuminate\Database\Eloquent\Builder::mixin(new \OpenSoutheners\LaravelApiable\Builder());
-        \Illuminate\Support\Collection::mixin(new \OpenSoutheners\LaravelApiable\Collection());
+        TestResponse::mixin(new TestResponseMacros);
+        Request::mixin(new Http\Request);
+        \Illuminate\Database\Eloquent\Builder::mixin(new Builder);
+        Collection::mixin(new \OpenSoutheners\LaravelApiable\Collection);
     }
 }

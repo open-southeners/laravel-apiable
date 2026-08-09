@@ -2,6 +2,7 @@
 
 namespace OpenSoutheners\LaravelApiable\Documentation;
 
+use Illuminate\Routing\Route;
 use Illuminate\Routing\Router;
 use OpenSoutheners\LaravelApiable\Attributes\AppendsQueryParam;
 use OpenSoutheners\LaravelApiable\Attributes\FieldsQueryParam;
@@ -48,7 +49,7 @@ class Generator
 
         $excludedPatterns = array_merge($configExcluded, $exclude);
 
-        /** @var array<string, list<array{route: \Illuminate\Routing\Route, method: string}>> $routesByController */
+        /** @var array<string, list<array{route: Route, method: string}>> $routesByController */
         $routesByController = [];
 
         foreach ($this->router->getRoutes()->getRoutes() as $route) {

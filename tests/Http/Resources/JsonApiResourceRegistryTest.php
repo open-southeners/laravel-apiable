@@ -5,9 +5,7 @@ namespace OpenSoutheners\LaravelApiable\Tests\Http\Resources;
 use Illuminate\Support\Facades\Route;
 use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource;
 use OpenSoutheners\LaravelApiable\Support\Apiable;
-use OpenSoutheners\LaravelApiable\Testing\AssertableJsonApi;
 use OpenSoutheners\LaravelApiable\Tests\Fixtures\Post;
-use OpenSoutheners\LaravelApiable\Tests\Fixtures\Tag;
 use OpenSoutheners\LaravelApiable\Tests\Fixtures\User;
 use OpenSoutheners\LaravelApiable\Tests\TestCase;
 
@@ -40,7 +38,7 @@ class JsonApiResourceRegistryTest extends TestCase
         parent::tearDown();
     }
 
-    public function testModelResourceMapRegistersResourceClasses()
+    public function test_model_resource_map_registers_resource_classes()
     {
         Apiable::modelResourceMap([
             Post::class => PostWithExtraJsonApiResource::class,
@@ -52,7 +50,7 @@ class JsonApiResourceRegistryTest extends TestCase
         );
     }
 
-    public function testJsonApiResourceForReturnsRegisteredClass()
+    public function test_json_api_resource_for_returns_registered_class()
     {
         Apiable::modelResourceMap([
             Post::class => PostWithExtraJsonApiResource::class,
@@ -63,7 +61,7 @@ class JsonApiResourceRegistryTest extends TestCase
         $this->assertSame(PostWithExtraJsonApiResource::class, Apiable::jsonApiResourceFor($post));
     }
 
-    public function testJsonApiResourceForFallsBackToBaseClass()
+    public function test_json_api_resource_for_falls_back_to_base_class()
     {
         Apiable::modelResourceMap([]);
 
@@ -72,7 +70,7 @@ class JsonApiResourceRegistryTest extends TestCase
         $this->assertSame(JsonApiResource::class, Apiable::jsonApiResourceFor($post));
     }
 
-    public function testToJsonApiUsesRegisteredResourceClass()
+    public function test_to_json_api_uses_registered_resource_class()
     {
         Apiable::modelResourceMap([
             Post::class => PostWithExtraJsonApiResource::class,
@@ -85,7 +83,7 @@ class JsonApiResourceRegistryTest extends TestCase
         $this->assertInstanceOf(PostWithExtraJsonApiResource::class, $resource);
     }
 
-    public function testToJsonApiWithExplicitResourceClassOverridesRegistry()
+    public function test_to_json_api_with_explicit_resource_class_overrides_registry()
     {
         Apiable::modelResourceMap([]);
 
@@ -96,7 +94,7 @@ class JsonApiResourceRegistryTest extends TestCase
         $this->assertInstanceOf(PostWithExtraJsonApiResource::class, $resource);
     }
 
-    public function testRelatedResourceUsesRegisteredClassForRelatedModel()
+    public function test_related_resource_uses_registered_class_for_related_model()
     {
         Apiable::modelResourceMap([
             User::class => UserWithExtraJsonApiResource::class,
@@ -126,7 +124,7 @@ class JsonApiResourceRegistryTest extends TestCase
         $this->assertSame('ALICE', $userIncluded[0]['attributes']['display_name']);
     }
 
-    public function testParentAndRelatedResourcesUseTheirOwnRegisteredClasses()
+    public function test_parent_and_related_resources_use_their_own_registered_classes()
     {
         Apiable::modelResourceMap([
             Post::class => PostWithExtraJsonApiResource::class,
@@ -164,7 +162,7 @@ class JsonApiResourceRegistryTest extends TestCase
         $this->assertSame('BOB', $userIncluded[0]['attributes']['display_name']);
     }
 
-    public function testToApplicationJsonArrayMergesModelAttributesWithComputedAttributes()
+    public function test_to_application_json_array_merges_model_attributes_with_computed_attributes()
     {
         $post = new Post(['id' => 1, 'status' => 'Published', 'title' => 'Hello', 'abstract' => 'World']);
 
@@ -176,7 +174,7 @@ class JsonApiResourceRegistryTest extends TestCase
         $this->assertSame('computed_value', $array['computed']);
     }
 
-    public function testToApplicationJsonArrayWithBaseResourceReturnsModelAttributes()
+    public function test_to_application_json_array_with_base_resource_returns_model_attributes()
     {
         $post = new Post(['id' => 1, 'status' => 'Published', 'title' => 'Hello']);
 
@@ -187,7 +185,7 @@ class JsonApiResourceRegistryTest extends TestCase
         $this->assertSame('Hello', $array['title']);
     }
 
-    public function testJsonApiResponseUsingResourceSetsExplicitClass()
+    public function test_json_api_response_using_resource_sets_explicit_class()
     {
         Route::get('/', function () {
             return Apiable::response(Post::query())

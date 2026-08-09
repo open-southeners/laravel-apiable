@@ -12,8 +12,8 @@ class ApplyIncludesToQuery implements HandlesRequestQueries
     /**
      * Apply modifications to the query based on allowed query fragments.
      *
-     * @param  \Closure(\OpenSoutheners\LaravelApiable\Http\RequestQueryObject): \Illuminate\Database\Eloquent\Builder  $next
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param  Closure(RequestQueryObject): Builder  $next
+     * @return Builder
      */
     public function from(RequestQueryObject $request, Closure $next)
     {
@@ -32,7 +32,7 @@ class ApplyIncludesToQuery implements HandlesRequestQueries
     /**
      * Apply array of includes to the query.
      *
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return Builder
      */
     protected function applyIncludes(Builder $query, array $includes)
     {

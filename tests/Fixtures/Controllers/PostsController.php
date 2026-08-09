@@ -20,8 +20,6 @@ class PostsController
      * Get a paginated list of posts.
      *
      * Returns all published posts, ordered by creation date.
-     *
-     * @return void
      */
     #[DocumentedEndpointSection(title: 'List Posts', description: 'Get a paginated list of posts')]
     #[FilterQueryParam(attribute: 'title', type: AllowedFilter::SIMILAR, description: 'Filter by title')]

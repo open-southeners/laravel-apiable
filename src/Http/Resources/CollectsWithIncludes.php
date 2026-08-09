@@ -5,7 +5,7 @@ namespace OpenSoutheners\LaravelApiable\Http\Resources;
 use Illuminate\Support\Collection;
 
 /**
- * @property \Illuminate\Support\Collection $collection
+ * @property Collection $collection
  */
 trait CollectsWithIncludes
 {
@@ -20,9 +20,9 @@ trait CollectsWithIncludes
             $this->with['included'] ?? []
         );
 
-        /** @var \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource $jsonResource */
+        /** @var JsonApiResource $jsonResource */
         foreach ($this->collection as $jsonResource) {
-            /** @var \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource $resource */
+            /** @var JsonApiResource $resource */
             foreach ($jsonResource->getIncluded() as $resource) {
                 $collectionIncludes->push($resource);
             }

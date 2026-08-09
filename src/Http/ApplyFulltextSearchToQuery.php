@@ -3,6 +3,7 @@
 namespace OpenSoutheners\LaravelApiable\Http;
 
 use Closure;
+use Laravel\Scout\Builder;
 use OpenSoutheners\LaravelApiable\Contracts\HandlesRequestQueries;
 
 use function OpenSoutheners\ExtendedPhp\Classes\class_use;
@@ -12,7 +13,7 @@ class ApplyFulltextSearchToQuery implements HandlesRequestQueries
     /**
      * Apply modifications to the query based on allowed query fragments.
      *
-     * @param  \Closure(\OpenSoutheners\LaravelApiable\Http\RequestQueryObject): \Illuminate\Database\Eloquent\Builder  $next
+     * @param  Closure(RequestQueryObject): \Illuminate\Database\Eloquent\Builder  $next
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function from(RequestQueryObject $request, Closure $next)
@@ -41,7 +42,7 @@ class ApplyFulltextSearchToQuery implements HandlesRequestQueries
     /**
      * Apply filters to search query (Scout).
      *
-     * @param  \Laravel\Scout\Builder  $query
+     * @param  Builder  $query
      * @param  array<string, array>  $searchFilters
      * @return void
      */

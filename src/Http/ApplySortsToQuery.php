@@ -4,7 +4,9 @@ namespace OpenSoutheners\LaravelApiable\Http;
 
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOneOrMany;
 use OpenSoutheners\LaravelApiable\Contracts\HandlesRequestQueries;
 
 class ApplySortsToQuery implements HandlesRequestQueries
@@ -12,8 +14,8 @@ class ApplySortsToQuery implements HandlesRequestQueries
     /**
      * Apply modifications to the query based on allowed query fragments.
      *
-     * @param  \Closure(\OpenSoutheners\LaravelApiable\Http\RequestQueryObject): \Illuminate\Database\Eloquent\Builder  $next
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param  Closure(RequestQueryObject): Builder  $next
+     * @return Builder
      */
     public function from(RequestQueryObject $request, Closure $next)
     {
@@ -37,7 +39,7 @@ class ApplySortsToQuery implements HandlesRequestQueries
     /**
      * Get attribute adding a join when sorting by relationship or a column sort.
      *
-     * @return string|\Closure|\Illuminate\Database\Eloquent\Builder
+     * @return string|Closure|Builder
      */
     protected function getQualifiedAttribute(Builder $query, string $attribute, string $direction)
     {
@@ -53,7 +55,7 @@ class ApplySortsToQuery implements HandlesRequestQueries
             return $queryModel->qualifyColumn($column);
         }
 
-        /** @var \Illuminate\Database\Eloquent\Relations\HasOneOrMany|\Illuminate\Database\Eloquent\Relations\BelongsTo|\Illuminate\Database\Eloquent\Relations\BelongsToMany $relationshipMethod */
+        /** @var HasOneOrMany|BelongsTo|BelongsToMany $relationshipMethod */
         $relationshipMethod = call_user_func([$queryModel, $relationship]);
         $relationshipModel = $relationshipMethod->getRelated();
 

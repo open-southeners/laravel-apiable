@@ -5,6 +5,7 @@ namespace OpenSoutheners\LaravelApiable\Console;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Routing\Router;
+use OpenSoutheners\LaravelApiable\Documentation\Exporters\ExporterInterface;
 use OpenSoutheners\LaravelApiable\Documentation\Exporters\MarkdownExporter;
 use OpenSoutheners\LaravelApiable\Documentation\Exporters\OpenApiExporter;
 use OpenSoutheners\LaravelApiable\Documentation\Exporters\PostmanExporter;
@@ -127,7 +128,7 @@ class ApiableDocsCommand extends Command
         return [$chosen];
     }
 
-    private function makeExporter(string $format, string $stub, string $outputPath): \OpenSoutheners\LaravelApiable\Documentation\Exporters\ExporterInterface
+    private function makeExporter(string $format, string $stub, string $outputPath): ExporterInterface
     {
         return match ($format) {
             'postman' => new PostmanExporter(

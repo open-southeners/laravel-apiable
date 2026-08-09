@@ -4,9 +4,10 @@ namespace OpenSoutheners\LaravelApiable\Http\Concerns;
 
 use Exception;
 use OpenSoutheners\LaravelApiable\Http\AllowedSearchFilter;
+use OpenSoutheners\LaravelApiable\Http\RequestQueryObject;
 
 /**
- * @mixin \OpenSoutheners\LaravelApiable\Http\RequestQueryObject
+ * @mixin RequestQueryObject
  */
 trait AllowsSearch
 {
@@ -69,7 +70,7 @@ trait AllowsSearch
     /**
      * Allow filter search by attribute and pattern of value(s).
      *
-     * @param  \OpenSoutheners\LaravelApiable\Http\AllowedSearchFilter|string  $attribute
+     * @param  AllowedSearchFilter|string  $attribute
      * @param  array<string>|string  $values
      * @return $this
      */

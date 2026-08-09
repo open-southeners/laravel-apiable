@@ -13,26 +13,26 @@ use PHPUnit\Framework\Attributes\Group;
 class JsonApiRelationshipsTest extends TestCase
 {
     /**
-     * @var \OpenSoutheners\LaravelApiable\Tests\Fixtures\Post
+     * @var Post
      */
     protected $authoredPost;
 
     /**
-     * @var \OpenSoutheners\LaravelApiable\Tests\Fixtures\Post
+     * @var Post
      */
     protected $lonelyPost;
 
     /**
-     * @var \OpenSoutheners\LaravelApiable\Tests\Fixtures\Tag
+     * @var Tag
      */
     protected $postTag;
 
     /**
-     * @var \OpenSoutheners\LaravelApiable\Tests\Fixtures\Tag
+     * @var Tag
      */
     protected $lonelyTag;
 
-    public function testCollectionHasAnyClientAuthorRelationship()
+    public function test_collection_has_any_client_author_relationship()
     {
         Route::get('/', function () {
             $this->authoredPost = new Post([
@@ -74,7 +74,7 @@ class JsonApiRelationshipsTest extends TestCase
     }
 
     #[Group('requiresDatabase')]
-    public function testPivotMetaKeysArePrefixedWithRelationName()
+    public function test_pivot_meta_keys_are_prefixed_with_relation_name()
     {
         $this->loadMigrationsFrom(__DIR__.'/database/migrations');
 
@@ -111,7 +111,7 @@ class JsonApiRelationshipsTest extends TestCase
     }
 
     #[Group('requiresDatabase')]
-    public function testResourceHasTagsRelationships()
+    public function test_resource_has_tags_relationships()
     {
         // TODO: setRelation method doesn't work with hasMany relationships, so need migrations loaded
         $this->loadMigrationsFrom(__DIR__.'/database/migrations');
