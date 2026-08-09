@@ -3,6 +3,7 @@
 namespace OpenSoutheners\LaravelApiable\Http\Resources;
 
 use Illuminate\Http\Resources\MissingValue;
+use Illuminate\Pagination\AbstractCursorPaginator;
 use Illuminate\Pagination\AbstractPaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -18,7 +19,7 @@ trait CollectsResources
     /**
      * Map the given collection resource into its individual resources.
      *
-     * @param  MissingValue|AbstractPaginator|Collection<JsonApiable>  $resource
+     * @param  MissingValue|AbstractPaginator|AbstractCursorPaginator|Collection<JsonApiable>  $resource
      * @return mixed
      */
     protected function collectResource($resource)
@@ -29,7 +30,7 @@ trait CollectsResources
             ? $this->getFiltered($resource, $collects)
             : $resource->toBase();
 
-        return $resource instanceof AbstractPaginator
+        return $resource instanceof AbstractPaginator || $resource instanceof AbstractCursorPaginator
             ? $resource->setCollection($this->collection)
             : $this->collection;
     }
@@ -37,13 +38,13 @@ trait CollectsResources
     /**
      * Get resource collection filtered by authorisation.
      *
-     * @param  AbstractPaginator<int, JsonApiable>|Collection<JsonApiable>  $resource
+     * @param  AbstractPaginator<int, JsonApiable>|AbstractCursorPaginator<int, JsonApiable>|Collection<JsonApiable>  $resource
      * @param  class-string<JsonApiResource>  $collects
      * @return Collection
      */
     protected function getFiltered($resource, $collects)
     {
-        if ($resource instanceof AbstractPaginator) {
+        if ($resource instanceof AbstractPaginator || $resource instanceof AbstractCursorPaginator) {
             $resource = $resource->getCollection();
         }
 

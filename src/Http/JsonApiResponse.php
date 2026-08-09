@@ -189,6 +189,37 @@ class JsonApiResponse implements Arrayable, Responsable
     }
 
     /**
+     * Paginate this response without a `COUNT` query, only knowing whether a next
+     * (or previous) page exists instead of the total item count and last page.
+     */
+    public function simplePaginating(?int $pageSize = null): self
+    {
+        config(['apiable.responses.pagination.type' => 'simple']);
+
+        if ($pageSize !== null) {
+            config(['apiable.responses.pagination.default_size' => $pageSize]);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Paginate this response using an opaque cursor instead of a page offset, avoiding
+     * `OFFSET` queries entirely. Requires the query to be sorted by a unique, sequential
+     * column (e.g. `id` or `created_at`).
+     */
+    public function cursorPaginating(?int $pageSize = null): self
+    {
+        config(['apiable.responses.pagination.type' => 'cursor']);
+
+        if ($pageSize !== null) {
+            config(['apiable.responses.pagination.default_size' => $pageSize]);
+        }
+
+        return $this;
+    }
+
+    /**
      * Serialize response with pagination using a custom function that user provides or the default one.
      *
      * @param  T|Builder<T>  $response
