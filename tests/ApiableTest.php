@@ -13,6 +13,8 @@ use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource;
 use OpenSoutheners\LaravelApiable\Support\Apiable;
 use OpenSoutheners\LaravelApiable\Tests\Fixtures\Plan;
 use OpenSoutheners\LaravelApiable\Tests\Fixtures\Post;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class ApiableTest extends TestCase
 {
@@ -152,5 +154,72 @@ class ApiableTest extends TestCase
 
         $this->assertStringContainsString('"title":"The password should have 6 characters or more."', $exceptionAsJsonString);
         $this->assertStringContainsString('"source":{"pointer":"password"}', $exceptionAsJsonString);
+    }
+
+    public function test_json_api_renderable_keeps_real_title_for_403_with_debug_false()
+    {
+        $handler = Apiable::jsonApiRenderable(new AccessDeniedHttpException('This action is unauthorized.'), false);
+
+        $exceptionAsJson = $handler->toResponse(request())->getData(true);
+
+        $this->assertSame('403', $exceptionAsJson['errors'][0]['status']);
+        $this->assertSame('This action is unauthorized.', $exceptionAsJson['errors'][0]['title']);
+        $this->assertArrayNotHasKey('trace', $exceptionAsJson['errors'][0]);
+    }
+
+    public function test_json_api_renderable_keeps_real_title_for_404_with_debug_false()
+    {
+        $handler = Apiable::jsonApiRenderable(new NotFoundHttpException('Post not found.'), false);
+
+        $exceptionAsJson = $handler->toResponse(request())->getData(true);
+
+        $this->assertSame('404', $exceptionAsJson['errors'][0]['status']);
+        $this->assertSame('Post not found.', $exceptionAsJson['errors'][0]['title']);
+        $this->assertArrayNotHasKey('trace', $exceptionAsJson['errors'][0]);
+    }
+
+    public function test_json_api_renderable_keeps_real_title_for_422_with_debug_false()
+    {
+        $handler = Apiable::jsonApiRenderable(ValidationException::withMessages([
+            'email' => ['The email is incorrectly formatted.'],
+        ]), false);
+
+        $exceptionAsJson = $handler->toResponse(request())->getData(true);
+
+        $this->assertSame('422', $exceptionAsJson['errors'][0]['status']);
+        $this->assertSame('The email is incorrectly formatted.', $exceptionAsJson['errors'][0]['title']);
+    }
+
+    public function test_json_api_renderable_keeps_generic_title_for_500_with_debug_false()
+    {
+        $handler = Apiable::jsonApiRenderable(new \Exception('Some internal detail leaking a stack frame.'), false);
+
+        $exceptionAsJson = $handler->toResponse(request())->getData(true);
+
+        $this->assertSame('500', $exceptionAsJson['errors'][0]['status']);
+        $this->assertSame('Internal server error.', $exceptionAsJson['errors'][0]['title']);
+        $this->assertArrayNotHasKey('trace', $exceptionAsJson['errors'][0]);
+    }
+
+    public function test_json_api_renderable_shows_real_title_and_trace_for_403_with_debug_true()
+    {
+        $handler = Apiable::jsonApiRenderable(new AccessDeniedHttpException('This action is unauthorized.'), true);
+
+        $exceptionAsJson = $handler->toResponse(request())->getData(true);
+
+        $this->assertSame('403', $exceptionAsJson['errors'][0]['status']);
+        $this->assertSame('This action is unauthorized.', $exceptionAsJson['errors'][0]['title']);
+        $this->assertArrayHasKey('trace', $exceptionAsJson['errors'][0]);
+    }
+
+    public function test_json_api_renderable_shows_real_title_and_trace_for_500_with_debug_true()
+    {
+        $handler = Apiable::jsonApiRenderable(new \Exception('My error'), true);
+
+        $exceptionAsJson = $handler->toResponse(request())->getData(true);
+
+        $this->assertSame('500', $exceptionAsJson['errors'][0]['status']);
+        $this->assertSame('My error', $exceptionAsJson['errors'][0]['title']);
+        $this->assertArrayHasKey('trace', $exceptionAsJson['errors'][0]);
     }
 }
