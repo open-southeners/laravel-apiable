@@ -54,8 +54,7 @@ All JSON:API responses flow through a 5-stage pipeline architecture:
 ### Key Components
 
 **Builder Macros** (registered via `ServiceProvider::registerMacros()`):
-- `Builder::jsonApiPaginate()` - Custom pagination with FastPaginate support
-- `Builder::buildLengthAwarePaginator()` - Traditional pagination with COUNT query
+- `Builder::jsonApiPaginate()` - Custom pagination with FastPaginate support, dispatching to `JsonApiPaginator::paginate()` for the length-aware/simple/cursor strategies
 - `Builder::hasJoin()` - Check if JOIN already exists on query
 
 **Resource Classes**:
