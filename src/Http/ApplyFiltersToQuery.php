@@ -111,12 +111,19 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
     /**
      * Wrap query if relationship found applying its operator and conditional to the filtered attribute.
      *
+     * An attribute can carry more than one allowed operator (e.g. gte + lte for a range filter).
+     * When that's the case, `$this->allowed[$filterAttribute]['operator']` is an operator-keyed
+     * map (see AllowsFilters::mergeFilterOperators()) instead of a single scalar string: each
+     * filter value is resolved to its own operator (`filter[attribute][gte]=`) rather than all
+     * values sharing whichever operator happened to be registered last.
+     *
      * @param  callable(Builder, string|null, string, string, string, string): mixed  $callback
      * @param  array<int|string, array<string>|string>|string  $filterValues
      */
     protected function wrapIfRelatedQuery(callable $callback, Builder $query, string $filterAttribute, array|string $filterValues): void
     {
-        $systemPreferredOperator = $this->allowed[$filterAttribute]['operator'];
+        $operatorRule = $this->allowed[$filterAttribute]['operator'] ?? null;
+        $systemPreferredOperator = is_array($operatorRule) ? array_key_first($operatorRule) : $operatorRule;
 
         $attributePartsArr = explode('.', $filterAttribute);
 
@@ -124,28 +131,28 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
 
         $relationship = implode($attributePartsArr);
 
+        $outerKeys = array_keys($filterValues);
+        $outerValues = array_values($filterValues);
+
         for ($i = 0; $i < count($filterValues); $i++) {
-            $filterValue = array_values($filterValues)[$i];
+            $filterValue = $outerValues[$i];
+
+            // Default filters are keyed directly by operator (e.g. ['equal' => 'published']),
+            // while user-submitted filters with an explicit operator key are a list of single
+            // pair arrays (e.g. [['gte' => '2024-01-01'], ['lte' => '2024-01-31']]) — the
+            // operator lives on the inner key, not this outer list's (numeric) index.
+            $operatorKey = is_string($outerKeys[$i])
+                ? $outerKeys[$i]
+                : (is_array($filterValue) ? array_key_first($filterValue) : $systemPreferredOperator);
+
+            $rawValue = is_array($filterValue) ? reset($filterValue) : $filterValue;
 
             $values = array_filter(
-                explode(',', is_array($filterValue) ? reset($filterValue) : $filterValue),
+                explode(',', (string) $rawValue),
                 fn ($value) => (string) $value === '0' || (! empty($value) && trim($value) !== '')
             );
-            $operator = array_keys($filterValues)[$i];
 
-            if (! is_string($operator)) {
-                $operator = $systemPreferredOperator;
-            }
-
-            $operator = match ($operator) {
-                'gt' => '>',
-                'gte' => '>=',
-                'lt' => '<',
-                'lte' => '<=',
-                'like' => 'LIKE',
-                'equal' => '=',
-                default => Apiable::config('requests.filters.default_operator')
-            };
+            $operator = $this->sqlOperatorFor($operatorKey);
 
             $query->where(function (Builder $query) use ($callback, $relationship, $attribute, $operator, $values) {
                 for ($n = 0; $n < count($values); $n++) {
@@ -165,6 +172,34 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
                 }
             });
         }
+    }
+
+    /**
+     * Resolve an operator key (e.g. "gte", "equal") into its SQL comparison operator.
+     *
+     * Falls back to the configured default operator for an unrecognised/missing key instead of
+     * leaking the raw operator key (or the numeric config value) into the query builder, which
+     * used to make Eloquent treat it as an invalid operator and silently rewrite the query into
+     * `WHERE attribute = 1`.
+     */
+    protected function sqlOperatorFor(?string $operatorKey): string
+    {
+        $sqlOperators = [
+            'gt' => '>',
+            'gte' => '>=',
+            'lt' => '<',
+            'lte' => '<=',
+            'like' => 'LIKE',
+            'equal' => '=',
+        ];
+
+        if ($operatorKey !== null && isset($sqlOperators[$operatorKey])) {
+            return $sqlOperators[$operatorKey];
+        }
+
+        $defaultOperatorKey = AllowedFilter::operatorKey((int) Apiable::config('requests.filters.default_operator'));
+
+        return $sqlOperators[$defaultOperatorKey] ?? 'LIKE';
     }
 
     /**

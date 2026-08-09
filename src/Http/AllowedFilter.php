@@ -168,6 +168,24 @@ class AllowedFilter implements Arrayable
     }
 
     /**
+     * Get the string key used to represent the given operator constant on the wire
+     * (query param modifiers, e.g. "gte"/"lte") and internally as an allowed filter rule key.
+     */
+    public static function operatorKey(int $operator): string
+    {
+        return match ($operator) {
+            static::EXACT => 'equal',
+            static::SCOPE => 'scope',
+            static::SIMILAR => 'like',
+            static::LOWER_THAN => 'lt',
+            static::GREATER_THAN => 'gt',
+            static::LOWER_OR_EQUAL_THAN => 'lte',
+            static::GREATER_OR_EQUAL_THAN => 'gte',
+            default => 'like',
+        };
+    }
+
+    /**
      * Get the instance as an array.
      *
      * @return array<string, array<string>>
@@ -177,16 +195,7 @@ class AllowedFilter implements Arrayable
         $operators = [];
 
         foreach ((array) $this->operator as $operator) {
-            $operators[] = match ($operator) {
-                static::EXACT => 'equal',
-                static::SCOPE => 'scope',
-                static::SIMILAR => 'like',
-                static::LOWER_THAN => 'lt',
-                static::GREATER_THAN => 'gt',
-                static::LOWER_OR_EQUAL_THAN => 'lte',
-                static::GREATER_OR_EQUAL_THAN => 'gte',
-                default => 'like',
-            };
+            $operators[] = static::operatorKey($operator);
         }
 
         return [
