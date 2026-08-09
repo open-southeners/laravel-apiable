@@ -12,6 +12,8 @@ use OpenSoutheners\LaravelApiable\Attributes\SortQueryParam;
 use OpenSoutheners\LaravelApiable\Documentation\QueryParam;
 use OpenSoutheners\LaravelApiable\Http\AllowedFilter;
 use OpenSoutheners\LaravelApiable\Http\AllowedSort;
+use OpenSoutheners\LaravelApiable\Support\Apiable;
+use OpenSoutheners\LaravelApiable\Tests\Fixtures\Tag;
 use PHPUnit\Framework\TestCase;
 
 class QueryParamTest extends TestCase
@@ -109,6 +111,55 @@ class QueryParamTest extends TestCase
         $this->assertSame('is_featured,word_count', $param->values);
     }
 
+    public function test_from_appends_attribute_resolves_model_class_to_resource_type_slug(): void
+    {
+        // Apiable's resource-type map is a shared static, isolate it from ambient
+        // state that other suites in the same process may have configured.
+        $originalMap = Apiable::getModelResourceTypeMap();
+        Apiable::modelResourceTypeMap([]);
+
+        try {
+            $attr = new AppendsQueryParam(Tag::class, ['is_featured'], 'Append computed fields');
+            $param = QueryParam::fromAppendsAttribute($attr);
+
+            $this->assertSame('appends[tag]', $param->key);
+            $this->assertStringNotContainsString(Tag::class, $param->key);
+        } finally {
+            Apiable::modelResourceTypeMap($originalMap);
+        }
+    }
+
+    public function test_from_appends_attribute_resolves_model_class_through_resource_type_map(): void
+    {
+        $originalMap = Apiable::getModelResourceTypeMap();
+        Apiable::modelResourceTypeMap([Tag::class => 'label']);
+
+        try {
+            $attr = new AppendsQueryParam(Tag::class, ['is_featured'], 'Append computed fields');
+            $param = QueryParam::fromAppendsAttribute($attr);
+
+            $this->assertSame('appends[label]', $param->key);
+        } finally {
+            Apiable::modelResourceTypeMap($originalMap);
+        }
+    }
+
+    public function test_from_fields_attribute_resolves_model_class_to_resource_type_slug(): void
+    {
+        $originalMap = Apiable::getModelResourceTypeMap();
+        Apiable::modelResourceTypeMap([]);
+
+        try {
+            $attr = new FieldsQueryParam(Tag::class, ['name'], 'Sparse fieldset');
+            $param = QueryParam::fromFieldsAttribute($attr);
+
+            $this->assertSame('fields[tag]', $param->key);
+            $this->assertStringNotContainsString(Tag::class, $param->key);
+        } finally {
+            Apiable::modelResourceTypeMap($originalMap);
+        }
+    }
+
     public function test_from_search_attribute(): void
     {
         $attr = new SearchQueryParam(true, 'Full-text search');
@@ -126,6 +177,42 @@ class QueryParamTest extends TestCase
 
         $this->assertSame('search[fields][title]', $param->key);
         $this->assertSame('search', $param->kind);
+    }
+
+    public function test_merge_combines_values_and_descriptions_for_same_key(): void
+    {
+        $a = new QueryParam('sort', 'sort', 'Sort by creation date', '-created_at');
+        $b = new QueryParam('sort', 'sort', 'Sort by likes', 'likes');
+
+        $merged = QueryParam::merge($a, $b);
+
+        $this->assertSame('sort', $merged->key);
+        $this->assertSame('sort', $merged->kind);
+        $this->assertStringContainsString('-created_at', $merged->values);
+        $this->assertStringContainsString('likes', $merged->values);
+        $this->assertStringContainsString('Sort by creation date', $merged->description);
+        $this->assertStringContainsString('Sort by likes', $merged->description);
+    }
+
+    public function test_merge_with_wildcard_values_stays_wildcard(): void
+    {
+        $a = new QueryParam('filter[status]', 'filter', '', '*');
+        $b = new QueryParam('filter[status]', 'filter', '', 'todo,done');
+
+        $merged = QueryParam::merge($a, $b);
+
+        $this->assertSame('*', $merged->values);
+    }
+
+    public function test_merge_does_not_duplicate_identical_values(): void
+    {
+        $a = new QueryParam('include', 'include', 'Include tags', 'tags');
+        $b = new QueryParam('include', 'include', 'Include tags', 'tags');
+
+        $merged = QueryParam::merge($a, $b);
+
+        $this->assertSame('tags', $merged->values);
+        $this->assertSame('Include tags', $merged->description);
     }
 
     public function test_to_array(): void

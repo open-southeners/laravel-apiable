@@ -28,12 +28,25 @@
 @endif
 ### Example Request
 
-```bash
-curl -G https://api.example.com/{{ $endpoint['uri'] }} \
-  -H "Accept: application/vnd.api+json"@if (!empty($endpoint['auth']) && $endpoint['auth']['type'] === 'bearer') \
-  -H "Authorization: Bearer {token}"@elseif (!empty($endpoint['auth']) && $endpoint['auth']['type'] === 'basic') \
-  -H "Authorization: Basic {credentials}"@endif
+@php
+    $isGetRequest = $endpoint['method'] === 'GET';
+    $curlHeaders = ['Accept: application/vnd.api+json', 'Content-Type: application/vnd.api+json'];
 
+    if (!empty($endpoint['auth']) && $endpoint['auth']['type'] === 'bearer') {
+        $curlHeaders[] = 'Authorization: Bearer {token}';
+    } elseif (!empty($endpoint['auth']) && $endpoint['auth']['type'] === 'basic') {
+        $curlHeaders[] = 'Authorization: Basic {credentials}';
+    }
+@endphp
+```bash
+curl {{ $isGetRequest ? '-G' : '-X '.$endpoint['method'] }} https://api.example.com/{{ $endpoint['uri'] }} \
+@foreach ($curlHeaders as $curlHeader)
+  -H "{{ $curlHeader }}"@if (!$loop->last || !$isGetRequest) \@endif
+
+@endforeach
+@unless ($isGetRequest)
+  -d '{"data": {"type": "resource", "attributes": {}}}'
+@endunless
 ```
 
 @endforeach

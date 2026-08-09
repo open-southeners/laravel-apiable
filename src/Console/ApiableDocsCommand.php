@@ -73,11 +73,12 @@ class ApiableDocsCommand extends Command
             $exporter = $this->makeExporter($format, $stub, (string) $outputPath);
             $outputs = $exporter->export($resources);
 
+            // Exporters already join their filenames with the output path passed to
+            // their constructor, so the keys returned here are the final paths.
             foreach ($outputs as $filePath => $contents) {
-                $fullPath = str_starts_with($filePath, '/') ? $filePath : $outputPath.'/'.$filePath;
-                $files->ensureDirectoryExists(dirname($fullPath));
-                $files->put($fullPath, $contents);
-                $generated[] = [$format, $fullPath];
+                $files->ensureDirectoryExists(dirname($filePath));
+                $files->put($filePath, $contents);
+                $generated[] = [$format, $filePath];
             }
         }
 

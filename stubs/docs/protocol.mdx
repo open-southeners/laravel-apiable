@@ -53,16 +53,30 @@ echo "export const description = '" . addslashes($resource['description']) . "'\
 
     @php echo '<CodeGroup title="Request" tag="' . $endpoint['method'] . '" label="/' . $endpoint['uri'] . '">' @endphp
 
-    ```bash @{{ title: 'cURL' }}
-    curl -G https://api.example.com/{{ $endpoint['uri'] }} \
-      -H "Accept: application/vnd.api+json"@if (!empty($endpoint['auth']) && $endpoint['auth']['type'] === 'bearer') \
-      -H "Authorization: Bearer {token}"@elseif (!empty($endpoint['auth']) && $endpoint['auth']['type'] === 'basic') \
-      -H "Authorization: Basic {credentials}"@endif
+    @php
+        $isGetRequest = $endpoint['method'] === 'GET';
+        $curlHeaders = ['Accept: application/vnd.api+json', 'Content-Type: application/vnd.api+json'];
 
+        if (!empty($endpoint['auth']) && $endpoint['auth']['type'] === 'bearer') {
+            $curlHeaders[] = 'Authorization: Bearer {token}';
+        } elseif (!empty($endpoint['auth']) && $endpoint['auth']['type'] === 'basic') {
+            $curlHeaders[] = 'Authorization: Basic {credentials}';
+        }
+    @endphp
+    ```bash @{{ title: 'cURL' }}
+    curl {{ $isGetRequest ? '-G' : '-X '.$endpoint['method'] }} https://api.example.com/{{ $endpoint['uri'] }} \
+    @foreach ($curlHeaders as $curlHeader)
+      -H "{{ $curlHeader }}"@if (!$loop->last || !empty($endpoint['queryParams']) || !$isGetRequest) \@endif
+
+    @endforeach
+    @if ($isGetRequest)
     @foreach ($endpoint['queryParams'] as $param)
       --data '{{ $param['key'] }}={{ $param['values'] !== '*' ? $param['values'] : '' }}'@if (!$loop->last) \@endif
 
     @endforeach
+    @else
+      -d '{"data": {"type": "resource", "attributes": {}}}'
+    @endif
     ```
 
     @php echo '</CodeGroup>' @endphp
