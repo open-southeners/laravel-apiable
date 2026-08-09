@@ -162,7 +162,7 @@ class JsonApiResponseTest extends TestCase
         $response->assertJsonCount(2, 'data');
     }
 
-    public function test_filtering_or_values_by_allowed_attribute_value_invalidates_whole_filter()
+    public function test_filtering_or_values_drops_the_invalid_value_and_keeps_the_valid_one()
     {
         Route::get('/', function () {
             return JsonApiResponse::from(Post::class)
@@ -171,7 +171,24 @@ class JsonApiResponseTest extends TestCase
                 ]);
         });
 
+        // "Inactive" isn't an allowed value: it's dropped, "Active" still applies on its own.
         $response = $this->get('/?filter[status]=Active,Inactive', ['Accept' => 'application/vnd.api+json']);
+
+        $response->assertJsonCount(2, 'data');
+    }
+
+    public function test_filtering_or_values_with_all_values_disallowed_falls_back_to_default()
+    {
+        Route::get('/', function () {
+            return JsonApiResponse::from(Post::class)
+                ->allowing([
+                    AllowedFilter::exact('status', ['Active', 'Archived']),
+                ]);
+        });
+
+        // Neither "Inactive" nor "Deleted" are allowed values, so nothing survives validation
+        // and the filter falls back to no filtering (no default filter registered here).
+        $response = $this->get('/?filter[status]=Inactive,Deleted', ['Accept' => 'application/vnd.api+json']);
 
         $response->assertJsonCount(4, 'data');
     }
@@ -262,6 +279,23 @@ class JsonApiResponseTest extends TestCase
         $response->assertJsonCount(3, 'data');
     }
 
+    public function test_filtering_by_scope_with_named_arguments_using_the_default_registration()
+    {
+        Route::get('/', function () {
+            return JsonApiResponse::from(Post::class)
+                ->allowing([
+                    // No explicit '*' pattern: named scope arguments validate against an
+                    // unrestricted pattern by default instead of the truthy '1' default.
+                    AllowedFilter::scoped('withStatuses'),
+                ]);
+        });
+
+        $response = $this->get('/?filter[withStatuses][status1]=Active&filter[withStatuses][status2]=Archived', ['Accept' => 'application/vnd.api+json']);
+
+        $response->assertSuccessful();
+        $response->assertJsonCount(3, 'data');
+    }
+
     // ---------------------------------------------------------------
     // Filters – Lower than / Lower or equal than
     // ---------------------------------------------------------------
@@ -336,6 +370,82 @@ class JsonApiResponseTest extends TestCase
 
         $response->assertSuccessful();
         $response->assertJsonCount(3, 'data');
+    }
+
+    // ---------------------------------------------------------------
+    // Filters – Multiple operators on the same attribute (range filters)
+    // ---------------------------------------------------------------
+
+    public function test_filtering_by_two_operators_on_the_same_attribute_applies_both_as_a_range()
+    {
+        Route::get('/', function () {
+            return JsonApiResponse::from(Post::class)
+                ->allowing([
+                    AllowedFilter::greaterOrEqualThan('author_id'),
+                    AllowedFilter::lowerOrEqualThan('author_id'),
+                ]);
+        });
+
+        // Posts with author_id between 2 and 3: post 2 (2), post 3 (3), post 4 (3)
+        $response = $this->get('/?filter[author_id][gte]=2&filter[author_id][lte]=3', ['Accept' => 'application/vnd.api+json']);
+
+        $response->assertSuccessful();
+        $response->assertJsonCount(3, 'data');
+    }
+
+    public function test_filtering_by_two_operators_narrows_down_to_a_single_result()
+    {
+        Route::get('/', function () {
+            return JsonApiResponse::from(Post::class)
+                ->allowing([
+                    AllowedFilter::greaterThan('author_id'),
+                    AllowedFilter::lowerThan('author_id'),
+                ]);
+        });
+
+        // Posts with author_id strictly between 1 and 3: only post 2 (author_id=2)
+        $response = $this->get('/?filter[author_id][gt]=1&filter[author_id][lt]=3', ['Accept' => 'application/vnd.api+json']);
+
+        $response->assertSuccessful();
+        $response->assertJsonCount(1, 'data');
+        $response->assertJsonApi(fn (AssertableJsonApi $assert) => $assert
+            ->isCollection()
+            ->at(0)->hasAttribute('title', 'Hello world')
+        );
+    }
+
+    public function test_filtering_by_attribute_with_multiple_operators_using_plain_filter_uses_the_first_registered_operator()
+    {
+        Route::get('/', function () {
+            return JsonApiResponse::from(Post::class)
+                ->allowing([
+                    AllowedFilter::greaterOrEqualThan('author_id'),
+                    AllowedFilter::lowerOrEqualThan('author_id'),
+                ]);
+        });
+
+        // No operator key sent: falls back to the first-registered operator (gte).
+        // Posts with author_id >= 2: post 2 (2), post 3 (3), post 4 (3)
+        $response = $this->get('/?filter[author_id]=2', ['Accept' => 'application/vnd.api+json']);
+
+        $response->assertSuccessful();
+        $response->assertJsonCount(3, 'data');
+    }
+
+    public function test_filtering_by_attribute_with_multiple_operators_using_an_unregistered_operator_key_is_dropped()
+    {
+        Route::get('/', function () {
+            return JsonApiResponse::from(Post::class)
+                ->allowing([
+                    AllowedFilter::greaterOrEqualThan('author_id'),
+                ]);
+        });
+
+        // "lte" was never registered for author_id, so it's silently dropped (no filtering).
+        $response = $this->get('/?filter[author_id][lte]=2', ['Accept' => 'application/vnd.api+json']);
+
+        $response->assertSuccessful();
+        $response->assertJsonCount(4, 'data');
     }
 
     // ---------------------------------------------------------------
@@ -843,6 +953,25 @@ class JsonApiResponseTest extends TestCase
             ->isCollection()
             ->at(0)->hasNotAttribute('nonexistent')
         );
+    }
+
+    public function test_non_allowed_append_returns_400_when_validate_params_is_enabled()
+    {
+        config(['apiable.requests.validate_params' => true]);
+
+        $this->withExceptionHandling();
+
+        Route::get('/', function () {
+            return JsonApiResponse::from(Post::class)
+                ->allowing([
+                    AllowedAppends::make('post', 'is_published'),
+                ]);
+        });
+
+        // "nonexistent" is not an allowed append
+        $response = $this->get('/?appends[post]=nonexistent', ['Accept' => 'application/vnd.api+json']);
+
+        $response->assertStatus(400);
     }
 
     public function test_appends_on_single_resource()

@@ -84,10 +84,6 @@ class QueryParamsValidator
                 $queryParamValues = Arr::isAssoc((array) $values) ? array_values($values) : $values;
                 $queryParamModifiers = Arr::isAssoc((array) $values) ? array_keys($values) : [];
 
-                if (is_string($queryParamValues) && Str::contains($queryParamValues, ',')) {
-                    $queryParamValues = explode(',', $values);
-                }
-
                 $conditionResult = is_null($rulesForKey)
                     ? false
                     : $condition($key, $queryParamModifiers, $queryParamValues, $rulesForKey, $valids);
