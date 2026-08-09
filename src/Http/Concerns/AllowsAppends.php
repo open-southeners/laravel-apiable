@@ -5,10 +5,11 @@ namespace OpenSoutheners\LaravelApiable\Http\Concerns;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use OpenSoutheners\LaravelApiable\Http\AllowedAppends;
+use OpenSoutheners\LaravelApiable\Http\RequestQueryObject;
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
 
 /**
- * @mixin \OpenSoutheners\LaravelApiable\Http\RequestQueryObject
+ * @mixin RequestQueryObject
  */
 trait AllowsAppends
 {
@@ -34,7 +35,7 @@ trait AllowsAppends
     /**
      * Allow the include of model accessors (attributes).
      *
-     * @param  \OpenSoutheners\LaravelApiable\Http\AllowedAppends|class-string<\Illuminate\Database\Eloquent\Model>|string  $type
+     * @param  AllowedAppends|class-string<Model>|string  $type
      */
     public function allowAppends(AllowedAppends|string $type, ?array $attributes = null): self
     {

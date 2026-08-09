@@ -57,11 +57,10 @@ class DocblockExtractorTest extends TestCase
 
     public function test_from_reflection_extracts_summary(): void
     {
-        $controller = new class {
+        $controller = new class
+        {
             /**
              * List all resources.
-             *
-             * @return void
              */
             public function index(): void {}
         };

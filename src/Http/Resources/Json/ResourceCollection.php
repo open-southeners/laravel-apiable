@@ -4,9 +4,11 @@ namespace OpenSoutheners\LaravelApiable\Http\Resources\Json;
 
 use Countable;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\PaginatedResourceResponse;
 use Illuminate\Pagination\AbstractCursorPaginator;
 use Illuminate\Pagination\AbstractPaginator;
+use Illuminate\Support\Collection;
 use IteratorAggregate;
 use OpenSoutheners\LaravelApiable\Http\Resources\CollectsResources;
 use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource;
@@ -14,7 +16,7 @@ use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource;
 /**
  * @template T
  *
- * @extends JsonApiResource<\Illuminate\Support\Collection<T>|\Illuminate\Pagination\AbstractPaginator|\Illuminate\Pagination\AbstractCursorPaginator>
+ * @extends JsonApiResource<Collection<T>|AbstractPaginator|AbstractCursorPaginator>
  */
 class ResourceCollection extends JsonApiResource implements Countable, IteratorAggregate
 {
@@ -23,14 +25,14 @@ class ResourceCollection extends JsonApiResource implements Countable, IteratorA
     /**
      * The resource that this resource collects.
      *
-     * @var class-string<\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource>
+     * @var class-string<JsonApiResource>
      */
     public $collects;
 
     /**
      * The mapped collection instance.
      *
-     * @var \Illuminate\Support\Collection
+     * @var Collection
      */
     public $collection;
 
@@ -87,11 +89,11 @@ class ResourceCollection extends JsonApiResource implements Countable, IteratorA
     /**
      * Transform the resource into a JSON array.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      */
     public function toArray($request): array
     {
-        /** @var \Illuminate\Support\Collection<array> $collectionArray */
+        /** @var Collection<array> $collectionArray */
         $collectionArray = $this->collection->map->toArray($request);
 
         return $collectionArray->toArray();
@@ -100,7 +102,7 @@ class ResourceCollection extends JsonApiResource implements Countable, IteratorA
     /**
      * Create an HTTP response that represents the object.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      */
     public function toResponse($request): JsonResponse
     {
@@ -114,7 +116,7 @@ class ResourceCollection extends JsonApiResource implements Countable, IteratorA
     /**
      * Create a paginate-aware HTTP response.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      */
     protected function preparePaginatedResponse($request): JsonResponse
     {

@@ -16,25 +16,25 @@ use OpenSoutheners\LaravelApiable\Tests\Fixtures\Post;
 
 class ApiableTest extends TestCase
 {
-    public function testApiableFacadeIsRegisteredIntoTheContainer()
+    public function test_apiable_facade_is_registered_into_the_container()
     {
         $this->assertTrue($this->app->bound('apiable'));
         $this->assertInstanceOf(Apiable::class, $this->app->make('apiable'));
     }
 
-    public function testApiableHelperReturnsSupportFromContainer()
+    public function test_apiable_helper_returns_support_from_container()
     {
         $this->assertTrue(function_exists('apiable'));
         $this->assertInstanceOf(Apiable::class, apiable());
     }
 
-    public function testToJsonApiReturnsEmptyJsonApiCollectionWhenInvalidInput()
+    public function test_to_json_api_returns_empty_json_api_collection_when_invalid_input()
     {
         $this->assertEquals(new JsonApiCollection(Collection::make([])), Apiable::toJsonApi(new \stdClass));
         $this->assertEquals(new JsonApiCollection(Collection::make([])), Apiable::toJsonApi('test'));
     }
 
-    public function testToJsonApiReturnsFormattedJsonWhenValidInput()
+    public function test_to_json_api_returns_formatted_json_when_valid_input()
     {
         $firstPost = new Post(['id' => 1, 'title' => 'foo', 'content' => 'bar', 'status' => 'Published']);
         $secondPost = new Post(['id' => 2, 'title' => 'hello', 'content' => 'world', 'status' => 'Published']);
@@ -46,7 +46,7 @@ class ApiableTest extends TestCase
         $this->assertTrue(Apiable::toJsonApi(Post::paginate()) instanceof JsonApiCollection);
     }
 
-    public function testResponseReturnsTrueWhenValidInput()
+    public function test_response_returns_true_when_valid_input()
     {
         $this->assertTrue(Apiable::response(Post::query()) instanceof JsonApiResponse);
         $this->assertTrue(
@@ -63,26 +63,26 @@ class ApiableTest extends TestCase
         );
     }
 
-    public function testGetModelResourceTypeMapGetsNonEmptyArray()
+    public function test_get_model_resource_type_map_gets_non_empty_array()
     {
         $this->assertIsArray(Apiable::getModelResourceTypeMap());
         $this->assertNotEmpty(Apiable::getModelResourceTypeMap());
     }
 
-    public function testModelResourceTypeMapSetsReplacingPreviousArray()
+    public function test_model_resource_type_map_sets_replacing_previous_array()
     {
         $this->assertNotEmpty(Apiable::getModelResourceTypeMap());
         Apiable::modelResourceTypeMap([]);
         $this->assertEmpty(Apiable::getModelResourceTypeMap());
     }
 
-    public function testModelResourceTypeMapSetsArrayOfModels()
+    public function test_model_resource_type_map_sets_array_of_models()
     {
         Apiable::modelResourceTypeMap([Post::class]);
         $this->assertNotEmpty(Apiable::getModelResourceTypeMap());
     }
 
-    public function testHandlerCanBeSentDirectlyWithoutCallingToResponseFirst()
+    public function test_handler_can_be_sent_directly_without_calling_to_response_first()
     {
         // Reproduces: "Call to undefined method OpenSoutheners\LaravelApiable\Handler::send()"
         // This happens when Handler is returned from an app's render() method directly
@@ -99,7 +99,7 @@ class ApiableTest extends TestCase
         $this->assertStringContainsString('"title":"Internal server error."', $output);
     }
 
-    public function testJsonApiRenderableReturnsExceptionAsFormatted500ErrorJson()
+    public function test_json_api_renderable_returns_exception_as_formatted500_error_json()
     {
         $handler = Apiable::jsonApiRenderable(new \Exception('My error'), true);
 
@@ -115,7 +115,7 @@ class ApiableTest extends TestCase
         $this->assertStringContainsString('"title":"My error"', $exceptionAsJsonString);
     }
 
-    public function testJsonApiRenderableReturnsExceptionAsFormatted500ErrorJsonWithHiddenDetailsWhenDebugFalse()
+    public function test_json_api_renderable_returns_exception_as_formatted500_error_json_with_hidden_details_when_debug_false()
     {
         $handler = Apiable::jsonApiRenderable(new \Exception('My error'), false);
 
@@ -131,7 +131,7 @@ class ApiableTest extends TestCase
         $this->assertStringContainsString('"title":"Internal server error."', $exceptionAsJsonString);
     }
 
-    public function testJsonApiRenderableReturnsValidationExceptionAsFormatted422ErrorJson()
+    public function test_json_api_renderable_returns_validation_exception_as_formatted422_error_json()
     {
         $handler = Apiable::jsonApiRenderable(ValidationException::withMessages([
             'email' => ['The email is incorrectly formatted.'],

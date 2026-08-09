@@ -2,7 +2,6 @@
 
 namespace OpenSoutheners\LaravelApiable;
 
-use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use OpenSoutheners\LaravelApiable\Http\JsonApiPaginator;
@@ -20,7 +19,7 @@ class Builder
          * Paginate the given query using JSON:API.
          *
          * @param  array<string>  $columns
-         * @return \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection
+         * @return JsonApiCollection
          */
         return function (null|int|string $pageSize = null, array $columns = ['*'], string $pageName = 'page.number', ?int $page = null) {
             // @codeCoverageIgnoreStart

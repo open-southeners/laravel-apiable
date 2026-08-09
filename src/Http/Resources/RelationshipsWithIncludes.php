@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use OpenSoutheners\LaravelApiable\Contracts\JsonApiable;
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
 
 /**
- * @mixin \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource
+ * @mixin JsonApiResource
  */
 trait RelationshipsWithIncludes
 {
@@ -38,7 +39,7 @@ trait RelationshipsWithIncludes
             if ($relationObj instanceof DatabaseCollection) {
                 $this->relationships[$relation]['data'] = [];
 
-                /** @var \Illuminate\Database\Eloquent\Model $relationModel */
+                /** @var Model $relationModel */
                 foreach ($relationObj->all() as $relationModel) {
                     $this->processModelRelation($relation, $relationModel);
                 }
@@ -65,11 +66,11 @@ trait RelationshipsWithIncludes
     /**
      * Process a model relation attaching to its model additional attributes.
      *
-     * @param  \OpenSoutheners\LaravelApiable\Contracts\JsonApiable|\Illuminate\Database\Eloquent\Model  $model
+     * @param  JsonApiable|Model  $model
      */
     protected function processModelRelation(string $relation, $model): void
     {
-        /** @var \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource $modelResource */
+        /** @var JsonApiResource $modelResource */
         $modelResource = $this->makeRelatedResource($model);
         $modelIdentifier = $modelResource->getResourceIdentifier();
 

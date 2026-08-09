@@ -4,8 +4,10 @@ namespace OpenSoutheners\LaravelApiable\Http;
 
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use OpenSoutheners\LaravelApiable\Contracts\HandlesRequestQueries;
+use OpenSoutheners\LaravelApiable\Contracts\JsonApiable;
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
 
 class ApplyFieldsToQuery implements HandlesRequestQueries
@@ -13,8 +15,8 @@ class ApplyFieldsToQuery implements HandlesRequestQueries
     /**
      * Apply modifications to the query based on allowed query fragments.
      *
-     * @param  \Closure(\OpenSoutheners\LaravelApiable\Http\RequestQueryObject): \Illuminate\Database\Eloquent\Builder  $next
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param  Closure(RequestQueryObject): Builder  $next
+     * @return Builder
      */
     public function from(RequestQueryObject $request, Closure $next)
     {
@@ -34,11 +36,11 @@ class ApplyFieldsToQuery implements HandlesRequestQueries
     /**
      * Apply array of fields to the query.
      *
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return Builder
      */
     protected function applyFields(Builder $query, array $fields)
     {
-        /** @var \OpenSoutheners\LaravelApiable\Contracts\JsonApiable|\Illuminate\Database\Eloquent\Model $mainQueryModel */
+        /** @var JsonApiable|Model $mainQueryModel */
         $mainQueryModel = $query->getModel();
         $mainQueryResourceType = Apiable::getResourceType($mainQueryModel);
         $queryEagerLoaded = $query->getEagerLoads();

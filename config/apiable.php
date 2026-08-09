@@ -81,8 +81,8 @@ return [
 
             'middleware_map' => [
                 'auth:sanctum' => 'bearer',
-                'auth:api'     => 'bearer',
-                'auth.basic'   => 'basic',
+                'auth:api' => 'bearer',
+                'auth.basic' => 'basic',
             ],
         ],
     ],

@@ -2,6 +2,7 @@
 
 namespace OpenSoutheners\LaravelApiable\Http;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Symfony\Component\HttpFoundation\HeaderUtils;
@@ -20,12 +21,12 @@ class RequestQueryObject
     use Concerns\ValidatesParams;
 
     /**
-     * @var \Illuminate\Database\Eloquent\Builder<T>
+     * @var Builder<T>
      */
     public $query;
 
     /**
-     * @var \Illuminate\Support\Collection<int|string, mixed>|null
+     * @var Collection<int|string, mixed>|null
      */
     protected ?Collection $queryParameters = null;
 
@@ -40,7 +41,7 @@ class RequestQueryObject
     /**
      * Set query for this request query object.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  Builder  $query
      */
     public function setQuery($query): self
     {
@@ -52,7 +53,7 @@ class RequestQueryObject
     /**
      * Get request query parameters as array.
      *
-     * @return \Illuminate\Support\Collection<int|string, mixed>
+     * @return Collection<int|string, mixed>
      */
     public function queryParameters(): Collection
     {

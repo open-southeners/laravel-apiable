@@ -3,9 +3,11 @@
 namespace OpenSoutheners\LaravelApiable\Http\Concerns;
 
 use Exception;
+use OpenSoutheners\LaravelApiable\Http\AllowedInclude;
+use OpenSoutheners\LaravelApiable\Http\RequestQueryObject;
 
 /**
- * @mixin \OpenSoutheners\LaravelApiable\Http\RequestQueryObject
+ * @mixin RequestQueryObject
  */
 trait AllowsIncludes
 {
@@ -27,7 +29,7 @@ trait AllowsIncludes
     /**
      * Allow include relationship to the response.
      *
-     * @param  \OpenSoutheners\LaravelApiable\Http\AllowedInclude|array|string  $relationship
+     * @param  AllowedInclude|array|string  $relationship
      * @return $this
      */
     public function allowInclude($relationship)

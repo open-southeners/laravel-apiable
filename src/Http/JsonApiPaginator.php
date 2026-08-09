@@ -9,6 +9,7 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection;
+use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource;
 use OpenSoutheners\LaravelApiable\Support\Facades\Apiable;
 
 class JsonApiPaginator
@@ -17,7 +18,7 @@ class JsonApiPaginator
      * Paginate the given Eloquent builder using JSON:API conventions.
      *
      * @param  array<string>  $columns
-     * @param  class-string<\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource>|null  $resourceClass
+     * @param  class-string<JsonApiResource>|null  $resourceClass
      */
     public static function paginate(
         Builder $builder,

@@ -8,7 +8,7 @@ use OpenSoutheners\LaravelApiable\Tests\TestCase;
 
 class RequestTest extends TestCase
 {
-    public function testRequestWantsJsonApi()
+    public function test_request_wants_json_api()
     {
         Route::get('/', function (Request $request) {
             return $request->wantsJsonApi() ? 'foo' : 'bar';

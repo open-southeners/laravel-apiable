@@ -3,16 +3,17 @@
 namespace OpenSoutheners\LaravelApiable\Http\Concerns;
 
 use Exception;
-use Illuminate\Pagination\AbstractPaginator;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Pagination\AbstractPaginator;
 use Illuminate\Support\Arr;
+use OpenSoutheners\LaravelApiable\Http\JsonApiResponse;
 use OpenSoutheners\LaravelApiable\Http\QueryParamsValidator;
 use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiCollection;
 use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource;
 use OpenSoutheners\LaravelApiable\Support\Apiable;
 
 /**
- * @mixin \OpenSoutheners\LaravelApiable\Http\JsonApiResponse
+ * @mixin JsonApiResponse
  */
 trait IteratesResultsAfterQuery
 {
@@ -96,8 +97,7 @@ trait IteratesResultsAfterQuery
     /**
      * Append array of attributes to the resulted JSON:API resource.
      *
-     * @param  \OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource|mixed  $resource
-     * @return void
+     * @param  JsonApiResource|mixed  $resource
      */
     protected function appendToApiResource(mixed $resource, array $appends): void
     {
@@ -105,7 +105,7 @@ trait IteratesResultsAfterQuery
             ? $resource->resource
             : $resource;
 
-        /** @var array<\OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource|\Illuminate\Database\Eloquent\Model> $resourceIncluded */
+        /** @var array<JsonApiResource|Model> $resourceIncluded */
         $resourceIncluded = match (true) {
             $resource instanceof JsonApiResource => $resource->with['included'] ?? [],
             $resource instanceof Model => Arr::flatten($resource->getRelations(), 1),

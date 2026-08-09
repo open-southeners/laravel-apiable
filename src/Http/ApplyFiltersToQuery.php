@@ -5,6 +5,7 @@ namespace OpenSoutheners\LaravelApiable\Http;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\ForwardsCalls;
@@ -25,8 +26,8 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
     /**
      * Apply modifications to the query based on allowed query fragments.
      *
-     * @param  \Closure(\OpenSoutheners\LaravelApiable\Http\RequestQueryObject): \Illuminate\Database\Eloquent\Builder  $next
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param  Closure(RequestQueryObject): Builder  $next
+     * @return Builder
      */
     public function from(RequestQueryObject $request, Closure $next)
     {
@@ -110,7 +111,7 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
     /**
      * Wrap query if relationship found applying its operator and conditional to the filtered attribute.
      *
-     * @param  callable(\Illuminate\Database\Eloquent\Builder, string|null, string, string, string, string): mixed  $callback
+     * @param  callable(Builder, string|null, string, string, string, string): mixed  $callback
      * @param  array<int|string, array<string>|string>|string  $filterValues
      */
     protected function wrapIfRelatedQuery(callable $callback, Builder $query, string $filterAttribute, array|string $filterValues): void
@@ -169,7 +170,7 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
     /**
      * Apply where or orWhere (non relationships only) to all filtered values.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Relations\Relation  $query
+     * @param  Builder|Relation  $query
      */
     protected function applyFilterAsWhere($query, $relationship, string $attribute, string $operator, string $value, string $condition): void
     {
@@ -184,7 +185,7 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
     /**
      * Apply scope wrapped into a where (non relationships only) forwarding the call directly to the builder.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Relations\Relation  $query
+     * @param  Builder|Relation  $query
      */
     protected function applyFilterAsScope($query, $relationship, string $scope, string $operator, string $value, string $condition): void
     {
@@ -223,7 +224,7 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
                 $value,
                 array_diff(
                     get_class_methods($modelQueryBuilder),
-                    get_class_methods(\Illuminate\Database\Eloquent\Builder::class)
+                    get_class_methods(Builder::class)
                 )
             );
         }

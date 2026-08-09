@@ -9,8 +9,8 @@ class AuthSchemeTest extends TestCase
 {
     private array $middlewareMap = [
         'auth:sanctum' => 'bearer',
-        'auth:api'     => 'bearer',
-        'auth.basic'   => 'basic',
+        'auth:api' => 'bearer',
+        'auth.basic' => 'basic',
     ];
 
     public function test_resolves_bearer_from_sanctum_middleware(): void

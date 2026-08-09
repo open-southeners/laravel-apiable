@@ -36,7 +36,7 @@ class JsonApiCollectionTest extends TestCase
         });
     }
 
-    public function testCollectionsMayBeConvertedToJsonApi()
+    public function test_collections_may_be_converted_to_json_api()
     {
         $response = $this->get('/', ['Accept' => 'application/json']);
 
@@ -63,7 +63,7 @@ class JsonApiCollectionTest extends TestCase
         ], true);
     }
 
-    public function testCollectionsAtHasAttribute()
+    public function test_collections_at_has_attribute()
     {
         $this->get('/', ['Accept' => 'application/json'])->assertJsonApi(function (AssertableJsonApi $jsonApi) {
             $jsonApi->at(0)->hasAttribute('title', 'Test Title');
@@ -72,21 +72,21 @@ class JsonApiCollectionTest extends TestCase
         });
     }
 
-    public function testCollectionsAtZeroHasFirstItemAttribute()
+    public function test_collections_at_zero_has_first_item_attribute()
     {
         $this->get('/', ['Accept' => 'application/json'])->assertJsonApi(function (AssertableJsonApi $assert) {
             $assert->at(0)->hasAttribute('title', 'Test Title');
         });
     }
 
-    public function testCollectionsHasSize()
+    public function test_collections_has_size()
     {
         $this->get('/', ['Accept' => 'application/json'])->assertJsonApi(function (AssertableJsonApi $assert) {
             $assert->hasSize(2);
         });
     }
 
-    public function testCollectionsAtUnreachablePosition()
+    public function test_collections_at_unreachable_position()
     {
         $this->expectException(AssertionFailedError::class);
 
@@ -95,7 +95,7 @@ class JsonApiCollectionTest extends TestCase
         });
     }
 
-    public function testCollectionsToArrayReturnsArray()
+    public function test_collections_to_array_returns_array()
     {
         $this->get('/', ['Accept' => 'application/json'])->assertJsonApi(function (AssertableJsonApi $jsonApi) {
             $responseArray = $jsonApi->toArray();
@@ -105,7 +105,7 @@ class JsonApiCollectionTest extends TestCase
         });
     }
 
-    public function testCollectionsWithPreserveQueryWillReturnPaginationLinksWithSimilarParams()
+    public function test_collections_with_preserve_query_will_return_pagination_links_with_similar_params()
     {
         Route::get('/posts', function () {
             $postsCollection = collect([

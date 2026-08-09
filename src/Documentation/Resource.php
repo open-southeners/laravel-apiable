@@ -2,6 +2,8 @@
 
 namespace OpenSoutheners\LaravelApiable\Documentation;
 
+use Illuminate\Database\Eloquent\Model;
+
 /**
  * Groups a set of documented endpoints under a named API resource.
  */
@@ -9,7 +11,7 @@ class Resource
 {
     /**
      * @param  Endpoint[]  $endpoints
-     * @param  class-string<\Illuminate\Database\Eloquent\Model>|null  $modelClass
+     * @param  class-string<Model>|null  $modelClass
      */
     public function __construct(
         public readonly string $name,

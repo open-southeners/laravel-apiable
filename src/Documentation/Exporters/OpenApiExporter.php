@@ -4,6 +4,7 @@ namespace OpenSoutheners\LaravelApiable\Documentation\Exporters;
 
 use OpenSoutheners\LaravelApiable\Documentation\AuthScheme;
 use OpenSoutheners\LaravelApiable\Documentation\QueryParam;
+use Symfony\Component\Yaml\Yaml;
 
 class OpenApiExporter implements ExporterInterface
 {
@@ -116,8 +117,8 @@ class OpenApiExporter implements ExporterInterface
      */
     private function toYaml(array $data): string
     {
-        if (class_exists(\Symfony\Component\Yaml\Yaml::class)) {
-            return \Symfony\Component\Yaml\Yaml::dump($data, 10, 2, \Symfony\Component\Yaml\Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
+        if (class_exists(Yaml::class)) {
+            return Yaml::dump($data, 10, 2, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
         }
 
         return $this->encodeYaml($data, 0);
