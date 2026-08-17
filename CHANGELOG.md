@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`responses.max_include_depth` config** (default `3`) caps how deeply nested an `include` path (e.g. `author.reviews.replies`) can go. Paths beyond the limit are dropped silently by default, or rejected with a `400` when `requests.validate_params` is enabled.
 - **Multi-operator filters.** An attribute can now be registered with more than one operator (e.g. `AllowedFilter::greaterOrEqualThan('due_at')` + `AllowedFilter::lowerOrEqualThan('due_at')`), letting clients send a proper range filter via `filter[attribute][gte]=X&filter[attribute][lte]=Y`. A plain `filter[attribute]=value` (no operator key) uses whichever operator was registered first.
 - `CURRENT_ISSUES.md` — a living ledger of known, non-blocking gaps and latent bugs found during this round, for future contributors to pick up.
+- **`apiable:types` command** generates a single TypeScript module (default `resources/js/api-schema.ts`) describing every `#[DocumentedResource]`-annotated endpoint's allowed filters (with operators and restricted values), sorts, includes, sparse fieldsets, appends, and default sort/filter — an `EndpointSchema` interface plus an `apiSchema` const object keyed by JSON:API resource type slug, ready to type a frontend URL builder (e.g. `@open-southeners/flex-url` v2) against your real API. Supports the same `--only`/`--exclude`/`--path` options as `apiable:docs` and shares its attribute-only reflection (fluent `->allowing()` controllers aren't picked up).
 
 ### Fixed
 

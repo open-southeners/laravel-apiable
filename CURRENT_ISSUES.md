@@ -1,9 +1,9 @@
 # Current issues (fix/known-gaps round)
 
-## Docs generator only reads PHP attributes, not fluent-style controllers
-- **Where**: `src/Documentation/Generator.php` (endpoint/query-param extraction walks `#[FilterQueryParam]`/`#[SortQueryParam]`/etc. reflection attributes only).
-- **What**: A controller that configures `JsonApiResponse` fluently (`->allowFilter()`, `->allowing([...])`, …) instead of declaring `#[FilterQueryParam]`-style attributes still gets a documented endpoint (route + method are always picked up), but with an empty query-param list — the generator has no way to see what a fluent call chain allows without executing it. This isn't a regression from this round; it's a structural limitation of attribute-only reflection.
-- **Fix**: Needs a runtime-introspection design (e.g. dry-running `JsonApiResponse::using()` against a fake request and reading back `getAllowedFilters()`/`getAllowedSorts()`/etc.), which is a larger feature, not a bug fix. Deferred.
+## Docs generator (and `apiable:types`) only read PHP attributes, not fluent-style controllers
+- **Where**: `src/Documentation/Generator.php` (endpoint/query-param extraction walks `#[FilterQueryParam]`/`#[SortQueryParam]`/etc. reflection attributes only); `src/Documentation/EndpointSchemaGenerator.php` (the `apiable:types` TypeScript schema exporter added this round reads the exact same set of attributes and shares this limitation — it was built attribute-only on purpose, matching the docs generator, rather than growing a separate runtime-introspection mode).
+- **What**: A controller that configures `JsonApiResponse` fluently (`->allowFilter()`, `->allowing([...])`, …) instead of declaring `#[FilterQueryParam]`-style attributes still gets a documented endpoint/schema entry (route + method are always picked up), but with an empty query-param list — neither generator has a way to see what a fluent call chain allows without executing it. This isn't a regression from this round; it's a structural limitation of attribute-only reflection.
+- **Fix**: Needs a runtime-introspection design (e.g. dry-running `JsonApiResponse::using()` against a fake request and reading back `getAllowedFilters()`/`getAllowedSorts()`/etc.), which is a larger feature, not a bug fix. Deferred. Any future fix should land in both `Generator`/`EndpointSchemaGenerator` (or a shared introspection layer they both call) to keep docs and generated types in sync.
 
 ## `AssertableJsonApi::relationship()` breaks `hasSize()`/`at()` for to-many relationships
 - **Where**: `src/Testing/AssertableJsonApi.php:204-209` (`relationship()` scopes into `relationships.{name}.data`); `src/Testing/Concerns/HasCollections.php` (`collection()`/`hasSize()`/`at()`, which all call `$this->prop('data')` looking for a further-nested `data` key).
@@ -40,3 +40,13 @@
 - **What**: Both features are optional-dependency-gated (`laravel/scout`, `hammerstone/fast-paginate`/`aaronfrancis/fast-paginate`) and neither dependency is installed in `project-rezero`, so neither path gets exercised by the testbed's integration suite. This package's own unit tests cover search filter *parsing* (see `tests/Http/RequestQueryObjectTest.php`) but not an actual Scout-backed search end-to-end, and FastPaginate has no tests at all (`@codeCoverageIgnoreStart`/`End` markers around it in `src/Builder.php`).
 - **Fix**: Out of scope for this round (no deps available); track separately if/when a consumer needs either feature validated against a real driver.
 
+
+## Sparse fieldsets silently drop `BelongsTo` eager-loaded relationships
+- **Where**: `src/Http/ApplyFieldsToQuery.php:53-59` (`applyFields()` restricts the main query's `select()` to requested fields + primary key).
+- **What**: Combining `fields[type]=...` with `include=someBelongsTo` trims the foreign-key columns those `BelongsTo` eager loads need, so the relationships silently vanish from the response (`include=project,assignee` works alone; adding `fields[issues]=title` loses both — only pivot-joined `BelongsToMany` survives, since it joins on the always-selected primary key). Found by the rezero Browse UI round (issues table island).
+- **Fix**: Preserve foreign-key columns required by `$query->getEagerLoads()` when trimming the select, or skip trimming columns an eager load depends on. Add a fields+include regression test.
+
+## List responses never consult `Apiable::modelResourceMap()`
+- **Where**: `src/Support/Apiable.php:44-51` (`toJsonApi()` Builder/paginator path) and the `JsonApiPaginator`/`JsonApiCollection` construction — rows serialize through the base `JsonApiResource`, ignoring registered custom resource classes.
+- **What**: A custom resource registered via `Apiable::modelResourceMap([Model::class => CustomResource::class])` only applies to single-model responses (`show`/`store`/`update`); index/list documents use the base resource, so custom `withAttributes()` additions (rezero's `IssueJsonApiResource::estimate_human`) never appear in collections. Found by the rezero Browse UI round (client had to re-derive the value from raw attributes).
+- **Fix**: Default the collection's resource class via `Apiable::jsonApiResourceFor($builder->getModel())` when none is explicitly set (`usingResource()` already overrides per-response). Add a list-endpoint custom-resource test.
