@@ -37,6 +37,7 @@
 * [Annotating Controllers](documentation/annotating-controllers.md)
 * [Output Formats](documentation/output-formats.md)
 * [Customising Stubs](documentation/customising-stubs.md)
+* [TypeScript Schema Export](documentation/typescript-schema.md)
 
 ## Testing
 

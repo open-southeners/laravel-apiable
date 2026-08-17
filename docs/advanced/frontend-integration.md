@@ -36,7 +36,11 @@ For a full list of JSON:API client libraries for every language and framework, s
 
 ### Flex URL
 
-[Flex URL](https://github.com/open-southeners/flex-url) is an open-source package maintained by Open Southeners that provides a fluent builder for constructing and parsing URLs that follow the JSON:API query parameter conventions (`filter`, `sort`, `include`, `fields`, `page`). It runs in the browser and in Node.js.
+[Flex URL](https://github.com/open-southeners/flex-url) is an open-source package maintained by Open Southeners that provides an immutable, fluent builder for constructing and parsing URLs that follow this package's request query grammar (`filter`, `sort`, `include`, `fields`, `appends`, `page`, `q`). It runs in the browser and in Node.js.
+
+{% hint style="warning" %}
+This section documents the **v2** API surface (`@open-southeners/flex-url`, scoped package name), currently in development. v1 (unscoped `flex-url`) predates this grammar and had several known parsing/encoding defects; don't rely on it against this package's endpoints. This page will be trued up against the real v2 implementation once it ships.
+{% endhint %}
 
 - **Repository**: https://github.com/open-southeners/flex-url
 - **Documentation**: https://docs.opensoutheners.com/flex-url/
@@ -45,18 +49,61 @@ For a full list of JSON:API client libraries for every language and framework, s
 npm install @open-southeners/flex-url
 ```
 
+Every builder call returns a **new** immutable instance — nothing is mutated in place, so intermediate values are safe to reuse or store:
+
 ```js
-import { url } from '@open-southeners/flex-url'
+import { flexUrl } from '@open-southeners/flex-url'
 
-const apiUrl = url('https://api.example.com/posts')
-  .filter('status', 'published')
-  .sort('-created_at')
-  .include('tags', 'author')
+const url = flexUrl('https://api.example.com/api/v1/posts')
+  .filter('status', 'published')            // filter[status]=published
+  .filter('title', 'like', 'laravel')        // filter[title][like]=laravel
+  .between('created_at', '2026-01-01', '2026-06-01') // filter[created_at][gte]=...&filter[created_at][lte]=...
+  .filterScope('featured')                   // filter[scope][featured]=1
+  .sort('-created_at')                       // sort=-created_at
+  .include('tags', 'author')                 // include=tags,author
+  .fields('post', 'title', 'excerpt')        // fields[post]=title,excerpt
+  .append('post', 'reading_time')            // appends[post]=reading_time
   .page(1)
-  .toString()
+  .pageSize(20)
 
-// https://api.example.com/posts?filter[status]=published&sort=-created_at&include=tags,author&page[number]=1
+url.toString()
+// https://api.example.com/api/v1/posts?filter[status]=published&filter[title][like]=laravel&filter[created_at][gte]=2026-01-01&filter[created_at][lte]=2026-06-01&filter[scope][featured]=1&sort=-created_at&include=tags,author&fields[post]=title,excerpt&appends[post]=reading_time&page[number]=1&page[size]=20
 ```
+
+Cursor pagination uses `pageCursor()` instead of `page()`:
+
+```js
+flexUrl('/api/v1/posts').pageCursor('eyJpZCI6MTB9')
+// /api/v1/posts?page[cursor]=eyJpZCI6MTB9
+```
+
+#### Parsing is the same as building
+
+Constructing a `FlexUrl` from a full URL or query string round-trips losslessly (pathname, port, and any params it doesn't recognise are preserved), and the same fluent vocabulary reads state back — useful for hydrating UI controls (filters, sort column, page) from `window.location` on page load:
+
+```js
+const current = flexUrl(window.location.href)
+
+current.hasFilter('status')       // true
+current.getFilter('status')       // 'published'
+current.getSort()                 // ['-created_at']
+current.getPage()                 // { number: 1, size: 20 }
+```
+
+#### Typed against a generated schema
+
+Paired with this package's [`apiable:types` command](../documentation/typescript-schema.md), `flexUrl` narrows `filter()`/`sort()`/`include()`/`fields()`/`append()` arguments to whatever a given endpoint actually allows:
+
+```ts
+import { flexUrl } from '@open-southeners/flex-url'
+import { apiSchema } from './resources/js/api-schema'
+
+const url = flexUrl<typeof apiSchema.post>('/api/v1/posts')
+  .filter('status', 'published') // typo/unknown attribute or value = compile error
+  .sort('-created_at')
+```
+
+Untyped usage (no generic parameter) continues to work without any generated schema.
 
 ---
 
