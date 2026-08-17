@@ -7,6 +7,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Illuminate\Testing\TestResponse;
 use OpenSoutheners\LaravelApiable\Console\ApiableDocsCommand;
+use OpenSoutheners\LaravelApiable\Console\ApiableTypesCommand;
 use OpenSoutheners\LaravelApiable\Support\Apiable;
 use OpenSoutheners\LaravelApiable\Testing\TestResponseMacros;
 
@@ -24,7 +25,7 @@ class ServiceProvider extends BaseServiceProvider
         }
 
         if ($this->app->runningInConsole()) {
-            $this->commands([ApiableDocsCommand::class]);
+            $this->commands([ApiableDocsCommand::class, ApiableTypesCommand::class]);
 
             $this->publishes([
                 __DIR__.'/../config/apiable.php' => config_path('apiable.php'),
