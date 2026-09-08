@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Multi-operator filters.** An attribute can now be registered with more than one operator (e.g. `AllowedFilter::greaterOrEqualThan('due_at')` + `AllowedFilter::lowerOrEqualThan('due_at')`), letting clients send a proper range filter via `filter[attribute][gte]=X&filter[attribute][lte]=Y`. A plain `filter[attribute]=value` (no operator key) uses whichever operator was registered first.
 - `CURRENT_ISSUES.md` — a living ledger of known, non-blocking gaps and latent bugs found during this round, for future contributors to pick up.
 - **`apiable:types` command** generates a single TypeScript module (default `resources/js/api-schema.ts`) describing every `#[DocumentedResource]`-annotated endpoint's allowed filters (with operators and restricted values), sorts, includes, sparse fieldsets, appends, and default sort/filter — an `EndpointSchema` interface plus an `apiSchema` const object keyed by JSON:API resource type slug, ready to type a frontend URL builder (e.g. `@open-southeners/flex-url` v2) against your real API. Supports the same `--only`/`--exclude`/`--path` options as `apiable:docs` and shares its attribute-only reflection (fluent `->allowing()` controllers aren't picked up).
+- **`requests.strict_comma_encoding` config** (default `false`) lets a client send a literal comma inside a single `filter`/`sort`/`include`/`fields`/`appends` value. With it enabled, a percent-encoded comma (`%2C`) stays part of the value instead of being treated as another OR-separator — `filter[title]=foo%2Cbar,baz` matches `"foo,bar"` OR `"baz"`, rather than three separate values.
 
 ### Fixed
 
@@ -34,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Docs and `CLAUDE.md` accuracy pass: removed references to APIs that don't exist (`Builder::buildLengthAwarePaginator()`, `JsonApiResponse::list()`, `AllowedSort::field()`, `Handler::render()`) in favour of the real ones, and aligned the stated requirements (PHP 8.2+, Laravel 12+) with `composer.json`.
+- **Query parsing now goes through `open-southeners/flex-url`'s parser** instead of six separate hand-rolled implementations across the `filter`/`sort`/`include`/`fields`/`appends` readers, removing a class of divergence in how each one comma-split values. Default (non-strict) behaviour for every existing request is unchanged. **Type change**: `RequestQueryObject::filters()`'s public return shape changed — each filter's values now arrive already split into an array rather than one comma-joined string. Code calling `filters()` directly (rather than through `userAllowedFilters()`) should account for this.
 
 ## [4.3.0] - 2026-04-22
 
