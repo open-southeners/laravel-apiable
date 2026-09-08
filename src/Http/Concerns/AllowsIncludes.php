@@ -25,7 +25,7 @@ trait AllowsIncludes
      */
     public function includes()
     {
-        return array_filter(explode(',', $this->request->get('include', '')));
+        return $this->flexUrl()->getIncludes();
     }
 
     /**

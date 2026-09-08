@@ -23,13 +23,7 @@ trait AllowsAppends
      */
     public function appends(): array
     {
-        $appends = $this->request->get('appends', []);
-
-        foreach ($appends as $type => $attributes) {
-            $appends[$type] = explode(',', $attributes);
-        }
-
-        return array_filter($appends);
+        return array_filter($this->flexUrl()->getAppends());
     }
 
     /**
