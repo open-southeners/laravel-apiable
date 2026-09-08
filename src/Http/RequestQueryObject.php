@@ -5,6 +5,9 @@ namespace OpenSoutheners\LaravelApiable\Http;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use OpenSoutheners\FlexUrl\FlexUrl;
+use OpenSoutheners\FlexUrl\FlexUrlOptions;
+use OpenSoutheners\LaravelApiable\Support\Apiable;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 
 /**
@@ -31,11 +34,34 @@ class RequestQueryObject
     protected ?Collection $queryParameters = null;
 
     /**
+     * Memoized flex-url parser for the current request's raw query string.
+     */
+    protected ?FlexUrl $flexUrl = null;
+
+    /**
      * Construct the request query object.
      */
     public function __construct(protected Request $request)
     {
         //
+    }
+
+    /**
+     * Single parse point for the request's query string (filter/sort/include/fields/appends), backed by flex-url.
+     *
+     * Fed the raw path + `QUERY_STRING` rather than `$this->request->fullUrl()`: Symfony's `getQueryString()`
+     * (behind `fullUrl()`) normalises the query string, re-encoding every comma to `%2C` uniformly before
+     * flex-url would ever see it, which would silently defeat `strict_comma_encoding` by merging every
+     * multi-value filter into one value.
+     */
+    public function flexUrl(): FlexUrl
+    {
+        return $this->flexUrl ??= FlexUrl::from(
+            $this->request->getPathInfo().'?'.$this->request->server('QUERY_STRING', ''),
+            new FlexUrlOptions(
+                strictCommaEncoding: (bool) Apiable::config('requests.strict_comma_encoding'),
+            ),
+        );
     }
 
     /**
