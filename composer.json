@@ -22,7 +22,8 @@
     "require": {
         "php": "^8.2",
         "illuminate/support": "^12.0 || ^13.0",
-        "open-southeners/extended-php": "~1.0"
+        "open-southeners/extended-php": "~1.0",
+        "open-southeners/flex-url": "@dev"
     },
     "require-dev": {
         "larastan/larastan": "^3.0",
@@ -39,6 +40,12 @@
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../flex-url/packages/php"
+        }
+    ],
     "autoload": {
         "psr-4": {
             "OpenSoutheners\\LaravelApiable\\": "src"
