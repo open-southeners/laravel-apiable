@@ -25,13 +25,7 @@ trait AllowsFields
      */
     public function fields()
     {
-        $fields = $this->request->get('fields', []);
-
-        foreach ($fields as $type => $columns) {
-            $fields[$type] = explode(',', $columns);
-        }
-
-        return array_filter($fields);
+        return array_filter($this->flexUrl()->getFields());
     }
 
     /**

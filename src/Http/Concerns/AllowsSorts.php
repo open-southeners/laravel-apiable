@@ -27,18 +27,10 @@ trait AllowsSorts
      */
     public function sorts(): array
     {
-        $sortsSourceArr = array_filter(explode(',', $this->request->get('sort', '')));
         $sortsArr = [];
 
-        while ($sort = array_pop($sortsSourceArr)) {
-            $attribute = $sort;
-            $direction = $sort[0] === '-' ? 'desc' : 'asc';
-
-            if ($direction === 'desc') {
-                $attribute = ltrim($attribute, '-');
-            }
-
-            $sortsArr[$attribute] = $direction;
+        foreach ($this->flexUrl()->getSorts() as $entry) {
+            $sortsArr[$entry['attribute']] = $entry['direction'];
         }
 
         return $sortsArr;
