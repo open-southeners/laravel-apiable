@@ -20,6 +20,14 @@ return [
     'requests' => [
         'validate_params' => false,
 
+        /**
+         * Escape a literal comma inside one filter/sort/include/fields/appends value as `%2C`
+         * (rather than treating every comma as a multi-value separator, the default). Opt in
+         * only once every client sending these query params is updated to encode a literal comma
+         * this way, since it changes how a raw `,` on the wire is interpreted.
+         */
+        'strict_comma_encoding' => false,
+
         'filters' => [
             'default_operator' => AllowedFilter::SIMILAR,
             'enforce_scoped_names' => false,
