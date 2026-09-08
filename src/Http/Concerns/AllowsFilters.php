@@ -8,7 +8,6 @@ use OpenSoutheners\LaravelApiable\Http\AllowedFilter;
 use OpenSoutheners\LaravelApiable\Http\DefaultFilter;
 use OpenSoutheners\LaravelApiable\Http\RequestQueryObject;
 use OpenSoutheners\LaravelApiable\Support\Apiable;
-use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
@@ -28,36 +27,21 @@ trait AllowsFilters
 
     /**
      * Get user filters from request.
+     *
+     * Each attribute maps to its list of filter entries as parsed by flex-url: a bracket-less
+     * `filter[attribute]=` reads as one entry with an empty `operator`, `filter[attribute][op]=`
+     * as one entry per operator (or, for a scoped filter's named arguments, one entry per
+     * argument key). `values` is a `list<string>` already split on comma — respecting
+     * `strict_comma_encoding` — rather than a comma-joined string.
+     *
+     * @return array<string, list<array{operator: string, values: list<string>}>>
      */
     public function filters(): array
     {
-        $queryStringArr = explode('&', $this->request->server('QUERY_STRING', ''));
         $filters = [];
 
-        foreach ($queryStringArr as $param) {
-            $filterQueryParam = HeaderUtils::parseQuery($param);
-
-            if (! is_array(head($filterQueryParam))) {
-                continue;
-            }
-
-            $filterQueryParamAttribute = head(array_keys($filterQueryParam));
-
-            if ($filterQueryParamAttribute !== 'filter') {
-                continue;
-            }
-
-            $filterQueryParam = head($filterQueryParam);
-            $filterQueryParamAttribute = head(array_keys($filterQueryParam));
-            $filterQueryParamValue = head(array_values($filterQueryParam));
-
-            if (! isset($filters[$filterQueryParamAttribute])) {
-                $filters[$filterQueryParamAttribute] = [$filterQueryParamValue];
-
-                continue;
-            }
-
-            $filters[$filterQueryParamAttribute][] = $filterQueryParamValue;
+        foreach ($this->flexUrl()->getFilters() as $entry) {
+            $filters[$entry['attribute']][] = ['operator' => $entry['operator'], 'values' => $entry['values']];
         }
 
         return $filters;
@@ -208,13 +192,21 @@ trait AllowsFilters
     }
 
     /**
-     * Validate (and select) the operator + value(s) for each requested filter value against
-     * the attribute's registered operator(s), splitting comma-separated values before matching
-     * them against the operator's value pattern (unmatched values are dropped rather than
-     * invalidating the whole comma list) and rejecting any operator key that isn't registered
-     * for the attribute (e.g. `filter[due_at][lte]=` when only `gte` was allowed).
+     * Validate (and select) the operator + value(s) for each requested filter entry against
+     * the attribute's registered operator(s), matching each already-split value against the
+     * operator's value pattern (unmatched values are dropped rather than invalidating the whole
+     * entry) and rejecting any operator key that isn't registered for the attribute (e.g.
+     * `filter[due_at][lte]=` when only `gte` was allowed).
      *
-     * @param  array<int, array|string>  $values
+     * `$values` arrives pre-split by flex-url's parser (see `RequestQueryObject::filters()`), so
+     * there's no comma explode/rejoin here: with `requests.strict_comma_encoding` off (the
+     * default), the valid parts are rejoined into a single comma-joined string — preserving the
+     * pre-flex-url output shape byte-for-byte, since a comma is always a plain separator in that
+     * mode and rejoining is lossless. With it on, the valid parts are kept as a real array so a
+     * literal comma inside one value survives instead of being rejoined then wrongly re-split
+     * downstream (see `ApplyFiltersToQuery::wrapIfRelatedQuery()`).
+     *
+     * @param  list<array{operator: string, values: list<string>}>  $values
      * @param  array<string, mixed>  $rules
      * @param  array<int, array|string>  $valids
      */
@@ -222,13 +214,14 @@ trait AllowsFilters
     {
         $operatorPatterns = $this->operatorPatternsFromFilterEntry($rules);
         $defaultOperator = array_key_first($operatorPatterns);
+        $strict = (bool) Apiable::config('requests.strict_comma_encoding');
 
         $valids = [];
         $allValid = true;
 
         foreach ($values as $value) {
-            $operatorKey = is_array($value) ? array_key_first($value) : $defaultOperator;
-            $rawValue = is_array($value) ? reset($value) : $value;
+            $operatorKey = $value['operator'] !== '' ? $value['operator'] : $defaultOperator;
+            $parts = $value['values'];
 
             if (! array_key_exists($operatorKey, $operatorPatterns)) {
                 $allValid = false;
@@ -237,7 +230,6 @@ trait AllowsFilters
             }
 
             $pattern = $operatorPatterns[$operatorKey];
-            $parts = is_string($rawValue) ? explode(',', $rawValue) : [$rawValue];
 
             $validParts = $pattern === '*'
                 ? $parts
@@ -251,9 +243,9 @@ trait AllowsFilters
                 continue;
             }
 
-            $rejoinedValue = implode(',', $validParts);
+            $resultValue = $strict ? $validParts : implode(',', $validParts);
 
-            $valids[] = is_array($value) ? [$operatorKey => $rejoinedValue] : $rejoinedValue;
+            $valids[] = $value['operator'] !== '' ? [$operatorKey => $resultValue] : $resultValue;
         }
 
         return $allValid;
@@ -268,35 +260,65 @@ trait AllowsFilters
      *
      * Unlike attribute filters, scope arguments are positional: a partially valid set can't be
      * applied (it would call the scope with the wrong argument order/count), so this is all
-     * arguments valid or none applied — never a partial drop.
+     * arguments valid or none applied — never a partial drop. Scope arguments never went through
+     * apiable's own comma-splitting, so each entry's (already flex-url-split) values are always
+     * rejoined back into a single scalar here too — this keeps `ApplyFiltersToQuery::
+     * applyScopeWithNamedArguments()` (which unwraps each argument to a single scalar) unaffected.
      *
-     * @param  array<int, array|string>  $values
+     * @param  list<array{operator: string, values: list<string>}>  $values
      * @param  array<string>|string  $pattern
      * @param  array<int, array|string>  $valids
      */
     protected function scopedFilterValuesMatchRules(array $values, $pattern, array &$valids): bool
     {
-        $isNamedArguments = ! empty($values) && is_array(reset($values));
+        $isNamedArguments = ! empty($values) && reset($values)['operator'] !== '';
 
         if ($isNamedArguments && $pattern === '1') {
             $pattern = '*';
         }
 
-        if ($pattern === '*') {
-            $valids = $values;
-
-            return true;
-        }
-
-        $allValid = array_reduce(
+        $allValid = $pattern === '*' || array_reduce(
             $values,
-            fn ($carry, $value) => $carry && Str::is($pattern, is_array($value) ? reset($value) : $value),
+            fn ($carry, $entry) => $carry && array_reduce(
+                $entry['values'],
+                fn ($carryValue, $value) => $carryValue && Str::is($pattern, $value),
+                true
+            ),
             true
         );
 
-        $valids = $allValid ? $values : [];
+        $valids = $allValid ? $this->reshapeScopeFilterValues($values) : [];
 
         return $allValid;
+    }
+
+    /**
+     * Reshapes flex-url's per-attribute filter entries back into the flat scope-argument shape
+     * `userAllowedFilters()`/`ApplyFiltersToQuery::applyScopeWithNamedArguments()` expect: a
+     * bracket-less entry's values become individual top-level scalars (matching a repeated
+     * `filter[scope]=a&filter[scope]=b`), a named-argument entry becomes a single `[arg => value]`
+     * pair.
+     *
+     * @param  list<array{operator: string, values: list<string>}>  $values
+     * @return array<int, array|string>
+     */
+    protected function reshapeScopeFilterValues(array $values): array
+    {
+        $valids = [];
+
+        foreach ($values as $entry) {
+            if ($entry['operator'] === '') {
+                foreach ($entry['values'] as $value) {
+                    $valids[] = $value;
+                }
+
+                continue;
+            }
+
+            $valids[] = [$entry['operator'] => implode(',', $entry['values'])];
+        }
+
+        return $valids;
     }
 
     /**

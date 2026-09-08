@@ -118,7 +118,7 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
      * values sharing whichever operator happened to be registered last.
      *
      * @param  callable(Builder, string|null, string, string, string, string): mixed  $callback
-     * @param  array<int|string, array<string>|string>|string  $filterValues
+     * @param  array<int|string, list<string>|array<string>|string>|string  $filterValues
      */
     protected function wrapIfRelatedQuery(callable $callback, Builder $query, string $filterAttribute, array|string $filterValues): void
     {
@@ -140,17 +140,31 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
             // Default filters are keyed directly by operator (e.g. ['equal' => 'published']),
             // while user-submitted filters with an explicit operator key are a list of single
             // pair arrays (e.g. [['gte' => '2024-01-01'], ['lte' => '2024-01-31']]) — the
-            // operator lives on the inner key, not this outer list's (numeric) index.
+            // operator lives on the inner key, not this outer list's (numeric) index. That
+            // wrapper is only ever an *associative* (string-keyed) array; with
+            // `strict_comma_encoding` on, an operator-less/default value can itself already be a
+            // plain `list<string>` of pre-split values (AllowsFilters::operatorFilterValuesMatchRules()),
+            // which must not be mistaken for the wrapper.
+            $isOperatorWrapper = is_array($filterValue) && ! array_is_list($filterValue);
+
             $operatorKey = is_string($outerKeys[$i])
                 ? $outerKeys[$i]
-                : (is_array($filterValue) ? array_key_first($filterValue) : $systemPreferredOperator);
+                : ($isOperatorWrapper ? array_key_first($filterValue) : $systemPreferredOperator);
 
-            $rawValue = is_array($filterValue) ? reset($filterValue) : $filterValue;
+            $rawValue = $isOperatorWrapper ? reset($filterValue) : $filterValue;
 
-            $values = array_filter(
-                explode(',', (string) $rawValue),
-                fn ($value) => (string) $value === '0' || (! empty($value) && trim($value) !== '')
-            );
+            // With `strict_comma_encoding` on, `$rawValue` already arrives as the final
+            // already-split `list<string>` — re-exploding it on comma here would wrongly split a
+            // literal comma the parser correctly preserved inside one value.
+            $values = is_array($rawValue)
+                ? array_values(array_filter(
+                    $rawValue,
+                    fn ($value) => (string) $value === '0' || (! empty($value) && trim((string) $value) !== '')
+                ))
+                : array_values(array_filter(
+                    explode(',', (string) $rawValue),
+                    fn ($value) => (string) $value === '0' || (! empty($value) && trim($value) !== '')
+                ));
 
             $operator = $this->sqlOperatorFor($operatorKey);
 
