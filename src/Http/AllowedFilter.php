@@ -27,7 +27,7 @@ class AllowedFilter implements Arrayable
     protected $attribute;
 
     /**
-     * @var int
+     * @var int|array<int>
      */
     protected $operator;
 
