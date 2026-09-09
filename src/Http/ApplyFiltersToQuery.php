@@ -156,14 +156,19 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
             // With `strict_comma_encoding` on, `$rawValue` already arrives as the final
             // already-split `list<string>` — re-exploding it on comma here would wrongly split a
             // literal comma the parser correctly preserved inside one value.
+            //
+            // Only a genuinely empty string is dropped (e.g. the gap left by a leading/repeated
+            // comma such as `filter[a]=x,,y`). A whitespace-only value (`' '`) is a real value a
+            // client can legitimately filter by and must survive — trimming it away here made it
+            // indistinguishable from an empty one, with no way to opt out.
             $values = is_array($rawValue)
                 ? array_values(array_filter(
                     $rawValue,
-                    fn ($value) => (string) $value === '0' || (! empty($value) && trim((string) $value) !== '')
+                    fn ($value) => (string) $value !== ''
                 ))
                 : array_values(array_filter(
                     explode(',', (string) $rawValue),
-                    fn ($value) => (string) $value === '0' || (! empty($value) && trim($value) !== '')
+                    fn ($value) => (string) $value !== ''
                 ));
 
             $operator = $this->sqlOperatorFor($operatorKey);
