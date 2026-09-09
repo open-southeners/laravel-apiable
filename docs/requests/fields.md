@@ -17,6 +17,10 @@ GET /posts?fields[post]=title,body&fields[user]=name,email
 
 The key inside `fields[]` is the JSON:API resource type (e.g. `post`, `user`). The value is a comma-separated list of attribute names.
 
+{% hint style="info" %}
+By default every comma splits a `fields[]` value into separate attribute names. Enable [`requests.strict_comma_encoding`](../getting-started/configuration.md#requests-strict-comma-encoding) to allow a percent-encoded comma (`%2C`) inside a single attribute name.
+{% endhint %}
+
 ## `AllowedFields::make()`
 
 `AllowedFields::make()` takes a resource type and an array (or comma-separated string) of allowed column names:

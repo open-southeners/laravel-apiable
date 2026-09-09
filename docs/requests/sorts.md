@@ -14,6 +14,10 @@ GET /posts?sort=-created_at         # descending
 GET /posts?sort=title,-created_at   # multiple sorts
 ```
 
+{% hint style="info" %}
+By default every comma splits `sort` into separate attributes. Enable [`requests.strict_comma_encoding`](../getting-started/configuration.md#requests-strict-comma-encoding) to allow a percent-encoded comma (`%2C`) inside a single attribute name.
+{% endhint %}
+
 ## Direction constants
 
 `AllowedSort` exposes three direction constants:

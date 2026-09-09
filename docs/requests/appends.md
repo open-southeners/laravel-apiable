@@ -15,6 +15,10 @@ GET /posts?appends[post]=is_featured,reading_time&appends[user]=avatar_url
 
 The key inside `appends[]` is the JSON:API resource type. The value is a comma-separated list of accessor names.
 
+{% hint style="info" %}
+By default every comma splits an `appends[]` value into separate accessor names. Enable [`requests.strict_comma_encoding`](../getting-started/configuration.md#requests-strict-comma-encoding) to allow a percent-encoded comma (`%2C`) inside a single accessor name.
+{% endhint %}
+
 ## `AllowedAppends::make()`
 
 `AllowedAppends::make()` takes a resource type and an array (or string) of accessor names:

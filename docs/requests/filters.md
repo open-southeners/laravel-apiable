@@ -21,6 +21,10 @@ Multiple values separated by commas are treated as `OR` conditions. Multiple `fi
 When an attribute restricts its accepted values (see [Restricting allowed values](#restricting-allowed-values)), comma-separated values are validated individually: any value that doesn't match the allowed pattern is dropped from the `OR` list rather than invalidating the whole request. If none of the comma-separated values are valid, the filter falls back to any registered [default filter](#default-filters) for that attribute (or is dropped entirely).
 {% endhint %}
 
+{% hint style="info" %}
+By default every comma splits a filter value into separate `OR` values, so a value can't contain a literal comma. Enable [`requests.strict_comma_encoding`](../getting-started/configuration.md#requests-strict-comma-encoding) to let clients keep a comma in a value by percent-encoding it (`%2C`) — only unencoded commas then act as separators.
+{% endhint %}
+
 ## Operators
 
 | Constant | String key | SQL behaviour |

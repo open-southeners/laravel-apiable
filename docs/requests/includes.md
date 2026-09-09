@@ -17,6 +17,10 @@ GET /posts?include=tags_count
 
 Multiple relationships are separated by commas. Nested relationships use dot notation.
 
+{% hint style="info" %}
+By default every comma splits `include` into separate relationships. Enable [`requests.strict_comma_encoding`](../getting-started/configuration.md#requests-strict-comma-encoding) to allow a percent-encoded comma (`%2C`) inside a single relationship path.
+{% endhint %}
+
 ## `AllowedInclude::make()`
 
 `AllowedInclude::make()` accepts a single relationship name, an array of names, or a dot-notation nested path:

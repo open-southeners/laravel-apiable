@@ -120,6 +120,27 @@ The sort direction applied when an `AllowedSort` is created without an explicit 
 ],
 ```
 
+### `requests.strict_comma_encoding`
+
+| Type | Default |
+|------|---------|
+| `bool` | `false` |
+
+Controls how a literal comma inside a single `filter`/`sort`/`include`/`fields`/`appends` value is interpreted, since commas are also the separator between multiple `OR`-ed values.
+
+- `false` (legacy): every comma splits the value, encoded or not — a client cannot send a value that itself contains a comma.
+- `true`: only an unencoded comma separates values. A percent-encoded comma (`%2C`) stays part of the value, so `filter[title]=foo%2Cbar,baz` matches `"foo,bar"` OR `"baz"`.
+
+```php
+'requests' => [
+    'strict_comma_encoding' => true,
+],
+```
+
+{% hint style="warning" %}
+Enable this only if your clients percent-encode commas they want kept literal. With it off, `foo%2Cbar` and `foo,bar` are indistinguishable.
+{% endhint %}
+
 ---
 
 ## `responses`
