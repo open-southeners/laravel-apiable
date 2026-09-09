@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.4.1] - 2026-09-10
+
 ### Fixed
 
 - **Whitespace-only filter values silently dropped.** A comma-separated filter value that was only whitespace (e.g. the middle value in `filter[title]=x, ,y`) used to be treated the same as an empty one and dropped from the query, making it impossible to filter by a legitimate all-whitespace value. Only genuinely empty values (from a leading/repeated comma, e.g. `filter[a]=x,,y`) are dropped now.
