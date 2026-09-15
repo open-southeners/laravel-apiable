@@ -26,7 +26,7 @@ class TypeScriptSchemaExporterTest extends TestCase
         $this->assertStringContainsString('resource: string;', $output);
         $this->assertStringContainsString('path: string;', $output);
         $this->assertStringContainsString(
-            "filters: Record<string, { operators: Array<'equal' | 'like' | 'gt' | 'gte' | 'lt' | 'lte' | 'scope'>; values?: string[] }>;",
+            "filters: Record<string, { operators: Array<'equal' | 'not_equal' | 'like' | 'not_like' | 'gt' | 'gte' | 'lt' | 'lte' | 'scope'>; values?: string[] }>;",
             $output
         );
         $this->assertStringContainsString('sorts: string[];', $output);

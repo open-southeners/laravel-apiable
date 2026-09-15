@@ -36,6 +36,12 @@ class QueryParamTest extends TestCase
         $this->assertSame('filter[status][equal]', $param->key);
     }
 
+    public function test_from_filter_attribute_with_negated_operators(): void
+    {
+        $this->assertSame('filter[status][not_equal]', QueryParam::fromFilterAttribute(new FilterQueryParam('status', AllowedFilter::NOT_EXACT))->key);
+        $this->assertSame('filter[title][not_like]', QueryParam::fromFilterAttribute(new FilterQueryParam('title', AllowedFilter::NOT_SIMILAR))->key);
+    }
+
     public function test_from_filter_attribute_with_comparison_operators(): void
     {
         $this->assertSame('filter[age][lt]', QueryParam::fromFilterAttribute(new FilterQueryParam('age', AllowedFilter::LOWER_THAN))->key);

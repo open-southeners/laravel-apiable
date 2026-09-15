@@ -47,6 +47,32 @@ class AllowsFiltersTest extends TestCase
         );
     }
 
+    public function test_negated_filter_factories_register_their_wire_keys()
+    {
+        $allowedFilters = $this->newRequestQueryObject()
+            ->allowFilter(AllowedFilter::notEqual('status'))
+            ->allowFilter(AllowedFilter::notLike('title'))
+            ->getAllowedFilters();
+
+        $this->assertSame(['operator' => 'not_equal', 'values' => '*'], $allowedFilters['status']);
+        $this->assertSame(['operator' => 'not_like', 'values' => '*'], $allowedFilters['title']);
+    }
+
+    public function test_explicit_negated_operator_is_selected_only_when_registered()
+    {
+        $requestQueryObject = $this->newRequestQueryObject([
+            'filter' => ['status' => ['not_equal' => 'draft,archived']],
+        ])->allowFilter(AllowedFilter::notEqual('status'));
+
+        $this->assertSame([['not_equal' => 'draft,archived']], $requestQueryObject->userAllowedFilters()['status']);
+
+        $unregistered = $this->newRequestQueryObject([
+            'filter' => ['status' => ['not_equal' => 'draft']],
+        ])->allowFilter(AllowedFilter::exact('status'));
+
+        $this->assertArrayNotHasKey('status', $unregistered->userAllowedFilters());
+    }
+
     public function test_allow_filter_with_two_operators_and_different_value_restrictions_keeps_each_pattern()
     {
         $allowedFilters = $this->newRequestQueryObject()

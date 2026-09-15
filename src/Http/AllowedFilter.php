@@ -21,6 +21,10 @@ class AllowedFilter implements Arrayable
 
     public const GREATER_OR_EQUAL_THAN = 7;
 
+    public const NOT_EXACT = 8;
+
+    public const NOT_SIMILAR = 9;
+
     /**
      * @var string
      */
@@ -78,6 +82,17 @@ class AllowedFilter implements Arrayable
     }
 
     /**
+     * Allow attribute-value(s) that do not match exactly.
+     *
+     * @param  string  $attribute
+     * @param  string|array<string>  $values
+     */
+    public static function notEqual($attribute, $values = '*'): self
+    {
+        return new self($attribute, static::NOT_EXACT, $values);
+    }
+
+    /**
      * Allow similar attribute-value(s) filter.
      *
      * @param  string  $attribute
@@ -86,6 +101,17 @@ class AllowedFilter implements Arrayable
     public static function similar($attribute, $values = '*'): self
     {
         return new self($attribute, static::SIMILAR, $values);
+    }
+
+    /**
+     * Allow attribute-value(s) that do not contain the supplied text.
+     *
+     * @param  string  $attribute
+     * @param  string|array<string>  $values
+     */
+    public static function notLike($attribute, $values = '*'): self
+    {
+        return new self($attribute, static::NOT_SIMILAR, $values);
     }
 
     /**
@@ -164,6 +190,8 @@ class AllowedFilter implements Arrayable
             static::GREATER_THAN,
             static::LOWER_OR_EQUAL_THAN,
             static::GREATER_OR_EQUAL_THAN,
+            static::NOT_EXACT,
+            static::NOT_SIMILAR,
         ])) === count($valuesArr);
     }
 
@@ -175,8 +203,10 @@ class AllowedFilter implements Arrayable
     {
         return match ($operator) {
             static::EXACT => 'equal',
+            static::NOT_EXACT => 'not_equal',
             static::SCOPE => 'scope',
             static::SIMILAR => 'like',
+            static::NOT_SIMILAR => 'not_like',
             static::LOWER_THAN => 'lt',
             static::GREATER_THAN => 'gt',
             static::LOWER_OR_EQUAL_THAN => 'lte',

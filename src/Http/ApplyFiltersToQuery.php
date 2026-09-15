@@ -173,9 +173,11 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
 
             $operator = $this->sqlOperatorFor($operatorKey);
 
-            $query->where(function (Builder $query) use ($callback, $relationship, $attribute, $operator, $values) {
+            $negated = in_array($operatorKey, ['not_equal', 'not_like'], true);
+
+            $query->where(function (Builder $query) use ($callback, $relationship, $attribute, $operator, $values, $negated) {
                 for ($n = 0; $n < count($values); $n++) {
-                    $condition = $n === 0 ? 'and' : 'or';
+                    $condition = $n === 0 || $negated ? 'and' : 'or';
 
                     if (! $relationship) {
                         $callback($query, $relationship, $attribute, $operator, $values[$n], $condition);
@@ -209,7 +211,9 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
             'lt' => '<',
             'lte' => '<=',
             'like' => 'LIKE',
+            'not_like' => 'NOT LIKE',
             'equal' => '=',
+            'not_equal' => '!=',
         ];
 
         if ($operatorKey !== null && isset($sqlOperators[$operatorKey])) {
@@ -231,7 +235,7 @@ class ApplyFiltersToQuery implements HandlesRequestQueries
         $query->where(
             $query->getModel()->getTable().".{$attribute}",
             $operator,
-            $operator === 'LIKE' ? "%{$value}%" : $value,
+            in_array($operator, ['LIKE', 'NOT LIKE'], true) ? "%{$value}%" : $value,
             $relationship ? 'and' : $condition
         );
     }

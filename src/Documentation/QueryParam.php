@@ -47,15 +47,7 @@ class QueryParam
     {
         $operator = is_array($attr->type) ? ($attr->type[0] ?? AllowedFilter::SIMILAR) : ($attr->type ?? AllowedFilter::SIMILAR);
 
-        $operatorStr = match ((int) $operator) {
-            AllowedFilter::EXACT => 'equal',
-            AllowedFilter::SCOPE => 'scope',
-            AllowedFilter::LOWER_THAN => 'lt',
-            AllowedFilter::GREATER_THAN => 'gt',
-            AllowedFilter::LOWER_OR_EQUAL_THAN => 'lte',
-            AllowedFilter::GREATER_OR_EQUAL_THAN => 'gte',
-            default => 'like',
-        };
+        $operatorStr = AllowedFilter::operatorKey((int) $operator);
 
         $values = is_array($attr->values) ? implode(',', $attr->values) : (string) $attr->values;
 

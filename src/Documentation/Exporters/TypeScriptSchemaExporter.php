@@ -28,7 +28,7 @@ class TypeScriptSchemaExporter
 export interface EndpointSchema {
   resource: string;
   path: string;
-  filters: Record<string, { operators: Array<'equal' | 'like' | 'gt' | 'gte' | 'lt' | 'lte' | 'scope'>; values?: string[] }>;
+  filters: Record<string, { operators: Array<'equal' | 'not_equal' | 'like' | 'not_like' | 'gt' | 'gte' | 'lt' | 'lte' | 'scope'>; values?: string[] }>;
   sorts: string[];
   includes: string[];
   fields: Record<string, string[]>;
