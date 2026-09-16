@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Negated `not_equal` and `not_like` filters (`AllowedFilter::notEqual()` / `notLike()`); comma-separated negated values are combined with `AND`.
 
+### Fixed
+
+- Sparse fieldsets now retain the primary, foreign, and morph keys Eloquent needs to hydrate requested relationships. These internal support columns remain absent from sparse response attributes, while explicitly requested appends remain visible.
+- Collections and paginated responses now consult `Apiable::modelResourceMap()` for every model, matching single-resource responses. Mixed-model collections use each model's registered resource class, and an explicitly supplied resource class still takes precedence.
+- Declaring the same default filter through both controller attributes and fluent configuration is now idempotent instead of turning its scalar value into a duplicate array and producing an empty query. Distinct operators registered on the same attribute continue to coexist.
+
 ## [4.4.1] - 2026-09-10
 
 ### Fixed
