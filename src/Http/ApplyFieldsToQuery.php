@@ -5,6 +5,9 @@ namespace OpenSoutheners\LaravelApiable\Http;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOneOrMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use OpenSoutheners\LaravelApiable\Contracts\HandlesRequestQueries;
 use OpenSoutheners\LaravelApiable\Contracts\JsonApiable;
@@ -47,31 +50,80 @@ class ApplyFieldsToQuery implements HandlesRequestQueries
 
         // TODO: Move this to some class methods
         foreach ($fields as $type => $columns) {
-            $typeModel = Apiable::getModelFromResourceType($type);
+            if ($mainQueryResourceType === $type) {
+                $query->select($mainQueryModel->qualifyColumns(
+                    $this->columnsForIncludes($mainQueryModel, $columns, array_keys($queryEagerLoaded))
+                ));
 
-            $matchedFn = match (true) {
-                $mainQueryResourceType === $type => function () use ($query, $mainQueryModel, $columns) {
-                    if (! in_array($mainQueryModel->getKeyName(), $columns)) {
-                        $columns[] = $mainQueryModel->getQualifiedKeyName();
+                continue;
+            }
+
+            foreach ($queryEagerLoaded as $path => $constraints) {
+                if (str_contains($path, '.')) {
+                    continue;
+                }
+
+                $relation = $this->relationFor($mainQueryModel, $path);
+
+                if (! $relation || Apiable::getResourceType($relation->getRelated()) !== $type) {
+                    continue;
+                }
+
+                $query->with($path, function (Relation $relatedQuery) use ($columns, $constraints, $relation) {
+                    $relatedModel = $relatedQuery->getRelated();
+                    $relatedColumns = $this->columnsForIncludes(
+                        $relatedModel,
+                        $columns,
+                        array_keys($relatedQuery->getEagerLoads())
+                    );
+
+                    if ($relation instanceof HasOneOrMany) {
+                        $relatedColumns[] = $relation->getForeignKeyName();
                     }
 
-                    $query->select($mainQueryModel->qualifyColumns($columns));
-                },
-                in_array($typeModel, $queryEagerLoaded) => fn () => $query->with($type, function (Relation $query) use ($queryEagerLoaded, $type, $columns) {
-                    $relatedModel = $query->getModel();
-
-                    if (! in_array($relatedModel->getKeyName(), $columns)) {
-                        $columns[] = $relatedModel->getKeyName();
-                    }
-
-                    $queryEagerLoaded[$type]($query->select($relatedModel->qualifyColumns($columns)));
-                }),
-                default => fn () => null,
-            };
-
-            $matchedFn();
+                    $relatedQuery->select($relatedModel->qualifyColumns(array_unique($relatedColumns)));
+                    $constraints($relatedQuery);
+                });
+            }
         }
 
         return $query;
+    }
+
+    /**
+     * Keep the keys Eloquent needs to match requested includes after a sparse select.
+     *
+     * @param  array<string>  $columns
+     * @param  array<string>  $includePaths
+     * @return array<string>
+     */
+    protected function columnsForIncludes(Model $model, array $columns, array $includePaths): array
+    {
+        $columns[] = $model->getKeyName();
+
+        foreach ($includePaths as $path) {
+            $relation = $this->relationFor($model, explode('.', $path)[0]);
+
+            if ($relation instanceof BelongsTo) {
+                $columns[] = $relation->getForeignKeyName();
+            }
+
+            if ($relation instanceof MorphTo) {
+                $columns[] = $relation->getMorphType();
+            }
+        }
+
+        return array_values(array_unique($columns));
+    }
+
+    protected function relationFor(Model $model, string $name): ?Relation
+    {
+        if (! method_exists($model, $name)) {
+            return null;
+        }
+
+        $relation = Relation::noConstraints(fn () => $model->{$name}());
+
+        return $relation instanceof Relation ? $relation : null;
     }
 }

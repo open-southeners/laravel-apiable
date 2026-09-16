@@ -87,9 +87,25 @@ class JsonApiResource extends JsonResource
      */
     protected function getAttributes()
     {
+        $attributes = $this->resource->attributesToArray();
+        $fields = request()->query('fields', []);
+        $type = Apiable::getResourceType($this->resource);
+
+        if (is_array($fields) && isset($fields[$type])) {
+            $requested = is_array($fields[$type])
+                ? $fields[$type]
+                : explode(',', (string) $fields[$type]);
+
+            $requested = array_merge($requested, $this->resource->getAppends());
+
+            // Keys retained only for Eloquent's eager loading are internal to
+            // the query; a sparse fieldset must not expose them as attributes.
+            $attributes = array_intersect_key($attributes, array_flip($requested));
+        }
+
         return static::filterAttributes(
             $this->resource,
-            array_merge($this->resource->attributesToArray(), $this->withAttributes())
+            array_merge($attributes, $this->withAttributes())
         );
     }
 

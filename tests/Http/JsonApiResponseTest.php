@@ -1064,6 +1064,51 @@ class JsonApiResponseTest extends TestCase
         );
     }
 
+    public function test_sparse_main_fields_keep_belongs_to_foreign_key_for_include()
+    {
+        Route::get('/', fn () => JsonApiResponse::from(Post::class)
+            ->allowFields(Post::class, ['title'])
+            ->allowInclude('author'));
+
+        $response = $this->get('/?fields[post]=title&include=author', ['Accept' => 'application/vnd.api+json']);
+
+        $response->assertSuccessful();
+        $this->assertNotEmpty($response->json('data.0.relationships.author.data.id'));
+        $this->assertNotEmpty($response->json('included.0.id'));
+        $this->assertArrayNotHasKey('author_id', $response->json('data.0.attributes'));
+    }
+
+    public function test_sparse_included_fields_keep_related_models_identifier()
+    {
+        Route::get('/', fn () => JsonApiResponse::from(Post::class)
+            ->allowFields(User::class, ['name'])
+            ->allowInclude('author'));
+
+        $response = $this->get('/?fields[client]=name&include=author', ['Accept' => 'application/vnd.api+json']);
+
+        $response->assertSuccessful();
+        $this->assertNotEmpty($response->json('data.0.relationships.author.data.id'));
+        $this->assertNotEmpty($response->json('included.0.id'));
+        $this->assertArrayNotHasKey('email', $response->json('included.0.attributes'));
+    }
+
+    public function test_sparse_included_fields_keep_foreign_key_for_nested_belongs_to()
+    {
+        $parent = Post::create(['status' => 'Active', 'title' => 'Parent', 'author_id' => 1]);
+        $child = Post::create(['status' => 'Active', 'title' => 'Child', 'author_id' => 2, 'parent_id' => $parent->id]);
+
+        Route::get('/nested-post', fn () => JsonApiResponse::from(Post::whereKey($child->id))
+            ->allowFields(Post::class, ['title'])
+            ->allowInclude('parent.author'));
+
+        $response = $this->get('/nested-post?fields[post]=title&include=parent.author', ['Accept' => 'application/vnd.api+json']);
+
+        $response->assertSuccessful();
+        $this->assertSame((string) $parent->id, $response->json('data.0.relationships.parent.data.id'));
+        $this->assertSame('1', $response->json('included.0.relationships.author.data.id'));
+        $this->assertArrayNotHasKey('author_id', $response->json('included.0.attributes'));
+    }
+
     public function test_sparse_fieldset_with_no_fields_query_returns_all()
     {
         Route::get('/', function () {
