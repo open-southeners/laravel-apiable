@@ -2,6 +2,7 @@
 
 namespace OpenSoutheners\LaravelApiable\Tests\Http\Resources;
 
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Route;
 use OpenSoutheners\LaravelApiable\Http\Resources\JsonApiResource;
 use OpenSoutheners\LaravelApiable\Support\Apiable;
@@ -92,6 +93,41 @@ class JsonApiResourceRegistryTest extends TestCase
         $resource = Apiable::toJsonApi($post, PostWithExtraJsonApiResource::class);
 
         $this->assertInstanceOf(PostWithExtraJsonApiResource::class, $resource);
+    }
+
+    public function test_collections_and_paginators_use_each_models_registered_resource()
+    {
+        Apiable::modelResourceMap([
+            Post::class => PostWithExtraJsonApiResource::class,
+            User::class => UserWithExtraJsonApiResource::class,
+        ]);
+
+        $post = new Post(['id' => 1, 'status' => 'Active', 'title' => 'Hello']);
+        $user = new User(['id' => 2, 'name' => 'Alice']);
+
+        foreach ([collect([$post, $user]), new LengthAwarePaginator(collect([$post, $user]), 2, 10)] as $items) {
+            $collection = Apiable::toJsonApi($items);
+
+            $this->assertInstanceOf(PostWithExtraJsonApiResource::class, $collection->collection[0]);
+            $this->assertInstanceOf(UserWithExtraJsonApiResource::class, $collection->collection[1]);
+        }
+    }
+
+    public function test_builder_response_uses_registered_resource_and_explicit_override()
+    {
+        Apiable::modelResourceMap([Post::class => PostWithExtraJsonApiResource::class]);
+        Post::create(['status' => 'Active', 'title' => 'Hello']);
+
+        Route::get('/mapped-posts', fn () => Apiable::response(Post::query()));
+        Route::get('/explicit-posts', fn () => Apiable::response(Post::query())
+            ->usingResource(JsonApiResource::class));
+
+        $this->get('/mapped-posts', ['Accept' => 'application/vnd.api+json'])
+            ->assertJsonPath('data.0.attributes.computed', 'computed_value');
+        $this->assertArrayNotHasKey(
+            'computed',
+            $this->get('/explicit-posts', ['Accept' => 'application/vnd.api+json'])->json('data.0.attributes')
+        );
     }
 
     public function test_related_resource_uses_registered_class_for_related_model()
