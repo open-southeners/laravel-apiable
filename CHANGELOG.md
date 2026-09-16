@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.5.0] - 2026-09-16
+
 ### Added
 
 - Negated `not_equal` and `not_like` filters (`AllowedFilter::notEqual()` / `notLike()`); comma-separated negated values are combined with `AND`.
