@@ -18,6 +18,19 @@ class AllowsFiltersTest extends TestCase
         return (new RequestQueryObject($request))->setQuery(Post::query());
     }
 
+    public function test_repeating_a_default_filter_keeps_its_scalar_value_and_other_operators()
+    {
+        $defaults = $this->newRequestQueryObject()
+            ->applyDefaultFilter('status', AllowedFilter::EXACT, 'Active,Archived')
+            ->applyDefaultFilter('status', AllowedFilter::EXACT, 'Active,Archived')
+            ->applyDefaultFilter('status', AllowedFilter::NOT_EXACT, 'Deleted')
+            ->getDefaultFilters();
+
+        $this->assertSame([
+            'status' => ['equal' => 'Active,Archived', 'not_equal' => 'Deleted'],
+        ], $defaults);
+    }
+
     // ---------------------------------------------------------------
     // allowFilter() merging multiple operators on the same attribute
     // ---------------------------------------------------------------

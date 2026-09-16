@@ -87,7 +87,10 @@ trait AllowsFilters
             $operator = null;
         }
 
-        $this->defaultFilters = array_merge_recursive(
+        // A default may be declared both as a controller attribute and fluently.
+        // Replacing an operator's value keeps that registration idempotent while
+        // retaining defaults registered for other operators on the same field.
+        $this->defaultFilters = array_replace_recursive(
             $this->defaultFilters,
             $attribute instanceof DefaultFilter
                 ? $attribute->toArray()
