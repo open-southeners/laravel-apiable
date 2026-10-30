@@ -990,6 +990,36 @@ class JsonApiResponseTest extends TestCase
         });
     }
 
+    public function test_appends_on_raw_json_response_with_null_to_one_relationship_included()
+    {
+        Route::get('/', function () {
+            return JsonApiResponse::from(Post::class)
+                ->allowing([
+                    AllowedInclude::make('parent'),
+                    AllowedAppends::make('post', 'is_published'),
+                ]);
+        });
+
+        $response = $this->get('/?include=parent&appends[post]=is_published', ['Accept' => 'application/json']);
+
+        $response->assertSuccessful();
+        $response->assertJsonPath('data.0.parent', null);
+        $response->assertJsonPath('data.0.is_published', true);
+    }
+
+    public function test_forced_appends_on_raw_json_response_with_null_eager_loaded_relationship()
+    {
+        Route::get('/', function () {
+            return JsonApiResponse::from(Post::with('parent'))
+                ->forceAppend('post', ['is_published']);
+        });
+
+        $response = $this->get('/', ['Accept' => 'application/json']);
+
+        $response->assertSuccessful();
+        $response->assertJsonPath('data.0.parent', null);
+    }
+
     public function test_appends_with_multiple_attributes()
     {
         Route::get('/', function () {
