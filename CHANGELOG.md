@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.5.1] - 2026-10-30
+
+### Fixed
+
+- Raw JSON responses (`Accept: application/json`) now skip null to-one relationships when applying requested or forced appends, preventing a `TypeError` and a `500` response when an included or eager-loaded relationship is empty.
+
 ## [4.5.0] - 2026-09-16
 
 ### Added
