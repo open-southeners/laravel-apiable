@@ -105,6 +105,11 @@ trait IteratesResultsAfterQuery
             ? $resource->resource
             : $resource;
 
+        // Empty to-one relations are loaded as null and have nothing to append to
+        if (! $resourceModel instanceof Model) {
+            return;
+        }
+
         /** @var array<JsonApiResource|Model> $resourceIncluded */
         $resourceIncluded = match (true) {
             $resource instanceof JsonApiResource => $resource->with['included'] ?? [],
