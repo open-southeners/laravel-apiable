@@ -21,7 +21,7 @@ class JsonApiCollection extends ResourceCollection
     /**
      * Create a new resource instance.
      *
-     * @param  TCollectedResource  $resource
+     * @param  mixed  $resource
      * @param  class-string<JsonApiResource>|null  $collects
      * @return void
      */
