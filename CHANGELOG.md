@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.5.1] - 2026-10-30
+
+### Fixed
+
+- Raw JSON responses (non JSON:API `Accept` header) no longer fail with a `TypeError` when appends are applied and a loaded to-one relationship is `null`, whether loaded through `include` or eager loaded on the query. Empty relationships are now skipped when adding appends and still serialize as `null`.
+- `JsonApiCollection` constructor docblock now types `$resource` as `mixed` instead of the collected item template, fixing PHPStan errors that reported the model-to-resource mapping as unreachable.
+
 ## [4.5.0] - 2026-09-16
 
 ### Added
